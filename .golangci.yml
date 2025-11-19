@@ -1,0 +1,11 @@
+run:
+  timeout: 10m
+  build-tags:
+    - all
+
+linters:
+  enable:
+    - unparam
+    - misspell
+    - gofumpt
+    - stylecheck
