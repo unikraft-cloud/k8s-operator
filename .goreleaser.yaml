@@ -1,0 +1,54 @@
+project_name: k8s-operator
+version: 2
+
+builds:
+  - id: k8s-operator
+    binary: k8s-operator
+    main: ./cmd
+    ldflags:
+      - -s
+      - -w
+      - -extldflags
+      - -static-pie
+      - -X unikraft.com/cli/internal/version.Version={{ .Version }}
+      - -X unikraft.com/cli/internal/version.Commit={{ .Commit }}
+      - -X unikraft.com/cli/internal/version.BuildTime={{ .Date }}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+release:
+  github:
+    owner: unikraft-cloud
+    name: k8s-operator
+  prerelease: auto
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    include:
+      - ^.*#[[:digit:]]+.*$
+  groups:
+    - title: ⚠️ Breaking Changes
+      regexp: '^[[:xdigit:]]+: [[:lower:]]+(\(.*\))?!:.*$'
+      order: 1
+    - title: "\U0001F680 New Features"
+      regexp: '^[[:xdigit:]]+: feat(\(.*\))?:.*$'
+      order: 2
+    - title: "\U0001F41B Bug Fixes"
+      regexp: '^[[:xdigit:]]+: fix(\(.*\))?:.*$'
+      order: 3
+    - title: "\U0001F4D6 Docs"
+      regexp: '^[[:xdigit:]]+: docs(\(.*\))?:.*$'
+      order: 4
+    - title: "\U0001F916 Bumps"
+      regexp: '^[[:xdigit:]]+: (gomod|build)\(deps\):.*$'
+      order: 5
+    - title: "\U0001F412 Miscellaneous"
+      order: 999
