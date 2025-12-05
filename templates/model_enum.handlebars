@@ -1,0 +1,15 @@
+{{~#if unescapedDescription}}
+	// 	{{{ replace unescapedDescription "
+" "
+	// 	"}}}
+{{~/if}}
+// +kubebuilder:validation:Enum={{#each allowableValues.values}}{{#if @first}}{{.}}{{else}};{{.}}{{/if}}{{/each}}
+type {{{classname}}} string
+
+const (
+{{~#allowableValues}}
+{{~#enumVars}}
+	{{classname}}{{name}} {{classname}} = {{{value}}}
+{{~/enumVars}}
+{{~/allowableValues}}
+)

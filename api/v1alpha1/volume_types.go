@@ -34,15 +34,23 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/unikraft-cloud/k8s-operator/api/v1alpha1/platform"
 )
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="Size",type="string",JSONPath=".spec.size_mb"
+// +kubebuilder:printcolumn:name="Sync status",type="string",JSONPath=".status.status"
 
 // Volume is the Schema for the volumes API
 type Volume struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   platform.CreateVolumeRequest  `json:"spec,omitempty"`
+	Status platform.CreateVolumeResponse `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
