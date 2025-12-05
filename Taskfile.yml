@@ -1,0 +1,13 @@
+# https://taskfile.dev
+version: 3
+
+includes:
+  go:
+    taskfile: https://github.com/unikraft-cloud/x.git//Taskfile.go.yml?ref=prod-staging
+    vars:
+      go_module: github.com/unikraft-cloud/k8s-operator
+
+tasks:
+  default:
+    cmds:
+      - task: go:tidy

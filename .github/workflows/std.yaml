@@ -1,0 +1,21 @@
+name: std
+
+on:
+  push:
+    branches: [prod-staging]
+  pull_request:
+    branches: [prod-staging]
+    paths:
+      - '**'
+      - '!.github/**'
+      - .github/workflows/std.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  checks: write
+
+jobs:
+  go:
+    uses: unikraft-cloud/internal-actions/.github/workflows/go.yaml@prod-staging
