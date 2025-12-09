@@ -52,7 +52,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	unikraftv1alpha1 "github.com/unikraft-cloud/k8s-operator/api/v1alpha1"
-	// +kubebuilder:scaffold:imports
+	"github.com/unikraft-cloud/k8s-operator/internal/client/instances"
+	"github.com/unikraft-cloud/k8s-operator/internal/client/services"
+	"github.com/unikraft-cloud/k8s-operator/internal/client/volumes"
 )
 
 var (
@@ -141,7 +143,32 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: add resource reconcilers
+	if err = instances.NewReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		instances.NewClient(config.UKCMetro, config.UKCToken),
+	).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Instance")
+		os.Exit(1)
+	}
+
+	if err = services.NewReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		services.NewClient(config.UKCMetro, config.UKCToken),
+	).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Service")
+		os.Exit(1)
+	}
+
+	if err = volumes.NewReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		volumes.NewClient(config.UKCMetro, config.UKCToken),
+	).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Volume")
+		os.Exit(1)
+	}
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
