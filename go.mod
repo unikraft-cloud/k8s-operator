@@ -6,7 +6,7 @@ toolchain go1.24.10
 
 require (
 	github.com/alecthomas/kong v1.12.1
-	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/logr v1.4.3
 	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.32.0
