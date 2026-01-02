@@ -49,6 +49,7 @@ type Volume struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.name) && !has(self.name)) || (has(oldSelf.name) && has(self.name) && self.name == oldSelf.name)",message="spec.name is immutable"
 	Spec   platform.CreateVolumeRequest  `json:"spec,omitempty"`
 	Status platform.CreateVolumeResponse `json:"status,omitempty"`
 }
