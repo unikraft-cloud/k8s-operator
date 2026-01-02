@@ -49,6 +49,14 @@ type Instance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.name) && !has(self.name)) || (has(oldSelf.name) && has(self.name) && self.name == oldSelf.name)",message="spec.name is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.service_group) && !has(self.service_group)) || (has(oldSelf.service_group) && has(self.service_group) && self.service_group == oldSelf.service_group)",message="spec.service_group is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.volumes) && !has(self.volumes)) || (has(oldSelf.volumes) && has(self.volumes) && self.volumes == oldSelf.volumes)",message="spec.volumes is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.autostart) && !has(self.autostart)) || (has(oldSelf.autostart) && has(self.autostart) && self.autostart == oldSelf.autostart)",message="spec.autostart is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.replicas) && !has(self.replicas)) || (has(oldSelf.replicas) && has(self.replicas) && self.replicas == oldSelf.replicas)",message="spec.replicas is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.restart_policy) && !has(self.restart_policy)) || (has(oldSelf.restart_policy) && has(self.restart_policy) && self.restart_policy == oldSelf.restart_policy)",message="spec.restart_policy is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.wait_timeout_ms) && !has(self.wait_timeout_ms)) || (has(oldSelf.wait_timeout_ms) && has(self.wait_timeout_ms) && self.wait_timeout_ms == oldSelf.wait_timeout_ms)",message="spec.wait_timeout_ms is immutable"
+	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.features) && !has(self.features)) || (has(oldSelf.features) && has(self.features) && self.features == oldSelf.features)",message="spec.features is immutable"
 	Spec   platform.CreateInstanceRequest  `json:"spec,omitempty"`
 	Status platform.CreateInstanceResponse `json:"status,omitempty"`
 }

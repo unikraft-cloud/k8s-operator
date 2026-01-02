@@ -65,6 +65,10 @@ spec:
             required:
             - size_mb
             type: object
+            x-kubernetes-validations:
+            - message: spec.name is immutable
+              rule: (!has(oldSelf.name) && !has(self.name)) || (has(oldSelf.name)
+                && has(self.name) && self.name == oldSelf.name)
           status:
             properties:
               data:

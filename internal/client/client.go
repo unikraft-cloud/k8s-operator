@@ -39,8 +39,8 @@ import (
 )
 
 type ResourceClient[CRD client.Object, SpecT any, StatusT any] interface {
-	ResourceExists(ctx context.Context, obj CRD) (bool, *SpecT, error)
+	ResourceExists(ctx context.Context, obj CRD) (bool, error)
 	CreateResource(ctx context.Context, obj CRD) (*StatusT, error)
-	UpdateResource(ctx context.Context, old *SpecT, new CRD) error
+	UpdateResource(ctx context.Context, obj CRD) (*StatusT, error)
 	DeleteResource(ctx context.Context, obj CRD) (*StatusT, error)
 }

@@ -34,6 +34,7 @@ package instances
 
 import (
 	"context"
+	"errors"
 
 	"unikraft.com/cloud/sdk/pkg/httpclient"
 	ukcplatform "unikraft.com/cloud/sdk/platform"
@@ -57,25 +58,20 @@ func NewClient(metro, token string) *Client {
 	}
 }
 
-func (c *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Instance) (bool, *platform.CreateInstanceRequest, error) {
+func (c *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Instance) (bool, error) {
 	resp, err := c.client.GetInstances(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, false)
 	if err != nil {
 		if ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
-			return false, nil, nil
+			return false, nil
 		}
-		return false, nil, err
+		return false, err
 	}
 
 	if resp == nil || resp.Data == nil || len(resp.Data.Instances) != 1 {
-		return false, nil, nil
+		return false, nil
 	}
 
-	req, err := client.Convert[ukcplatform.Instance, *platform.CreateInstanceRequest](resp.Data.Instances[0])
-	if err != nil {
-		return false, nil, err
-	}
-
-	return true, req, nil
+	return true, nil
 }
 
 func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.CreateInstanceResponse, error) {
@@ -83,6 +79,7 @@ func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	if err != nil {
 		return nil, err
 	}
+
 	resp, err := c.client.CreateInstance(ctx, req)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
 		return &platform.CreateInstanceResponse{
@@ -95,9 +92,49 @@ func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	return client.Convert[*ukcplatform.Response[ukcplatform.CreateInstanceResponseData], *platform.CreateInstanceResponse](resp)
 }
 
-func (c *Client) UpdateResource(ctx context.Context, old *platform.CreateInstanceRequest, new *unikraftv1alpha1.Instance) error {
-	// TODO(petar-cvit): implement updates
-	return nil
+func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.CreateInstanceResponse, error) {
+	resp, err := c.client.GetInstances(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, true)
+	if err != nil {
+		return &platform.CreateInstanceResponse{
+			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
+			Message: ukcplatform.Ptr(err.Error()),
+			Data:    obj.Status.Data,
+		}, err
+	}
+
+	if len(resp.Data.Instances) != 1 {
+		return nil, errors.New("failed to fetch exactly one instance")
+	}
+
+	instance := resp.Data.Instances[0]
+
+	updates := instanceUpdates(instance, obj)
+	if len(updates) == 0 {
+		return &obj.Status, nil
+	}
+
+	updateResp, err := c.client.UpdateInstances(ctx, updates)
+	if err != nil {
+		return &platform.CreateInstanceResponse{
+			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
+			Message: ukcplatform.Ptr(err.Error()),
+			Data:    obj.Status.Data,
+		}, err
+	}
+
+	if updateResp.Status == string(ukcplatform.ResponseStatusERROR) {
+		return &platform.CreateInstanceResponse{
+			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
+			Message: ukcplatform.Ptr(updateResp.Message),
+			Data:    obj.Status.Data,
+		}, nil
+	}
+
+	return &platform.CreateInstanceResponse{
+		Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusSUCCESS)),
+		Message: ukcplatform.Ptr(""),
+		Data:    obj.Status.Data,
+	}, nil
 }
 
 func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.CreateInstanceResponse, error) {
