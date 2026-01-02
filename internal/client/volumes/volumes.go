@@ -57,25 +57,20 @@ func NewClient(metro, token string) *Client {
 	}
 }
 
-func (m *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Volume) (bool, *platform.CreateVolumeRequest, error) {
+func (m *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Volume) (bool, error) {
 	resp, err := m.client.GetVolumes(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, false)
 	if err != nil {
 		if ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
-			return false, nil, nil
+			return false, nil
 		}
-		return false, nil, err
+		return false, err
 	}
 
 	if resp == nil || resp.Data == nil || len(resp.Data.Volumes) != 1 {
-		return false, nil, nil
+		return false, nil
 	}
 
-	req, err := client.Convert[ukcplatform.Volume, *platform.CreateVolumeRequest](resp.Data.Volumes[0])
-	if err != nil {
-		return false, nil, err
-	}
-
-	return true, req, nil
+	return true, nil
 }
 
 func (m *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.CreateVolumeResponse, error) {
@@ -95,9 +90,9 @@ func (m *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Volum
 	return client.Convert[*ukcplatform.Response[ukcplatform.CreateVolumeResponseData], *platform.CreateVolumeResponse](resp)
 }
 
-func (m *Client) UpdateResource(ctx context.Context, old *platform.CreateVolumeRequest, new *unikraftv1alpha1.Volume) error {
+func (m *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.CreateVolumeResponse, error) {
 	// TODO(petar-cvit): implement updates
-	return nil
+	return nil, nil
 }
 
 func (m *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.CreateVolumeResponse, error) {

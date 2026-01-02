@@ -57,25 +57,20 @@ func NewClient(metro, token string) *Client {
 	}
 }
 
-func (c *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Service) (bool, *platform.CreateServiceGroupRequest, error) {
+func (c *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Service) (bool, error) {
 	resp, err := c.client.GetServiceGroups(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, false)
 	if err != nil {
 		if ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
-			return false, nil, nil
+			return false, nil
 		}
-		return false, nil, err
+		return false, err
 	}
 
 	if resp == nil || resp.Data == nil || len(resp.Data.ServiceGroups) != 1 {
-		return false, nil, nil
+		return false, nil
 	}
 
-	req, err := client.Convert[ukcplatform.ServiceGroup, *platform.CreateServiceGroupRequest](resp.Data.ServiceGroups[0])
-	if err != nil {
-		return false, nil, err
-	}
-
-	return true, req, nil
+	return true, nil
 }
 
 func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.CreateServiceGroupResponse, error) {
@@ -95,9 +90,9 @@ func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Servi
 	return client.Convert[*ukcplatform.Response[ukcplatform.CreateServiceGroupResponseData], *platform.CreateServiceGroupResponse](resp)
 }
 
-func (c *Client) UpdateResource(ctx context.Context, old *platform.CreateServiceGroupRequest, new *unikraftv1alpha1.Service) error {
+func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.CreateServiceGroupResponse, error) {
 	// TODO(petar-cvit): implement updates
-	return nil
+	return nil, nil
 }
 
 func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.CreateServiceGroupResponse, error) {

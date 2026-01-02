@@ -102,21 +102,32 @@ func (r *Reconciler[CRD, SpecT, StatusT]) Reconcile(ctx context.Context, req rec
 		}
 	}
 
-	exists, _, err := r.ResourceClient.ResourceExists(ctx, obj)
+	exists, err := r.ResourceClient.ResourceExists(ctx, obj)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if exists {
-		// TODO(petar-cvit): implement resource updates
-		return ctrl.Result{}, nil
+		r.Logger.Info("updating", "namespacedName", req.NamespacedName)
+
+		status, err := r.ResourceClient.UpdateResource(ctx, obj)
+		if status != nil {
+			r.SetStatus(obj, status)
+		}
+		if err := r.Status().Update(ctx, obj); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, err
 	}
 
 	r.Logger.Info("creating", "namespacedName", req.NamespacedName)
 
 	status, err := r.ResourceClient.CreateResource(ctx, obj)
+	if status != nil {
+		r.SetStatus(obj, status)
+	}
 
-	r.SetStatus(obj, status)
 	if err := r.Status().Update(ctx, obj); err != nil {
 		return ctrl.Result{}, err
 	}
