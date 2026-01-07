@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: format
         if: always()
-        uses: taskmedia/action-conventional-commits@v1.1.23
+        uses: taskmedia/action-conventional-commits@v1.1.25
         with:
           types: "build|ci|docs|feat|fix|perf|refactor|style|test|revert|gomod|chore|sync"
           token: ${{ secrets.GH_PAT }}
