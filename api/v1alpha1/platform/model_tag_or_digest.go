@@ -7,9 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type GetInstancesLogsResponseAvailable struct {
-	// The first byte offset that can be retrieved.
-	Start *int64 `json:"start,omitempty"`
-	// The last byte offset that can be retrieved.
-	End *int64 `json:"end,omitempty"`
+type TagOrDigest struct {
+	Digest *string `json:"digest,omitempty"`
+	Tag    *string `json:"tag,omitempty"`
 }

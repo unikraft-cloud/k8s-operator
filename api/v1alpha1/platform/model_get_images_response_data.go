@@ -9,6 +9,7 @@ package platform
 
 // The response data for this request.
 
-type GetImageResponseData struct {
-	Image *GetImageResponseDataImage `json:"image,omitempty"`
+type GetImagesResponseData struct {
+	// The list of images.
+	Images []Image `json:"images,omitempty"`
 }
