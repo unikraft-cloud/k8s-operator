@@ -243,6 +243,14 @@ spec:
                       UUID.  Mutually exclusive with name.
                     type: string
                 type: object
+              timeout_s:
+                description: |-
+                  Timeout to wait for all new instances to reach running state in
+                  milliseconds.  If you autostart your new instance, you can wait for it to
+                  finish starting with a blocking API call if you specify a wait timeout
+                  greater than zero.  No wait performed for a value of 0.
+                format: int64
+                type: integer
               vcpus:
                 description: Number of vCPUs to allocate for the instance.
                 format: int32
