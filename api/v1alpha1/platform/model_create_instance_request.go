@@ -69,8 +69,14 @@ type CreateInstanceRequest struct {
 	// configurations or capabilities that can be enabled for the instance.
 	Features []CreateInstanceRequestFeatures `json:"features,omitempty"`
 	// Timeout to wait for all new instances to reach running state in
-	// milliseconds.  If you autostart your new instance, you can wait for it to
+	// seconds.  If you autostart your new instance, you can wait for it to
 	// finish starting with a blocking API call if you specify a wait timeout
 	// greater than zero.  No wait performed for a value of 0.
 	TimeoutS *int64 `json:"timeout_s,omitempty"`
+	// Read-Only Memory (ROM) blobs to attach to the instance.
+	// Unikraft Cloud supports the ability to attach Read-Only Memory (ROM) blobs
+	// to instances. It allows you to create a general-purpose base image and
+	// then customize individual instances by attaching code or data as separate
+	// ROM blobs.
+	Roms []CreateInstanceRequestRom `json:"roms,omitempty"`
 }
