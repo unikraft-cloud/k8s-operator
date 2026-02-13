@@ -110,10 +110,13 @@ spec:
                       which can lead to performance issues or resource exhaustion.
                     format: int32
                     type: integer
-                  enabled:
-                    description: Indicates whether scale-to-zero is enabled for the
-                      instance.
-                    type: boolean
+                  notify_time_ms:
+                    description: |-
+                      The notification time in milliseconds before the instance is scaled to
+                      zero. This allows the instance to perform any necessary cleanup or state
+                      saving before being scaled down.
+                    format: int32
+                    type: integer
                   policy:
                     description: The specific policy to use for scaling the instance
                       to zero.
@@ -554,6 +557,13 @@ spec:
                               description: Indicates whether scale-to-zero is enabled
                                 for the instance.
                               type: boolean
+                            notify_time_ms:
+                              description: |-
+                                The notification time in milliseconds before the instance is scaled to
+                                zero. This allows the instance to perform any necessary cleanup or state
+                                saving before being scaled down.
+                              format: int32
+                              type: integer
                             policy:
                               description: The specific policy to use for scaling
                                 the instance to zero.
