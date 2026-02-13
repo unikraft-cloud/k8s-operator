@@ -101,6 +101,25 @@ spec:
                 - always
                 - on_failure
                 type: string
+              roms:
+                description: |-
+                  Read-Only Memory (ROM) blobs to attach to the instance.
+                  Unikraft Cloud supports the ability to attach Read-Only Memory (ROM) blobs
+                  to instances. It allows you to create a general-purpose base image and
+                  then customize individual instances by attaching code or data as separate
+                  ROM blobs.
+                items:
+                  properties:
+                    image:
+                      description: The image of the ROM to use for the instance configuration.
+                      type: string
+                    name:
+                      description: The name of the ROM to use for the instance configuration.
+                      type: string
+                  required:
+                  - image
+                  type: object
+                type: array
               scale_to_zero:
                 properties:
                   cooldown_time_ms:
@@ -249,7 +268,7 @@ spec:
               timeout_s:
                 description: |-
                   Timeout to wait for all new instances to reach running state in
-                  milliseconds.  If you autostart your new instance, you can wait for it to
+                  seconds.  If you autostart your new instance, you can wait for it to
                   finish starting with a blocking API call if you specify a wait timeout
                   greater than zero.  No wait performed for a value of 0.
                 format: int64
@@ -544,6 +563,27 @@ spec:
                           - always
                           - on_failure
                           type: string
+                        roms:
+                          description: |-
+                            Read-Only Memory (ROM) blobs to attach to the instance.
+                            Unikraft Cloud supports the ability to attach Read-Only Memory (ROM) blobs
+                            to instances. It allows you to create a general-purpose base image and
+                            then customize individual instances by attaching code or data as separate
+                            ROM blobs.
+                          items:
+                            properties:
+                              image:
+                                description: The image of the ROM to use for the instance
+                                  configuration.
+                                type: string
+                              name:
+                                description: The name of the ROM to use for the instance
+                                  configuration.
+                                type: string
+                            required:
+                            - image
+                            type: object
+                          type: array
                         scale_to_zero:
                           properties:
                             cooldown_time_ms:
