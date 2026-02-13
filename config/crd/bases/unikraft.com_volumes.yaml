@@ -91,6 +91,17 @@ spec:
                         name:
                           description: The name of the newly created volume.
                           type: string
+                        state:
+                          description: Current state of the volume.
+                          enum:
+                          - uninitialized
+                          - initializing
+                          - available
+                          - idle
+                          - mounted
+                          - busy
+                          - error
+                          type: string
                         status:
                           description: The status of the response.
                           enum:
