@@ -42,6 +42,7 @@ type Config struct {
 	UKCToken string `name:"ukc-token" env:"OPERATOR_UKC_TOKEN" help:"Unikraft Cloud access token." required:""`
 	UKCMetro string `name:"ukc-metro" env:"OPERATOR_UKC_METRO" help:"Default Unikraft Cloud metro where the instances will be created." required:""`
 
+	Kubeconfig              string              `name:"kubeconfig" env:"KUBECONFIG" help:"Path to kubeconfig file. If not set, uses in-cluster config or default kubeconfig." default:""`
 	MetricsAddr             string              `name:"metrics-addr" env:"METRICS_ADDR" help:"The address the metric endpoint binds to." default:":8080"`
 	ProbeAddr               string              `name:"probe-addr" env:"PROBE_ADDR" help:"The address the probe endpoint binds to." default:":8081"`
 	EnableLeaderElection    bool                `name:"enable-leader-election" env:"ENABLE_LEADER_ELECTION" help:"Enable leader election for controller manager." default:"false"`

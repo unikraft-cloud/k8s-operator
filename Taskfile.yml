@@ -6,6 +6,7 @@ includes:
     taskfile: https://github.com/unikraft-cloud/x.git//Taskfile.go.yml?ref=prod-staging
     vars:
       go_module: github.com/unikraft-cloud/k8s-operator
+      goreleaser_version: "v2.11.0"
 
 tasks:
   default:
