@@ -55,7 +55,9 @@ spec:
                   type: string
                 type: array
               autostart:
-                description: Whether the instance should start automatically on creation.
+                description: |-
+                  Whether the instance should start automatically on creation.
+                  Must be set to true when `timeout_s` is specified.
                 type: boolean
               env:
                 additionalProperties:
@@ -65,11 +67,15 @@ spec:
               features:
                 description: |-
                   Features to enable for the instance.  Features are specific
-                  configurations or capabilities that can be enabled for the instance.
+                  configurations or capabilities that can be enabled for the
+                  instance.  The `scale-to-zero` and `delete-on-stop` features are
+                  mutually exclusive.
                 items:
                   description: |-
                     Features to enable for the instance.  Features are specific
-                    configurations or capabilities that can be enabled for the instance.
+                    configurations or capabilities that can be enabled for the
+                    instance.  The `scale-to-zero` and `delete-on-stop` features are
+                    mutually exclusive.
                   enum:
                   - delete_on_stop
                   type: string
@@ -89,13 +95,16 @@ spec:
                   If not provided, a random name will be generated.  The name must be unique.
                 type: string
               replicas:
-                description: Number of replicas for the instance.
+                description: |-
+                  (Optional).  Number of additional replicas to create.  The total
+                  number of instances created is `replicas + 1`.  Defaults to 0.
                 format: int64
                 type: integer
               restart_policy:
                 description: |-
-                  Restart policy for the instance.  This defines how the instance should
-                  behave when it stops or crashes.
+                  Restart policy for the instance.  This defines how the instance
+                  should behave when it stops or crashes.  Cannot be combined with
+                  the `delete-on-stop` feature.
                 enum:
                 - never
                 - always
@@ -154,6 +163,12 @@ spec:
                       scaled back up.
                     type: boolean
                 type: object
+              sched_priority:
+                description: |-
+                  (Optional).  The scheduling priority for the instance.  Higher values
+                  indicate higher priority.
+                format: int32
+                type: integer
               service_group:
                 properties:
                   domains:
@@ -265,16 +280,36 @@ spec:
                       UUID.  Mutually exclusive with name.
                     type: string
                 type: object
+              tags:
+                description: (Optional).  Tags to associate with the instance.
+                items:
+                  type: string
+                type: array
+              template:
+                properties:
+                  name:
+                    description: Mutually exclusive with UUID.
+                    type: string
+                  uuid:
+                    description: Mutually exclusive with name.
+                    type: string
+                required:
+                - name
+                - uuid
+                type: object
               timeout_s:
                 description: |-
-                  Timeout to wait for all new instances to reach running state in
-                  seconds.  If you autostart your new instance, you can wait for it to
-                  finish starting with a blocking API call if you specify a wait timeout
-                  greater than zero.  No wait performed for a value of 0.
+                  Timeout in seconds to wait for all new instances to reach running
+                  state.  Requires `autostart` to be set.  If you autostart your
+                  new instance, you can wait for it to finish starting with a
+                  blocking API call if you specify a wait timeout greater than
+                  zero.  No wait performed for a value of 0.
                 format: int64
                 type: integer
               vcpus:
-                description: Number of vCPUs to allocate for the instance.
+                description: |-
+                  (Optional).  Number of vCPUs to allocate for the instance.
+                  Defaults to 1.
                 format: int32
                 type: integer
               volumes:
@@ -329,10 +364,11 @@ spec:
                 type: array
               wait_timeout_ms:
                 description: |-
-                  Timeout to wait for all new instances to reach running state in
-                  milliseconds.  If you autostart your new instance, you can wait for it to
-                  finish starting with a blocking API call if you specify a wait timeout
-                  greater than zero.  No wait performed for a value of 0.
+                  Deprecated: Use `timeout_s` instead.  Timeout in milliseconds to
+                  wait for all new instances to reach running state.  Requires
+                  `autostart` to be set.  If `timeout_s` is not set, this value is
+                  converted by rounding up to the next full second.  No wait
+                  performed for a value of 0.
                 format: int64
                 type: integer
             required:
