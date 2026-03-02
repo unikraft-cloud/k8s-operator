@@ -1,0 +1,23 @@
+image:
+  name: ghcr.io/unikraft-cloud/k8s-operator
+  pullSecrets:
+  - ghcr-pull-secret
+
+#resources:
+#  requests:
+#    cpu:
+#    memory:
+#  limits:
+#    cpu:
+#    memory:
+
+ukc:
+  metro:
+  token:
+
+leaderElection:
+  enabled: false
+  id: "operator.unikraft.com"
+  namespace: "ukc-operator"
+
+metricsSecure: true
