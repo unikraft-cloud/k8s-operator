@@ -7,7 +7,9 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Scale-to-zero configuration for the instance.
+// Scale-to-zero configuration for the instance.  Requires
+// `service_group` to be set.  Cannot be combined with the
+// `delete-on-stop` feature.
 // The specific policy to use for scaling the instance to zero.
 // +kubebuilder:validation:Enum=on;off;idle
 type CreateInstanceRequestScaleToZeroPolicy string
