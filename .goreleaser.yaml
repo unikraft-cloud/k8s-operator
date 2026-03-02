@@ -28,6 +28,43 @@ release:
     name: k8s-operator
   prerelease: auto
 
+dockers:
+  - image_templates:
+      - ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}-amd64
+      - ghcr.io/unikraft-cloud/k8s-operator:latest
+    dockerfile: Dockerfile
+    use: buildx
+    extra_files:
+      - LICENSE.txt
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.source={{ .GitURL }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+  - image_templates:
+      - ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}-arm64
+      - ghcr.io/unikraft-cloud/k8s-operator:latest
+    dockerfile: Dockerfile
+    use: buildx
+    extra_files:
+      - LICENSE.txt
+    build_flag_templates:
+      - --platform=linux/arm64
+      - --label=org.opencontainers.image.source={{ .GitURL }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+
+docker_manifests:
+  - name_template: ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}
+    image_templates:
+      - ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}-amd64
+      - ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}-arm64
+  - name_template: ghcr.io/unikraft-cloud/k8s-operator:latest
+    image_templates:
+      - ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}-amd64
+      - ghcr.io/unikraft-cloud/k8s-operator:{{ .Version }}-arm64
+
+
 changelog:
   sort: asc
   use: github

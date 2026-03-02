@@ -147,12 +147,14 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
+SVU                ?= $(GO) run github.com/caarlos0/svu/v3@$(SVU_VERSION)
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.4.2
 CONTROLLER_TOOLS_VERSION ?= v0.16.5
 ENVTEST_VERSION ?= release-0.18
 GOLANGCI_LINT_VERSION ?= v1.59.1
+SVU_VERSION        ?= v3.2.3
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
@@ -228,3 +230,17 @@ platform.yaml:
 apifmt:
 	ls $(WORKDIR)/api/v1alpha1/platform/*.go | xargs $(GOIMPORTS) -l -w
 
+.PHONY: next-stable
+next-stable: PRERELEASE ?=
+next-stable:
+	$(Q)$(SVU) next --v0 --tag.prefix "v" --tag.pattern "v[0-9]*.[0-9]*.[0-9]*" --prerelease "$(PRERELEASE)"
+
+.PHONY: next-staging
+next-staging:
+	$(Q)NEXT=$$($(SVU) current); \
+	if [[ "$$NEXT" == *"staging"* ]]; then \
+		NEXT=$$(echo "$$NEXT" | awk -F. '{print $$1 "." $$2 "." $$3 "." $$4 + 1}'); \
+	else \
+		NEXT=$$(PRERELEASE=staging.1 $(MAKE) next-stable); \
+	fi; \
+	echo $$NEXT
