@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8s-operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "k8s-operator.fullname" . }}
+    app.kubernetes.io/part-of: ukc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "k8s-operator.fullname" . }}
+      app.kubernetes.io/part-of: ukc
+  template:
+    metadata:
+      name: k8s-operator
+      labels:
+        app.kubernetes.io/name: {{ include "k8s-operator.fullname" . }}
+        app.kubernetes.io/part-of: ukc
+    spec:
+      serviceAccountName: {{ include "k8s-operator.fullname" . }}
+      containers:
+        - name: k8s-operator
+          image: {{ include "k8s-operator.image" . }}
+          imagePullPolicy: IfNotPresent
+          {{- if .Values.resources }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "k8s-operator.configmap-name" . }}
+          env:
+            - name: OPERATOR_UKC_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "k8s-operator.secret-name" . }}
+                  key: ukcToken
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      restartPolicy: Always

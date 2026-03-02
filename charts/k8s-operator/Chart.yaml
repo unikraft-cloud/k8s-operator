@@ -1,0 +1,10 @@
+apiVersion: v2
+description: A Helm chart to install the Unikraft Kubernetes operator
+name: k8s-operator
+version: 0.1.0
+home: https://unikraft.com/
+keywords:
+  - unikraft
+  - operator
+annotations:
+  org.opencontainers.image.source: https://github.com/unikraft-cloud/k8s-operator
