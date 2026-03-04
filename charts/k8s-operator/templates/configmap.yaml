@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "k8s-operator.configmap-name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "k8s-operator.fullname" . }}
+    app.kubernetes.io/part-of: ukc
+data:
+  OPERATOR_UKC_METRO: {{ include "ukc.metro" . | quote }}
+  {{- if (.Values.leaderElection).enabled }}
+  ENABLE_LEADER_ELECTION: {{ .Values.leaderElection.enabled | quote }}
+  LEADER_ELECTION_NAMESPACE: {{ .Release.Namespace | quote }}
+  {{- end }}
+  {{- if (.Values.leaderElection).id }}
+  LEADER_ELECTION_ID: {{ .Values.leaderElection.id | quote }}
+  {{- end }}
+  {{- if hasKey .Values "metricsSecure" }}
+  METRICS_SECURE: {{ .Values.metricsSecure | quote }}
+  {{- end }}
+
+

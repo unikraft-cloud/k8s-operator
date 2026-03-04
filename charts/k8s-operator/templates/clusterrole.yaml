@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "k8s-operator.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "k8s-operator.fullname" . }}
+    app.kubernetes.io/part-of: ukc
+rules:
+  - apiGroups:
+      - unikraft.com
+    resources:
+      - instances
+      - services
+      - volumes
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - unikraft.com
+    resources:
+      - instances/status
+      - services/status
+      - volumes/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - unikraft.com
+    resources:
+      - instances/finalizers
+      - services/finalizers
+      - volumes/finalizers
+    verbs:
+      - update
