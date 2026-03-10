@@ -1,14 +1,6 @@
 image:
   name: ghcr.io/unikraft-cloud/k8s-operator
 
-#resources:
-#  requests:
-#    cpu:
-#    memory:
-#  limits:
-#    cpu:
-#    memory:
-
 ukc:
   metro:
   token:
@@ -17,3 +9,11 @@ leaderElection:
   enabled: false
 
 metricsSecure: true
+
+#resources:
+#  requests:
+#    cpu:
+#    memory:
+#  limits:
+#    cpu:
+#    memory:
