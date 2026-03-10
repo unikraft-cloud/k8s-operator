@@ -3,7 +3,7 @@ name: check/pr
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    branches: [prod-staging]
+    branches: [prod-staging, prod-stable]
 
 # Automatically cancel in-progress actions on the same branch
 concurrency:
@@ -34,7 +34,7 @@ jobs:
           accessToken: ${{ secrets.GH_PAT }}
 
       - name: signed-off-by
-        if: always()
+        if: ${{ always() && github.actor != 'unikraft-bot' }}
         uses: gsactions/commit-message-checker@v2
         with:
           pattern: '^Signed-off-by: .+ \<.+\@.+\..+\>$'
@@ -51,7 +51,7 @@ jobs:
         if: always()
         uses: gsactions/commit-message-checker@v2
         with:
-          pattern: '^(build|ci|docs|feat|fix|perf|refactor|style|test|revert|gomod|chore|sync)(\([\w\-\_\d]+\))?!?: '
+          pattern: '^(build|ci|docs|feat|fix|perf|refactor|style|test|revert|gomod|chore|sync|promote)(\([\w\-\_\d]+\))?!?: '
           error: 'The PR title must follow the conventional commits format.'
           excludeDescription: 'true'
           excludeTitle: 'false'
