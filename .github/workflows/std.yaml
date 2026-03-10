@@ -21,5 +21,32 @@ permissions:
   checks: write
 
 jobs:
-  go:
-    uses: unikraft-cloud/internal-actions/.github/workflows/go.yaml@prod-staging
+  check-static:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run go-check
+        uses: unikraft-cloud/internal-actions/actions/go-check@prod-staging
+        with:
+          gh_pat: ${{ secrets.GH_PAT }}
+
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - check-static
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run go-test
+        uses: unikraft-cloud/internal-actions/actions/go-test@prod-staging
+        with:
+          gh_pat: ${{ secrets.GH_PAT }}
