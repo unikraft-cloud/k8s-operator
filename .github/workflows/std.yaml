@@ -3,11 +3,15 @@ name: std
 on:
   push:
     branches: [prod-staging]
+    paths-ignore:
+      - '.github/**'
+      - 'charts/**'
   pull_request:
     branches: [prod-staging]
     paths:
       - '**'
       - '!.github/**'
+      - '!charts/**'
       - .github/workflows/std.yaml
   workflow_dispatch:
 
