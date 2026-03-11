@@ -1,14 +1,14 @@
 image:
   name: ghcr.io/unikraft-cloud/k8s-operator
 
-ukc:
-  metro:
-  token:
-
 leaderElection:
   enabled: false
 
 metricsSecure: true
+
+ukc:
+  metro:
+  token:
 
 #resources:
 #  requests:
