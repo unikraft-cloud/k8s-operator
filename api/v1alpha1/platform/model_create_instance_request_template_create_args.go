@@ -9,20 +9,20 @@ package platform
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// An instance is a unikernel virtual machine running an application.
+// (Optional). Configuration parameters to apply when building the new instance from the source template.
 // The state of the instance.  This indicates the current state of the
 // instance, such as whether it is running, stopped, or in an error state.
 // +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type InstanceState string
+type CreateInstanceRequestTemplateCreateArgsState string
 
 const (
-	InstanceStateStopped  InstanceState = "stopped"
-	InstanceStateStarting InstanceState = "starting"
-	InstanceStateRunning  InstanceState = "running"
-	InstanceStateDraining InstanceState = "draining"
-	InstanceStateStopping InstanceState = "stopping"
-	InstanceStateTemplate InstanceState = "template"
-	InstanceStateStandby  InstanceState = "standby"
+	CreateInstanceRequestTemplateCreateArgsStateStopped  CreateInstanceRequestTemplateCreateArgsState = "stopped"
+	CreateInstanceRequestTemplateCreateArgsStateStarting CreateInstanceRequestTemplateCreateArgsState = "starting"
+	CreateInstanceRequestTemplateCreateArgsStateRunning  CreateInstanceRequestTemplateCreateArgsState = "running"
+	CreateInstanceRequestTemplateCreateArgsStateDraining CreateInstanceRequestTemplateCreateArgsState = "draining"
+	CreateInstanceRequestTemplateCreateArgsStateStopping CreateInstanceRequestTemplateCreateArgsState = "stopping"
+	CreateInstanceRequestTemplateCreateArgsStateTemplate CreateInstanceRequestTemplateCreateArgsState = "template"
+	CreateInstanceRequestTemplateCreateArgsStateStandby  CreateInstanceRequestTemplateCreateArgsState = "standby"
 )
 
 // The restart configuration for the instance.
@@ -53,15 +53,15 @@ const (
 // A manual start or stop of the instance aborts the restart sequence and
 // resets the back-off delay.
 // +kubebuilder:validation:Enum=never;always;on_failure
-type InstanceRestartPolicy string
+type CreateInstanceRequestTemplateCreateArgsRestartPolicy string
 
 const (
-	InstanceRestartPolicyNever      InstanceRestartPolicy = "never"
-	InstanceRestartPolicyAlways     InstanceRestartPolicy = "always"
-	InstanceRestartPolicyOn_failure InstanceRestartPolicy = "on_failure"
+	CreateInstanceRequestTemplateCreateArgsRestartPolicyNever      CreateInstanceRequestTemplateCreateArgsRestartPolicy = "never"
+	CreateInstanceRequestTemplateCreateArgsRestartPolicyAlways     CreateInstanceRequestTemplateCreateArgsRestartPolicy = "always"
+	CreateInstanceRequestTemplateCreateArgsRestartPolicyOn_failure CreateInstanceRequestTemplateCreateArgsRestartPolicy = "on_failure"
 )
 
-type Instance struct {
+type CreateInstanceRequestTemplateCreateArgs struct {
 	// The UUID of the instance.
 	//
 	// This is a unique identifier for the instance that is generated when the
@@ -79,7 +79,7 @@ type Instance struct {
 	CreatedAt *metav1.Time `json:"created_at,omitempty"`
 	// The state of the instance.  This indicates the current state of the
 	// instance, such as whether it is running, stopped, or in an error state.
-	State *InstanceState `json:"state,omitempty"`
+	State *CreateInstanceRequestTemplateCreateArgsState `json:"state,omitempty"`
 	// The internal hostname of the instance.  This address can be used privately
 	// within the Unikraft Cloud network to access the instance.  It is not
 	// accessible from the public Internet.
@@ -256,8 +256,8 @@ type Instance struct {
 	//
 	// A manual start or stop of the instance aborts the restart sequence and
 	// resets the back-off delay.
-	RestartPolicy *InstanceRestartPolicy `json:"restart_policy,omitempty"`
-	ScaleToZero   *InstanceScaleToZero   `json:"scale_to_zero,omitempty"`
+	RestartPolicy *CreateInstanceRequestTemplateCreateArgsRestartPolicy `json:"restart_policy,omitempty"`
+	ScaleToZero   *InstanceScaleToZero                                  `json:"scale_to_zero,omitempty"`
 	// The list of volumes attached to the instance.
 	Volumes      []InstanceVolume      `json:"volumes,omitempty"`
 	ServiceGroup *InstanceServiceGroup `json:"service_group,omitempty"`

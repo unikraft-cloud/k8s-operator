@@ -7,7 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type AttachVolumesRequestInstanceIDAllOf struct {
-	// The UUID of the instance that the volume is attached to.
-	Uuid *string `json:"uuid,omitempty"`
+type GetTemplateVolumesResponseData struct {
+	// The template volume(s) which were retrieved by the request.
+	Volumes []Volume `json:"volumes,omitempty"`
 }

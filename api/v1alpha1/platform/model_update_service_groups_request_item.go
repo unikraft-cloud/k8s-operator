@@ -11,7 +11,7 @@ import "k8s.io/apimachinery/pkg/runtime"
 
 // A single update operation to be applied to a service group
 // The property to modify.
-// +kubebuilder:validation:Enum=services;domains;soft_limit;hard_limit
+// +kubebuilder:validation:Enum=services;domains;soft_limit;hard_limit;autokill
 type UpdateServiceGroupsRequestItemProp string
 
 const (
@@ -19,6 +19,7 @@ const (
 	UpdateServiceGroupsRequestItemPropDomains    UpdateServiceGroupsRequestItemProp = "domains"
 	UpdateServiceGroupsRequestItemPropSoft_limit UpdateServiceGroupsRequestItemProp = "soft_limit"
 	UpdateServiceGroupsRequestItemPropHard_limit UpdateServiceGroupsRequestItemProp = "hard_limit"
+	UpdateServiceGroupsRequestItemPropAutokill   UpdateServiceGroupsRequestItemProp = "autokill"
 )
 
 // The operation to perform.
@@ -43,9 +44,10 @@ type UpdateServiceGroupsRequestItem struct {
 	// The operation to perform.
 	Op UpdateServiceGroupsRequestItemOp `json:"op"`
 	// The value for the update operation:
-	// - For "services": array of Service objects
-	// - For "domains": array of Domain objects
+	// - For "services": array of Service objects (same as for creation)
+	// - For "domains": array of Domain objects (same as for creation)
 	// - For "soft_limit": integer (1–65535), must be <= "hard_limit"
 	// - For "hard_limit": integer (1–65535), must be >= "soft_limit"
+	// - For "autokill": object with time_ms field
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

@@ -11,12 +11,13 @@ import "k8s.io/apimachinery/pkg/runtime"
 
 // A single update operation to be applied to a template instance.
 // The property to modify.
-// +kubebuilder:validation:Enum=tags;delete_lock
+// +kubebuilder:validation:Enum=tags;delete_lock;autokill
 type UpdateTemplateInstancesRequestItemProp string
 
 const (
 	UpdateTemplateInstancesRequestItemPropTags        UpdateTemplateInstancesRequestItemProp = "tags"
 	UpdateTemplateInstancesRequestItemPropDelete_lock UpdateTemplateInstancesRequestItemProp = "delete_lock"
+	UpdateTemplateInstancesRequestItemPropAutokill    UpdateTemplateInstancesRequestItemProp = "autokill"
 )
 
 // The operation to perform on the property.
@@ -44,5 +45,6 @@ type UpdateTemplateInstancesRequestItem struct {
 	// The value for the update operation. The type depends on the property and operation:
 	// - For "tags": array of strings
 	// - For "delete_lock": boolean
+	// - For "autokill": object with time_ms field
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

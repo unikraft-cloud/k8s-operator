@@ -7,11 +7,11 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Reference to the instance to attach the volume to.
+// UUID or name of the instance to attach the volume to.
 
-type AttachVolumesRequestInstanceID struct {
-	// The UUID of the instance that the volume is attached to.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance that the volume is attached to.
-	Name *string `json:"name,omitempty"`
+type AttachVolumesRequestItemAttachTo struct {
+	// Mutually exclusive with name.
+	Uuid string `json:"uuid"`
+	// Mutually exclusive with UUID.
+	Name string `json:"name"`
 }

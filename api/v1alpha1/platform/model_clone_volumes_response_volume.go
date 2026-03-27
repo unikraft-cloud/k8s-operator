@@ -9,28 +9,28 @@ package platform
 
 // The state of the volume.
 // +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error;template
-type CreateVolumeResponseVolumeState string
+type CloneVolumesResponseVolumeState string
 
 const (
-	CreateVolumeResponseVolumeStateUninitialized CreateVolumeResponseVolumeState = "uninitialized"
-	CreateVolumeResponseVolumeStateInitializing  CreateVolumeResponseVolumeState = "initializing"
-	CreateVolumeResponseVolumeStateAvailable     CreateVolumeResponseVolumeState = "available"
-	CreateVolumeResponseVolumeStateIdle          CreateVolumeResponseVolumeState = "idle"
-	CreateVolumeResponseVolumeStateMounted       CreateVolumeResponseVolumeState = "mounted"
-	CreateVolumeResponseVolumeStateBusy          CreateVolumeResponseVolumeState = "busy"
-	CreateVolumeResponseVolumeStateError         CreateVolumeResponseVolumeState = "error"
-	CreateVolumeResponseVolumeStateTemplate      CreateVolumeResponseVolumeState = "template"
+	CloneVolumesResponseVolumeStateUninitialized CloneVolumesResponseVolumeState = "uninitialized"
+	CloneVolumesResponseVolumeStateInitializing  CloneVolumesResponseVolumeState = "initializing"
+	CloneVolumesResponseVolumeStateAvailable     CloneVolumesResponseVolumeState = "available"
+	CloneVolumesResponseVolumeStateIdle          CloneVolumesResponseVolumeState = "idle"
+	CloneVolumesResponseVolumeStateMounted       CloneVolumesResponseVolumeState = "mounted"
+	CloneVolumesResponseVolumeStateBusy          CloneVolumesResponseVolumeState = "busy"
+	CloneVolumesResponseVolumeStateError         CloneVolumesResponseVolumeState = "error"
+	CloneVolumesResponseVolumeStateTemplate      CloneVolumesResponseVolumeState = "template"
 )
 
-type CreateVolumeResponseVolume struct {
+type CloneVolumesResponseVolume struct {
 	// The status of the response.
 	Status *ResponseStatus `json:"status,omitempty"`
-	// UUID of the newly created volume.
+	// The UUID of the newly cloned volume.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the newly created volume.
+	// The name of the newly cloned volume.
 	Name *string `json:"name,omitempty"`
 	// The state of the volume.
-	State *CreateVolumeResponseVolumeState `json:"state,omitempty"`
+	State *CloneVolumesResponseVolumeState `json:"state,omitempty"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`

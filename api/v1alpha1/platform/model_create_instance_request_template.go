@@ -7,11 +7,14 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// (Optional).  The UUID of a template instance to create the instance from.
+// Template instances.
+// An existing instance can be saved as a template. This template is then
+// used to create new instances that inherit the exact configuration and
+// state the original instance had when the template was created.
 
 type CreateInstanceRequestTemplate struct {
-	// Mutually exclusive with name.
-	Uuid string `json:"uuid"`
-	// Mutually exclusive with UUID.
-	Name string `json:"name"`
+	// (Optional).  Whether the instance needs to run in order to reach template state
+	Prepare    *bool                                    `json:"prepare,omitempty"`
+	NameOrUUID *CreateInstanceRequestTemplateNameOrUUID `json:"nameOrUUID,omitempty"`
+	CreateArgs *CreateInstanceRequestTemplateCreateArgs `json:"create_args,omitempty"`
 }

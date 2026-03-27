@@ -11,7 +11,7 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // A volume represents a storage device that can be attached to an instance.
 // Current state of the volume.
-// +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error
+// +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error;template
 type VolumeState string
 
 const (
@@ -22,6 +22,7 @@ const (
 	VolumeStateMounted       VolumeState = "mounted"
 	VolumeStateBusy          VolumeState = "busy"
 	VolumeStateError         VolumeState = "error"
+	VolumeStateTemplate      VolumeState = "template"
 )
 
 type Volume struct {
@@ -50,7 +51,8 @@ type Volume struct {
 	// List of instances that this volume is attached to.
 	AttachedTo []VolumeInstanceID `json:"attached_to,omitempty"`
 	// List of instances that have this volume mounted.
-	MountedBy []VolumeVolumeInstanceMount `json:"mounted_by,omitempty"`
+	// This does not apply to template volumes.
+	MountedBy []VolumeInstanceMount `json:"mounted_by,omitempty"`
 	// The tags associated with the volume.
 	// Maximum 16 tags are allowed, and each tag may not be longer than 256 characters.
 	Tags []string `json:"tags,omitempty"`
@@ -65,4 +67,10 @@ type Volume struct {
 	// This field is only set when this message object is used as a response
 	// message, and is useful when the status is not `success`.
 	Error *int32 `json:"error,omitempty"`
+	// Either static or dynamic reservation.
+	QuotaPolicy *string `json:"quota_policy,omitempty"`
+	// If set to true, the volume cannot be deleted.
+	DeleteLock *bool `json:"delete_lock,omitempty"`
+	// The amount of free space in the volume in megabytes.
+	FreeMb *uint32 `json:"free_mb,omitempty"`
 }

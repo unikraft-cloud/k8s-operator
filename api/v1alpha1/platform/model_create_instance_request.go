@@ -37,7 +37,7 @@ type CreateInstanceRequest struct {
 	// If not provided, a random name will be generated.  The name must be unique.
 	Name *string `json:"name,omitempty"`
 	// The image to use for the instance.
-	Image string `json:"image"`
+	Image *string `json:"image,omitempty"`
 	// (Optional).  The arguments to pass to the instance when it starts.
 	Args []string `json:"args,omitempty"`
 	// (Optional).  Environment variables to set for the instance.
@@ -96,4 +96,10 @@ type CreateInstanceRequest struct {
 	// (Optional).  The scheduling priority for the instance.  Higher values
 	// indicate higher priority.
 	SchedPriority *int32 `json:"sched_priority,omitempty"`
+	// (Optional).  Schedules for the instance.  Scheduled operations let you
+	// automatically start, stop, or delete the instance on a calendar-based
+	// schedule.  Each instance stores its own schedules, and cloning preserves
+	// them.
+	Schedules []Schedule                     `json:"schedules,omitempty"`
+	Autokill  *CreateInstanceRequestAutokill `json:"autokill,omitempty"`
 }

@@ -7,7 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CloneVolumeResponseData struct {
-	// The volume(s) which were created by the request.
-	Volumes []CloneVolumeResponseVolume `json:"volumes,omitempty"`
+type CreateTemplateVolumesResponseData struct {
+	// The template volume(s) which were created by the request.
+	Volumes []CreateTemplateVolumesResponseTemplateVolume `json:"volumes,omitempty"`
 }

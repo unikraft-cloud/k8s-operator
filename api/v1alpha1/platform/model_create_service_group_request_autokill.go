@@ -7,11 +7,10 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Reference to the instance to detach the volume from.
+// Automatic delete-on-idle configuration for service groups.
 
-type DetachVolumesRequestInstanceID struct {
-	// The UUID of the instance that the volume is detached from.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance that the volume is detached from.
-	Name *string `json:"name,omitempty"`
+type CreateServiceGroupRequestAutokill struct {
+	// Time in milliseconds after the service group becomes empty before it is
+	// deleted. A value of 0 disables autokill.
+	TimeMs *uint64 `json:"time_ms,omitempty"`
 }
