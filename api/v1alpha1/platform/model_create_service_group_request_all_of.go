@@ -7,9 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The request message for creating a new service group.
-
-type CreateServiceGroupRequest struct {
+type CreateServiceGroupRequestAllOf struct {
 	// Name of the service group.  This is a human-readable name that can be used
 	// to identify the service group.  The name must be unique within the context
 	// of your account.  If no name is specified, a random name is generated for
@@ -37,6 +35,4 @@ type CreateServiceGroupRequest struct {
 	// case there are no other instances available, excess requests fail (i.e.,
 	// they are blocked and not queued).
 	HardLimit *uint64 `json:"hard_limit,omitempty"`
-	// Automatic delete-on-idle configuration.
-	Autokill *CreateServiceGroupRequestAutokill `json:"autokill,omitempty"`
 }

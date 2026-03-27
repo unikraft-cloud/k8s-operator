@@ -92,7 +92,7 @@ spec:
                           description: The name of the newly created volume.
                           type: string
                         state:
-                          description: Current state of the volume.
+                          description: The state of the volume.
                           enum:
                           - uninitialized
                           - initializing
@@ -101,6 +101,7 @@ spec:
                           - mounted
                           - busy
                           - error
+                          - template
                           type: string
                         status:
                           description: The status of the response.
@@ -135,6 +136,18 @@ spec:
                   the request and generate the response.
                 format: int64
                 type: integer
+              state:
+                description: Current state of the volume.
+                enum:
+                - uninitialized
+                - initializing
+                - available
+                - idle
+                - mounted
+                - busy
+                - error
+                - template
+                type: string
               status:
                 description: The status of the response.
                 enum:

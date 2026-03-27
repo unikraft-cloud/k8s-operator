@@ -10,7 +10,7 @@ package platform
 import "k8s.io/apimachinery/pkg/runtime"
 
 // The property to modify.
-// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock
+// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock;schedules;autokill
 type UpdateInstanceByUUIDRequestBodyProp string
 
 const (
@@ -22,6 +22,8 @@ const (
 	UpdateInstanceByUUIDRequestBodyPropScale_to_zero UpdateInstanceByUUIDRequestBodyProp = "scale_to_zero"
 	UpdateInstanceByUUIDRequestBodyPropTags          UpdateInstanceByUUIDRequestBodyProp = "tags"
 	UpdateInstanceByUUIDRequestBodyPropDelete_lock   UpdateInstanceByUUIDRequestBodyProp = "delete_lock"
+	UpdateInstanceByUUIDRequestBodyPropSchedules     UpdateInstanceByUUIDRequestBodyProp = "schedules"
+	UpdateInstanceByUUIDRequestBodyPropAutokill      UpdateInstanceByUUIDRequestBodyProp = "autokill"
 )
 
 // The operation to perform on the property.
@@ -51,5 +53,7 @@ type UpdateInstanceByUUIDRequestBody struct {
 	// - For "scale_to_zero": object with cooldown_time_ms, policy, and stateful fields
 	// - For "tags": array of strings
 	// - For "delete_lock": boolean
+	// - For "schedules": array of schedule objects (with name, when, and action fields)
+	// - For "autokill": object with time_ms and num_requests fields
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

@@ -7,10 +7,10 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type UpdateVolumesResponseUpdatedVolume struct {
-	// The UUID of the volume that was updated.
+type UpdateTemplateVolumesResponseTemplateVolume struct {
+	// The UUID of the template volume that was updated.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume that was updated.
+	// The name of the template volume that was updated.
 	Name *string `json:"name,omitempty"`
 	// The status of this particular volume update operation.
 	Status *string `json:"status,omitempty"`

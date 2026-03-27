@@ -24,4 +24,9 @@ type StopInstancesRequestItem struct {
 	// Note: This endpoint does not block.  Use the wait endpoint for the
 	// instance to reach the stopped state.
 	DrainTimeoutMs *uint64 `json:"drain_timeout_ms,omitempty"`
+	// Whether to perform a quick shutdown.  This flag is
+	// overridden by force.
+	Quick *bool `json:"quick,omitempty"`
+	// Only stop the instance if it is in this state.
+	Ifstate *string `json:"ifstate,omitempty"`
 }

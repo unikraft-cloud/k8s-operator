@@ -7,9 +7,10 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type VolumeVolumeInstanceMountAllOf struct {
-	// The UUID of the instance that the volume is mounted in.
-	Uuid *string `json:"uuid,omitempty"`
-	// Whether the volume is mounted read-only or read-write.
-	ReadOnly *bool `json:"read_only,omitempty"`
+// The request message for creating one or more template volumes.
+
+type CreateTemplateVolumesRequest struct {
+	// The list of IDs of the volumes that will be converted into templates.
+	// Each ID can be either a UUID or a name.
+	Ids []NameOrUUID `json:"ids"`
 }

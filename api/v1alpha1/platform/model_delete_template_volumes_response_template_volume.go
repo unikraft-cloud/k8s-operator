@@ -7,15 +7,13 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type UpdateVolumesResponseUpdatedVolume struct {
-	// The UUID of the volume that was updated.
+type DeleteTemplateVolumesResponseTemplateVolume struct {
+	// The UUID of the template volume that was deleted.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume that was updated.
+	// The name of the template volume that was deleted.
 	Name *string `json:"name,omitempty"`
-	// The status of this particular volume update operation.
+	// The status of this particular template volume deletion operation.
 	Status *string `json:"status,omitempty"`
-	// (Optional).  The client-provided ID from the request.
-	Id *string `json:"id,omitempty"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`

@@ -9,6 +9,7 @@ package platform
 
 import "k8s.io/apimachinery/pkg/runtime"
 
+// A single request item for updating a volume.
 // The property to modify.
 // +kubebuilder:validation:Enum=size_mb;tags;quota_policy;delete_lock
 type UpdateVolumesRequestItemProp string

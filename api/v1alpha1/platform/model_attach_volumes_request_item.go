@@ -7,17 +7,16 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The request message for attaching one or more volume(s) to instances by
-// their UUID(s) or name(s).
+// A single request item for attaching a volume to an instance.
 
-type AttachVolumesRequest struct {
+type AttachVolumesRequestItem struct {
 	// The UUID of the volume to attach. Mutually exclusive with name.
 	// Exactly one of uuid or name must be provided.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the volume to attach. Mutually exclusive with UUID.
 	// Exactly one of uuid or name must be provided.
-	Name     *string                      `json:"name,omitempty"`
-	AttachTo AttachVolumesRequestAttachTo `json:"attach_to"`
+	Name     string                           `json:"name"`
+	AttachTo AttachVolumesRequestItemAttachTo `json:"attach_to"`
 	// Path of the mountpoint.
 	//
 	// The path must be absolute, not contain `.` and `..` components, and not

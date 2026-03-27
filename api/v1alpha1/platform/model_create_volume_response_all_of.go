@@ -7,6 +7,21 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// Current state of the volume.
+// +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error;template
+type CreateVolumeResponseAllOfState string
+
+const (
+	CreateVolumeResponseAllOfStateUninitialized CreateVolumeResponseAllOfState = "uninitialized"
+	CreateVolumeResponseAllOfStateInitializing  CreateVolumeResponseAllOfState = "initializing"
+	CreateVolumeResponseAllOfStateAvailable     CreateVolumeResponseAllOfState = "available"
+	CreateVolumeResponseAllOfStateIdle          CreateVolumeResponseAllOfState = "idle"
+	CreateVolumeResponseAllOfStateMounted       CreateVolumeResponseAllOfState = "mounted"
+	CreateVolumeResponseAllOfStateBusy          CreateVolumeResponseAllOfState = "busy"
+	CreateVolumeResponseAllOfStateError         CreateVolumeResponseAllOfState = "error"
+	CreateVolumeResponseAllOfStateTemplate      CreateVolumeResponseAllOfState = "template"
+)
+
 type CreateVolumeResponseAllOf struct {
 	// The status of the response.
 	Status *ResponseStatus           `json:"status,omitempty"`
@@ -16,4 +31,6 @@ type CreateVolumeResponseAllOf struct {
 	// The operation time in microseconds.  This is the time it took to process
 	// the request and generate the response.
 	OpTimeUs *uint64 `json:"op_time_us,omitempty"`
+	// Current state of the volume.
+	State *CreateVolumeResponseAllOfState `json:"state,omitempty"`
 }

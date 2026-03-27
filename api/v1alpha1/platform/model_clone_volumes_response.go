@@ -7,12 +7,13 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The response message for cloning a volume.
+// The response message for cloning one or more volume(s).
 
-type CloneVolumeResponse struct {
+type CloneVolumesResponse struct {
 	// The status of the response.
-	Status *ResponseStatus          `json:"status,omitempty"`
-	Data   *CloneVolumeResponseData `json:"data,omitempty"`
+	Status *ResponseStatus `json:"status,omitempty"`
+	// The response data for this request.
+	Data *CloneVolumesResponseData `json:"data,omitempty"`
 	// A list of errors which may have occurred during the request.
 	Errors []ResponseError `json:"errors,omitempty"`
 	// The operation time in microseconds.  This is the time it took to process
