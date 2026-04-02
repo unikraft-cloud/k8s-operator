@@ -8,10 +8,16 @@
 package platform
 
 // The request message for creating a volume.
+// Quota policy for the volume.
+// +kubebuilder:validation:Enum=static;dynamic
+type CreateVolumeRequestQuotaPolicy string
+
+const (
+	CreateVolumeRequestQuotaPolicyStatic  CreateVolumeRequestQuotaPolicy = "static"
+	CreateVolumeRequestQuotaPolicyDynamic CreateVolumeRequestQuotaPolicy = "dynamic"
+)
 
 type CreateVolumeRequest struct {
-	// The size of the volume in megabytes.
-	SizeMb uint64 `json:"size_mb"`
 	// The name of the volume.
 	//
 	// This is a human-readable name that can be used to identify the volume.
@@ -20,4 +26,22 @@ type CreateVolumeRequest struct {
 	// `X` is a 5 character long random alphanumeric suffix..  The name can also
 	// be used to identify the volume in API calls.
 	Name *string `json:"name,omitempty"`
+	// The size of the volume in megabytes.
+	SizeMb *uint64 `json:"size_mb,omitempty"`
+	// A host path to create a managed volume from.
+	HostPath *string                      `json:"host_path,omitempty"`
+	Template *CreateVolumeRequestTemplate `json:"template,omitempty"`
+	// Quota policy for the volume.
+	QuotaPolicy *CreateVolumeRequestQuotaPolicy `json:"quota_policy,omitempty"`
+	// Filesystem type to format or configure.
+	// Without custom configuration, this is either `ext4` or `virtiofs`.
+	Filesystem *string `json:"filesystem,omitempty"`
+	// Tags to assign to the new volume.
+	Tags []string `json:"tags,omitempty"`
+	// Guest UID for managed volumes (host_path mode only).
+	Uid *uint32 `json:"uid,omitempty"`
+	// Guest GID for managed volumes (host_path mode only).
+	Gid *uint32 `json:"gid,omitempty"`
+	// Script arguments passed to volume initialization scripts.
+	Args map[string]string `json:"args,omitempty"`
 }
