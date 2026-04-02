@@ -7,7 +7,11 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CreateVolumeRequestAllOf struct {
-	// The size of the volume in megabytes.
-	SizeMb *uint64 `json:"size_mb,omitempty"`
+// Source template volume to clone from.
+
+type CreateVolumeRequestTemplate struct {
+	// Mutually exclusive with name.
+	Uuid string `json:"uuid"`
+	// Mutually exclusive with UUID.
+	Name string `json:"name"`
 }
