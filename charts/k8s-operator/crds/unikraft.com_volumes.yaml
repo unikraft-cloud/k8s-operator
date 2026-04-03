@@ -48,6 +48,23 @@ spec:
             type: object
           spec:
             properties:
+              args:
+                additionalProperties:
+                  type: string
+                description: Script arguments passed to volume initialization scripts.
+                type: object
+              filesystem:
+                description: |-
+                  Filesystem type to format or configure.
+                  Without custom configuration, this is either `ext4` or `virtiofs`.
+                type: string
+              gid:
+                description: Guest GID for managed volumes (host_path mode only).
+                format: int32
+                type: integer
+              host_path:
+                description: A host path to create a managed volume from.
+                type: string
               name:
                 description: |-
                   The name of the volume.
@@ -58,12 +75,37 @@ spec:
                   `X` is a 5 character long random alphanumeric suffix..  The name can also
                   be used to identify the volume in API calls.
                 type: string
+              quota_policy:
+                description: Quota policy for the volume.
+                enum:
+                - static
+                - dynamic
+                type: string
               size_mb:
                 description: The size of the volume in megabytes.
                 format: int64
                 type: integer
-            required:
-            - size_mb
+              tags:
+                description: Tags to assign to the new volume.
+                items:
+                  type: string
+                type: array
+              template:
+                properties:
+                  name:
+                    description: Mutually exclusive with UUID.
+                    type: string
+                  uuid:
+                    description: Mutually exclusive with name.
+                    type: string
+                required:
+                - name
+                - uuid
+                type: object
+              uid:
+                description: Guest UID for managed volumes (host_path mode only).
+                format: int32
+                type: integer
             type: object
             x-kubernetes-validations:
             - message: spec.name is immutable
@@ -136,18 +178,6 @@ spec:
                   the request and generate the response.
                 format: int64
                 type: integer
-              state:
-                description: Current state of the volume.
-                enum:
-                - uninitialized
-                - initializing
-                - available
-                - idle
-                - mounted
-                - busy
-                - error
-                - template
-                type: string
               status:
                 description: The status of the response.
                 enum:
