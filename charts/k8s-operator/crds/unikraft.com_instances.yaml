@@ -958,8 +958,26 @@ spec:
                   instance where the volume will be mounted.
                 items:
                   properties:
+                    args:
+                      additionalProperties:
+                        type: string
+                      description: Script arguments passed to volume initialization
+                        scripts.
+                      type: object
                     at:
                       description: The mount point for the volume in the instance.
+                      type: string
+                    filesystem:
+                      description: |-
+                        Filesystem type to format or configure.
+                        Without custom configuration, this is either `ext4` or `virtiofs`.
+                      type: string
+                    gid:
+                      description: Guest GID for managed volumes (host_path mode only).
+                      format: int32
+                      type: integer
+                    host_path:
+                      description: A host path to create a managed volume from.
                       type: string
                     name:
                       description: |-
@@ -968,7 +986,11 @@ spec:
                         If this is the only specified field, then it will look up an existing
                         volume by this name.  If the volume does not exist, the request will
                         fail.  If a new volume is intended to be created, then this field must be
-                        specified along with the size in MiB and the mount point in the instance.
+                        specified along with the mount point in the instance and a provisioning
+                        source (size_mb or host_path).
+                      type: string
+                    quota_policy:
+                      description: Quota policy for the volume.
                       type: string
                     readonly:
                       description: |-
@@ -985,6 +1007,15 @@ spec:
                         When creating a new volume as part of the instance create request,
                         specify the size of the volume in MiB.
                       format: int64
+                      type: integer
+                    tags:
+                      description: Tags to assign to the new volume.
+                      items:
+                        type: string
+                      type: array
+                    uid:
+                      description: Guest UID for managed volumes (host_path mode only).
+                      format: int32
                       type: integer
                     uuid:
                       description: |-

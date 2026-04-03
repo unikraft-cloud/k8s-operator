@@ -7,7 +7,9 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CreateVolumeRequestAllOf struct {
-	// The size of the volume in megabytes.
-	SizeMb *uint64 `json:"size_mb,omitempty"`
+// The response data for this request.
+
+type UpdateCertificateResponseData struct {
+	// The certificate(s) which were updated by the request.
+	Certificates []Certificate `json:"certificates,omitempty"`
 }

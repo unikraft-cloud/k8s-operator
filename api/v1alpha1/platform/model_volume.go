@@ -25,6 +25,15 @@ const (
 	VolumeStateTemplate      VolumeState = "template"
 )
 
+// Either static or dynamic reservation.
+// +kubebuilder:validation:Enum=static;dynamic
+type VolumeQuotaPolicy string
+
+const (
+	VolumeQuotaPolicyStatic  VolumeQuotaPolicy = "static"
+	VolumeQuotaPolicyDynamic VolumeQuotaPolicy = "dynamic"
+)
+
 type Volume struct {
 	// The UUID of the volume.
 	//
@@ -68,9 +77,19 @@ type Volume struct {
 	// message, and is useful when the status is not `success`.
 	Error *int32 `json:"error,omitempty"`
 	// Either static or dynamic reservation.
-	QuotaPolicy *string `json:"quota_policy,omitempty"`
+	QuotaPolicy *VolumeQuotaPolicy `json:"quota_policy,omitempty"`
 	// If set to true, the volume cannot be deleted.
 	DeleteLock *bool `json:"delete_lock,omitempty"`
 	// The amount of free space in the volume in megabytes.
 	FreeMb *uint32 `json:"free_mb,omitempty"`
+	// The filesystem type of this volume.
+	// Without custom configuration, this is either `ext4` or `virtiofs`.
+	Filesystem *string `json:"filesystem,omitempty"`
+	// Host path backing this managed volume.
+	// This field is only available for managed volumes and users with
+	// appropriate permissions.
+	HostPath *string `json:"host_path,omitempty"`
+	// Optional script arguments that were applied to the custom volume filesystem
+	// initialization scripts.
+	Args map[string]string `json:"args,omitempty"`
 }

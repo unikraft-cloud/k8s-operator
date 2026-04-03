@@ -7,10 +7,15 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CreateVolumeResponseAllOf struct {
+// The response message for updating one or more certificate(s).
+
+type UpdateCertificateResponse struct {
 	// The status of the response.
-	Status *ResponseStatus           `json:"status,omitempty"`
-	Data   *CreateVolumeResponseData `json:"data,omitempty"`
+	Status *ResponseStatus `json:"status,omitempty"`
+	// An optional message providing additional information about the status.
+	// This field is useful when the status is not `success`.
+	Message *string                        `json:"message,omitempty"`
+	Data    *UpdateCertificateResponseData `json:"data,omitempty"`
 	// A list of errors which may have occurred during the request.
 	Errors []ResponseError `json:"errors,omitempty"`
 	// The operation time in microseconds.  This is the time it took to process
