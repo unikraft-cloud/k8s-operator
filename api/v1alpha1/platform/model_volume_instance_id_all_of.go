@@ -7,11 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type VolumeVolumeInstanceMount struct {
-	// The UUID of the instance that the volume is mounted in.
+type VolumeInstanceIDAllOf struct {
+	// The UUID of the instance that the volume is attached to.
 	Uuid *string `json:"uuid,omitempty"`
-	// Whether the volume is mounted read-only or read-write.
-	ReadOnly *bool `json:"read_only,omitempty"`
-	// The name of the instance that the volume is mounted in.
-	Name *string `json:"name,omitempty"`
 }

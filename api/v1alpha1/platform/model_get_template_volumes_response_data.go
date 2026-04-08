@@ -7,11 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CreateCertificateRequestAllOf struct {
-	// The common name (CN) of the certificate.
-	Cn *string `json:"cn,omitempty"`
-	// The chain of the certificate.
-	Chain *string `json:"chain,omitempty"`
-	// The private key of the certificate.
-	Pkey *string `json:"pkey,omitempty"`
+type GetTemplateVolumesResponseData struct {
+	// The template volume(s) which were retrieved by the request.
+	Volumes []Volume `json:"volumes,omitempty"`
 }

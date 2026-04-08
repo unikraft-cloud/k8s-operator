@@ -53,5 +53,5 @@ jobs:
         branch: ${{ steps.id.outputs.name }}
         committer: Unikraft Bot <monkey@unikraft.io>
         author: Unikraft Bot <monkey@unikraft.io>
-        add-paths: api,config
+        add-paths: api,charts
         signoff: true

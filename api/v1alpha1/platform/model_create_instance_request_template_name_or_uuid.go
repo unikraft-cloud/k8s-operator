@@ -7,7 +7,11 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CloneVolumeResponseData struct {
-	// The volume(s) which were created by the request.
-	Volumes []CloneVolumeResponseVolume `json:"volumes,omitempty"`
+// (Optional).  The UUID of a template instance to create the instance from.
+
+type CreateInstanceRequestTemplateNameOrUUID struct {
+	// Mutually exclusive with name.
+	Uuid string `json:"uuid"`
+	// Mutually exclusive with UUID.
+	Name string `json:"name"`
 }

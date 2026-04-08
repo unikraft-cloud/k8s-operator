@@ -54,6 +54,21 @@ spec:
                 items:
                   type: string
                 type: array
+              autokill:
+                properties:
+                  num_requests:
+                    description: |-
+                      Maximum number of requests/connections the instance serves before it is
+                      deleted. A value of 0 disables request-based autokill.
+                    format: int32
+                    type: integer
+                  time_ms:
+                    description: |-
+                      Time in milliseconds after the instance was stopped before it is deleted.
+                      A value of 0 disables time-based autokill.
+                    format: int64
+                    type: integer
+                type: object
               autostart:
                 description: |-
                   Whether the instance should start automatically on creation.
@@ -169,6 +184,48 @@ spec:
                   indicate higher priority.
                 format: int32
                 type: integer
+              schedules:
+                description: |-
+                  (Optional).  Schedules for the instance.  Scheduled operations let you
+                  automatically start, stop, or delete the instance on a calendar-based
+                  schedule.  Each instance stores its own schedules, and cloning preserves
+                  them.
+                items:
+                  properties:
+                    action:
+                      description: The action to perform at the scheduled time.
+                      enum:
+                      - start
+                      - stop
+                      - delete
+                      type: string
+                    name:
+                      description: |-
+                        The name of the schedule.
+
+                        Must be unique within an instance.
+                      type: string
+                    next_at:
+                      description: |-
+                        The timestamp of when the next scheduled action will occur.
+
+                        This field is populated only in responses (not settable in requests).
+                        Unix timestamp in seconds.  Omitted if no next execution is scheduled.
+                      format: int64
+                      type: integer
+                    when:
+                      description: |-
+                        The calendar expression specifying when the action should be performed.
+
+                        Uses systemd calendar event syntax.
+                        See https://www.man7.org/linux/man-pages/man7/systemd.time.7.html
+                      type: string
+                  required:
+                  - action
+                  - name
+                  - when
+                  type: object
+                type: array
               service_group:
                 properties:
                   domains:
@@ -287,15 +344,593 @@ spec:
                 type: array
               template:
                 properties:
-                  name:
-                    description: Mutually exclusive with UUID.
-                    type: string
-                  uuid:
-                    description: Mutually exclusive with name.
-                    type: string
-                required:
-                - name
-                - uuid
+                  create_args:
+                    properties:
+                      args:
+                        description: |-
+                          The arguments passed to the instance when it was started.  This is a
+                          list of command-line arguments that were provided to the instance at
+                          startup.  These arguments can be used to configure the behavior of the
+                          instance and its applications.
+                        items:
+                          type: string
+                        type: array
+                      autokill:
+                        properties:
+                          num_requests:
+                            description: |-
+                              Maximum number of requests/connections the instance serves before it is
+                              deleted. A value of 0 disables request-based autokill.
+                            format: int32
+                            type: integer
+                          time_ms:
+                            description: |-
+                              Time in milliseconds after the instance was stopped before it is deleted.
+                              A value of 0 disables time-based autokill.
+                            format: int64
+                            type: integer
+                        type: object
+                      boot_time_us:
+                        description: |-
+                          The boot time of the instance in microseconds.  We take a pragmatic
+                          approach is to define the boot time.  We calculate this as the difference
+                          in time between the moment the virtualization toolstack is invoked to
+                          respond to a VM boot request and the moment the OS starts executing user
+                          code (i.e., the end of the guest OS boot process).  This is essentially the
+                          time that a user would experience in a deployment, minus the application
+                          initialization time, which we leave out since it is independent from the
+                          OS.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      created_at:
+                        description: The time the instance was created.
+                        format: date-time
+                        type: string
+                      delete_lock:
+                        description: If set to true, the instance cannot be deleted
+                          until the lock is removed.
+                        type: boolean
+                      env:
+                        additionalProperties:
+                          type: string
+                        description: Environment variables set for the instance.
+                        type: object
+                      error:
+                        description: |-
+                          An optional error code providing additional information about the status.
+                          This field is only set when this message object is used as a response
+                          message, and is useful when the status is not `success`.
+                        format: int32
+                        type: integer
+                      exit_code:
+                        description: |-
+                          The application exit code.
+
+                          This is the code which the application returns upon leaving its main entry
+                          point.  The encoding of the exit code is application specific.  See the
+                          documentation of the application for more details.  Usually, an exit code
+                          of `0` indicates success / no failure.
+                          Not used for template instances.
+                        format: int32
+                        type: integer
+                      image:
+                        description: |-
+                          The image used to create the instance.  This is a reference to the
+                          Unikraft image that was used to create the instance.
+                        type: string
+                      memory_mb:
+                        description: |-
+                          The amount of memory in megabytes allocated for the instance.  This is the
+                          total amount of memory that is available to the instance for its
+                          operations.
+                        format: int64
+                        type: integer
+                      message:
+                        description: |-
+                          An optional message providing additional information about the status.
+                          This field is only set when this message object is used as a response
+                          message, and is useful when the status is not `success`.
+                        type: string
+                      name:
+                        description: |-
+                          The name of the instance.
+
+                          This is a human-readable name that can be used to identify the instance.
+                          The name must be unique within the context of your account.  The name can
+                          also be used to identify the instance in API calls.
+                        type: string
+                      net_time_us:
+                        description: |-
+                          This is the time it took for the user-level application to start listening
+                          on a non-localhost port measured in microseconds.  This is the time from
+                          when the instance started until it reasonably ready to start responding to
+                          network requests.  This is useful for measuring the time it takes for the
+                          instance to become operationally ready.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      network_interfaces:
+                        description: |-
+                          The network interfaces of the instance.
+                          Not used for template instances.
+                        items:
+                          properties:
+                            mac:
+                              description: The MAC address of the network interface.
+                              type: string
+                            private_ip:
+                              description: |-
+                                The private IP address of the network interface. This is the internal IP
+                                address that is used for communication between instances within the same
+                                network.
+                              type: string
+                            rx_bytes:
+                              description: Amount of bytes received from interface.
+                              format: int64
+                              type: integer
+                            rx_packets:
+                              description: Count of packets received from interface
+                              format: int64
+                              type: integer
+                            tx_bytes:
+                              description: Amount of bytes sent to interface.
+                              format: int64
+                              type: integer
+                            tx_packets:
+                              description: Count of packets sent to interface
+                              format: int64
+                              type: integer
+                            uuid:
+                              description: |-
+                                The UUID of the network interface. This is a unique identifier for the
+                                network interface that is generated when the instance is created.
+                              type: string
+                          type: object
+                        type: array
+                      private_fqdn:
+                        description: |-
+                          The internal hostname of the instance.  This address can be used privately
+                          within the Unikraft Cloud network to access the instance.  It is not
+                          accessible from the public Internet.
+                        type: string
+                      restart:
+                        properties:
+                          attempt:
+                            description: |-
+                              Current restart attempt number. This is incremented each time the instance
+                              is restarted automatically by the platform.
+                            format: int32
+                            type: integer
+                          next_at:
+                            description: Timestamp of the next scheduled restart attempt.
+                            format: date-time
+                            type: string
+                        type: object
+                      restart_count:
+                        description: |-
+                          The total number of times the instance has been restarted. This is a counter
+                          that increments each time the instance has been restarted. This can be
+                          useful for tracking the usage of the instance over time and/or for
+                          debugging purposes.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      restart_policy:
+                        description: |-
+                          The restart configuration for the instance.
+
+                          When an instance stops either because the application exits or the instance
+                          crashes, Unikraft Cloud can auto-restart your instance.  Auto-restarts are
+                          performed according to the restart policy configured for a particular
+                          instance.
+
+                          The policy can have the following values:
+
+                          | Policy       | Description |
+                          |--------------|-------------|
+                          | `never`      | Never restart the instance (default). |
+                          | `always`     | Always restart the instance when the stop is initiated from within the instance (i.e., the application exits or the instance crashes). |
+                          | `on-failure` | Only restart the instance if it crashes. |
+
+                          When an instance stops, the stop reason and the configured restart policy
+                          are evaluated to decide if a restart should be performed.  Unikraft Cloud
+                          uses an exponential back-off delay (immediate, 5s, 10s, 20s, 40s, ..., 5m)
+                          to slow down restarts in tight crash loops.  If an instance runs without
+                          problems for 10s the back-off delay is reset and the restart sequence ends.
+
+                          The `restart.attempt` attribute reported in counts the number of restarts
+                          performed in the current sequence.  The `restart.next_at` field indicates
+                          when the next restart will take place if a back-off delay is in effect.
+
+                          A manual start or stop of the instance aborts the restart sequence and
+                          resets the back-off delay.
+                        enum:
+                        - never
+                        - always
+                        - on_failure
+                        type: string
+                      roms:
+                        description: |-
+                          Read-Only Memory (ROM) blobs to attach to the instance.
+                          Unikraft Cloud supports the ability to attach Read-Only Memory (ROM) blobs
+                          to instances. It allows you to create a general-purpose base image and
+                          then customize individual instances by attaching code or data as separate
+                          ROM blobs.
+                        items:
+                          properties:
+                            image:
+                              description: The image of the ROM to use for the instance
+                                configuration.
+                              type: string
+                            name:
+                              description: The name of the ROM to use for the instance
+                                configuration.
+                              type: string
+                          required:
+                          - image
+                          type: object
+                        type: array
+                      scale_to_zero:
+                        properties:
+                          cooldown_time_ms:
+                            description: |-
+                              The cooldown time in milliseconds before the instance can be scaled to
+                              zero again.  This is useful to prevent rapid scaling to zero and back up,
+                              which can lead to performance issues or resource exhaustion.
+                            format: int32
+                            type: integer
+                          enabled:
+                            description: Indicates whether scale-to-zero is enabled
+                              for the instance.
+                            type: boolean
+                          notify_time_ms:
+                            description: |-
+                              The notification time in milliseconds before the instance is scaled to
+                              zero. This allows the instance to perform any necessary cleanup or state
+                              saving before being scaled down.
+                            format: int32
+                            type: integer
+                          policy:
+                            description: The specific policy to use for scaling the
+                              instance to zero.
+                            enum:
+                            - "on"
+                            - "off"
+                            - idle
+                            type: string
+                          stateful:
+                            description: |-
+                              Whether the instance should be stateful when scaled to zero. If set to
+                              true, the instance will retain its state (e.g., RAM contents) when scaled
+                              to zero.  This is useful for instances that need to maintain their state
+                              across scale-to-zero operations.  If set to false, the instance will lose
+                              its state when scaled to zero, and it will be restarted from scratch when
+                              scaled back up.
+                            type: boolean
+                        type: object
+                      schedules:
+                        description: |-
+                          Scheduled operations for this instance.
+
+                          Each schedule defines a calendar expression and an action (`start`,
+                          `stop`, or `delete`) to perform at matching times.
+                        items:
+                          properties:
+                            action:
+                              description: The action to perform at the scheduled
+                                time.
+                              enum:
+                              - start
+                              - stop
+                              - delete
+                              type: string
+                            name:
+                              description: |-
+                                The name of the schedule.
+
+                                Must be unique within an instance.
+                              type: string
+                            next_at:
+                              description: |-
+                                The timestamp of when the next scheduled action will occur.
+
+                                This field is populated only in responses (not settable in requests).
+                                Unix timestamp in seconds.  Omitted if no next execution is scheduled.
+                              format: int64
+                              type: integer
+                            when:
+                              description: |-
+                                The calendar expression specifying when the action should be performed.
+
+                                Uses systemd calendar event syntax.
+                                See https://www.man7.org/linux/man-pages/man7/systemd.time.7.html
+                              type: string
+                          required:
+                          - action
+                          - name
+                          - when
+                          type: object
+                        type: array
+                      service_group:
+                        properties:
+                          domains:
+                            description: The domain configuration for the service
+                              group.
+                            items:
+                              properties:
+                                certificate:
+                                  description: |-
+                                    The certificate associated with the domain.
+
+                                    The certificate is used to secure the domain with TLS/SSL.  If no
+                                    certificate is specified, Unikraft Cloud will automatically generate a
+                                    new certificate for the domain based on Let's Encrypt and seek to
+                                    accomplish a DNS-01 challenge.
+                                  properties:
+                                    name:
+                                      description: Mutually exclusive with UUID.
+                                      type: string
+                                    uuid:
+                                      description: Mutually exclusive with name.
+                                      type: string
+                                  type: object
+                                fqdn:
+                                  description: |-
+                                    Publicly accessible domain name.
+
+                                    If this name ends in a period `.` it must be a valid Full Qualified
+                                    Domain Name (FQDN), otherwise it will become a subdomain of the target
+                                    metro.
+                                  type: string
+                              type: object
+                            type: array
+                          name:
+                            description: |-
+                              The name of the service group.
+
+                              This is a human-readable name that can be used to identify the service
+                              group.  The name is unique within the context of your account.  The name
+                              can also be used to identify the service group in API calls.
+                            type: string
+                          uuid:
+                            description: |-
+                              The UUID of the service group.
+
+                              This is a unique identifier for the service group that is generated when
+                              the service is created.  The UUID is used to reference the service group
+                              in API calls and can be used to identify the service in all API calls
+                              that require an service identifier.
+                            type: string
+                        type: object
+                      snapshot:
+                        properties:
+                          uuid:
+                            description: The UUID of the snapshot.
+                            type: string
+                        type: object
+                      start_count:
+                        description: |-
+                          The total number of times the instance has been started.  This is a counter
+                          that increments each time the instance is started, regardless of whether it
+                          was manually stopped or restarted.  This can be useful for tracking the
+                          usage of the instance over time and/or for debugging purposes.
+
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      started_at:
+                        description: |-
+                          The time the instance was started.  This is the timestamp when the
+                          instance was last started.
+                          Not used for template instances.
+                        format: date-time
+                        type: string
+                      state:
+                        description: |-
+                          The state of the instance.  This indicates the current state of the
+                          instance, such as whether it is running, stopped, or in an error state.
+                        enum:
+                        - stopped
+                        - starting
+                        - running
+                        - draining
+                        - stopping
+                        - template
+                        - standby
+                        type: string
+                      status:
+                        description: |-
+                          An optional field representing the status of the request.  This field is
+                          only set when this message object is used as a response message.
+                        enum:
+                        - success
+                        - error
+                        type: string
+                      stop_code:
+                        description: |-
+                          The kernel stop code.
+
+                          This value encodes multiple details about the stop irrespective of the
+                          application.
+
+                          ```
+                          MSB                                                     LSB
+                          ┌──────────────┬──────────┬──────────┬───────────┬────────┐
+                          │ 31 ────── 24 │ 23 ── 16 │    15    │ 14 ──── 8 │ 7 ── 0 │
+                          ├──────────────┼──────────┼──────────┼───────────┼────────┤
+                          │ reserved[^1] │ errno    │ shutdown │ initlevel │ reason │
+                          └──────────────┴──────────┴──────────┴───────────┴────────┘
+                          ```
+
+                          - **errno**:     The application errno, using Linux's errno.h values.
+                                           (Optional, can be 0.)
+                          - **shutdown**:  Whether the shutdown originated from the inittable (0) or
+                                           from the termtable (1).
+                          - **initlevel**: The initlevel at the time of the stop.
+                          - **reason**:    The reason for the stop.  See `StopCodeReason`.
+
+                          [^1]: Reserved for future use.
+                          Not used for template instances.
+                        format: int32
+                        type: integer
+                      stop_reason:
+                        description: |-
+                          The instance stop reason.
+
+                          Provides reason as to why an instance is stopped or in the process of
+                          shutting down.  The stop reason is a bitmask that tells you the origin of
+                          the shutdown:
+
+                          | Bit     | 4          | 3          | 2          | 1          | 0 (LSB)      |
+                          |---------|------------|------------|------------|------------|--------------|
+                          | Purpose | [F]orced   | [U]ser     | [P]latform | [A]pp      | [K]ernel     |
+
+                          - **Forced**:   This was a force stop.  A forced stop does not give the
+                                          instance a chance to perform a clean shutdown.  Bits 0
+                                          (Kernel) and 1 (App) can thus never be set for forced
+                                          shutdowns.  Consequently, there won't be an `exit_code` or
+                                          `stop_code`.
+                          - **User**:     Stop initiated by user, e.g. via an API call.
+                          - **Platform**: Stop initiated by platform, e.g. an autoscale policy.
+                          - **App**:      The Application exited.  The `exit_code` field will be set.
+                          - **Kernel**:   The kernel exited.  The `stop_code` field will be set.
+
+                          For example, the stop reason will contain the following values in the given
+                          scenarios:
+
+                          | Value | Bitmask | Aliases | Scenario |
+                          |-------|---------|---------|----------|
+                          | 28    | `11100` | `FUP--` | Forced user-initiated shutdown. |
+                          | 15    | `01111` | `-UPAK` | Regular user-initiated shutdown. The application and kernel have exited. The exit_code and stop_code indicate if the application and kernel shut down cleanly. |
+                          | 13    | `01101` | `-UP-K` | The user initiated a shutdown but the application was forcefully killed by the kernel during shutdown. This can be the case if the image does not support a clean application exit or the application crashed after receiving a termination signal. The exit_code won’t be present in this scenario. |
+                          | 7     | `00111` | `--PAK` | Unikraft Cloud initiated the shutdown, for example, due to scale-to-zero. The application and kernel have exited. The exit_code and stop_code indicate if the application and kernel shut down cleanly. |
+                          | 3     | `00011` | `---AK` | The application exited. The exit_code and stop_code indicate if the application and kernel shut down cleanly. |
+                          | 1     | `00001` | `----K` | The instance likely expierenced a fatal crash and the stop_code contains more information about the cause of the crash. |
+                          | 0     | `00000` | `-----` | The stop reason is unknown. |
+                          Not used for template instances.
+                        format: int32
+                        type: integer
+                      stopped_at:
+                        description: |-
+                          The time the instance was stopped.  This is the timestamp when the
+                          instance was last stopped.  If the instance is currently running, this
+                          field will be empty.
+                          Not used for template instances.
+                        format: date-time
+                        type: string
+                      tags:
+                        description: The tags associated with the instance.
+                        items:
+                          type: string
+                        type: array
+                      template_autokill:
+                        properties:
+                          time_ms:
+                            description: |-
+                              Time in milliseconds after the template was last used for cloning before
+                              it is deleted. A value of 0 disables template autokill.
+                            format: int64
+                            type: integer
+                        type: object
+                      uptime_ms:
+                        description: |-
+                          The total amount of time the instance has been running in milliseconds.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      uuid:
+                        description: |-
+                          The UUID of the instance.
+
+                          This is a unique identifier for the instance that is generated when the
+                          instance is created.  The UUID is used to reference the instance in API
+                          calls and can be used to identify the instance in all API calls that
+                          require an instance identifier.
+                        type: string
+                      vcpus:
+                        description: |-
+                          The number of vCPUs allocated for the instance.  This is the total
+                          number of virtual CPUs that are available to the instance for its
+                          operations.
+                        format: int32
+                        type: integer
+                      vmm_load_time_us:
+                        description: |-
+                          (Developer-only).  The time it took the VMM (Virtual Machine Monitor) to
+                          load the instance's kernel and initramfs into VM memory measured in
+                          microseconds.  This field is primarily used for debugging and performance
+                          analysis purposes.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      vmm_ready_time_us:
+                        description: |-
+                          (Developer-only).  The time taken for the VMM (Virtual Machine Monitor) to
+                          become ready to execute the instance measured in microseconds.  This is the
+                          time from when the VMM started until it was ready to execute the instance's
+                          code.  This field is primarily used for debugging and performance analysis
+                          purposes.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      vmm_start_time_us:
+                        description: |-
+                          (Developer-only).  The time taken between the main controller and the
+                          beginning of execution of the VMM (Virtual Machine Monitor) measured in
+                          microseconds.  This field is primarily used for debugging and performance
+                          analysis purposes.
+                          Not used for template instances.
+                        format: int64
+                        type: integer
+                      volumes:
+                        description: The list of volumes attached to the instance.
+                        items:
+                          properties:
+                            at:
+                              description: |-
+                                The mount point of the volume in the instance.  This is the directory in
+                                the instance where the volume will be mounted.
+                              type: string
+                            name:
+                              description: |-
+                                The name of the volume.
+
+                                This is a human-readable name that can be used to identify the volume.
+                                The name must be unique within the context of your account.  The name can
+                                also be used to identify the volume in API calls.
+                              type: string
+                            readonly:
+                              description: Whether the volume is read-only or not.
+                              type: boolean
+                            uuid:
+                              description: |-
+                                The UUID of the volume.
+
+                                This is a unique identifier for the volume that is generated when the
+                                volume is created.  The UUID is used to reference the volume in API calls
+                                and can be used to identify the volume in all API calls that require a
+                                volume identifier.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  nameOrUUID:
+                    properties:
+                      name:
+                        description: Mutually exclusive with UUID.
+                        type: string
+                      uuid:
+                        description: Mutually exclusive with name.
+                        type: string
+                    required:
+                    - name
+                    - uuid
+                    type: object
+                  prepare:
+                    description: (Optional).  Whether the instance needs to run in
+                      order to reach template state
+                    type: boolean
                 type: object
               timeout_s:
                 description: |-
@@ -323,8 +958,26 @@ spec:
                   instance where the volume will be mounted.
                 items:
                   properties:
+                    args:
+                      additionalProperties:
+                        type: string
+                      description: Script arguments passed to volume initialization
+                        scripts.
+                      type: object
                     at:
                       description: The mount point for the volume in the instance.
+                      type: string
+                    filesystem:
+                      description: |-
+                        Filesystem type to format or configure.
+                        Without custom configuration, this is either `ext4` or `virtiofs`.
+                      type: string
+                    gid:
+                      description: Guest GID for managed volumes (host_path mode only).
+                      format: int32
+                      type: integer
+                    host_path:
+                      description: A host path to create a managed volume from.
                       type: string
                     name:
                       description: |-
@@ -333,7 +986,11 @@ spec:
                         If this is the only specified field, then it will look up an existing
                         volume by this name.  If the volume does not exist, the request will
                         fail.  If a new volume is intended to be created, then this field must be
-                        specified along with the size in MiB and the mount point in the instance.
+                        specified along with the mount point in the instance and a provisioning
+                        source (size_mb or host_path).
+                      type: string
+                    quota_policy:
+                      description: Quota policy for the volume.
                       type: string
                     readonly:
                       description: |-
@@ -350,6 +1007,15 @@ spec:
                         When creating a new volume as part of the instance create request,
                         specify the size of the volume in MiB.
                       format: int64
+                      type: integer
+                    tags:
+                      description: Tags to assign to the new volume.
+                      items:
+                        type: string
+                      type: array
+                    uid:
+                      description: Guest UID for managed volumes (host_path mode only).
+                      format: int32
                       type: integer
                     uuid:
                       description: |-
@@ -371,8 +1037,6 @@ spec:
                   performed for a value of 0.
                 format: int64
                 type: integer
-            required:
-            - image
             type: object
             x-kubernetes-validations:
             - message: spec.name is immutable
@@ -418,6 +1082,21 @@ spec:
                           items:
                             type: string
                           type: array
+                        autokill:
+                          properties:
+                            num_requests:
+                              description: |-
+                                Maximum number of requests/connections the instance serves before it is
+                                deleted. A value of 0 disables request-based autokill.
+                              format: int32
+                              type: integer
+                            time_ms:
+                              description: |-
+                                Time in milliseconds after the instance was stopped before it is deleted.
+                                A value of 0 disables time-based autokill.
+                              format: int64
+                              type: integer
+                          type: object
                         boot_time_us:
                           description: |-
                             The boot time of the instance in microseconds.  We take a pragmatic
@@ -658,6 +1337,49 @@ spec:
                                 scaled back up.
                               type: boolean
                           type: object
+                        schedules:
+                          description: |-
+                            Scheduled operations for this instance.
+
+                            Each schedule defines a calendar expression and an action (`start`,
+                            `stop`, or `delete`) to perform at matching times.
+                          items:
+                            properties:
+                              action:
+                                description: The action to perform at the scheduled
+                                  time.
+                                enum:
+                                - start
+                                - stop
+                                - delete
+                                type: string
+                              name:
+                                description: |-
+                                  The name of the schedule.
+
+                                  Must be unique within an instance.
+                                type: string
+                              next_at:
+                                description: |-
+                                  The timestamp of when the next scheduled action will occur.
+
+                                  This field is populated only in responses (not settable in requests).
+                                  Unix timestamp in seconds.  Omitted if no next execution is scheduled.
+                                format: int64
+                                type: integer
+                              when:
+                                description: |-
+                                  The calendar expression specifying when the action should be performed.
+
+                                  Uses systemd calendar event syntax.
+                                  See https://www.man7.org/linux/man-pages/man7/systemd.time.7.html
+                                type: string
+                            required:
+                            - action
+                            - name
+                            - when
+                            type: object
+                          type: array
                         service_group:
                           properties:
                             domains:
@@ -830,6 +1552,15 @@ spec:
                           items:
                             type: string
                           type: array
+                        template_autokill:
+                          properties:
+                            time_ms:
+                              description: |-
+                                Time in milliseconds after the template was last used for cloning before
+                                it is deleted. A value of 0 disables template autokill.
+                              format: int64
+                              type: integer
+                          type: object
                         uptime_ms:
                           description: |-
                             The total amount of time the instance has been running in milliseconds.

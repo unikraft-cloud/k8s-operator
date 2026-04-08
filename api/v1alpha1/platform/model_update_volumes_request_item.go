@@ -9,6 +9,7 @@ package platform
 
 import "k8s.io/apimachinery/pkg/runtime"
 
+// A single request item for updating a volume.
 // The property to modify.
 // +kubebuilder:validation:Enum=size_mb;tags;quota_policy;delete_lock
 type UpdateVolumesRequestItemProp string
@@ -43,7 +44,7 @@ type UpdateVolumesRequestItem struct {
 	Op UpdateVolumesRequestItemOp `json:"op"`
 	// The value for the update operation. The type depends on the property and operation:
 	// - For "size_mb": unsigned integer
-	// - For "quota_policy": 1 - static reservation, 2 - dynamic reservation
+	// - For "quota_policy": "static" or "dynamic"
 	// - For "tags": array of Strings
 	// - For "delete_lock": boolean
 	Value *runtime.RawExtension `json:"value,omitempty"`

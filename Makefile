@@ -1,3 +1,35 @@
+# SPDX-License-Identifier: UNLICENSED
+#
+# Copyright (c) 2026, Unikraft GmbH.  All rights reserved.
+#
+# This software and related documentation ("Unikraft Software") are protected
+# under relevant copyright laws.  The information contained herein is
+# confidential and proprietary to Unikraft GmbH and/or its licensors.  Without
+# the prior written permission of Unikraft GmbH and/or its licensors, any
+# reproduction, modification, use or disclosure of Unikraft Software, and
+# information contained herein, in whole or in part, shall be strictly
+# prohibited.
+#
+# BY OPENING THIS FILE, RECEIVER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+# THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("UNIKRAFT SOFTWARE")
+# RECEIVED FROM UNIKRAFT AND/OR ITS REPRESENTATIVES ARE PROVIDED TO RECEIVER ON
+# AN "AS-IS" BASIS ONLY.  UNIKRAFT EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+# NEITHER DOES UNIKRAFT PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+# SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+# SUPPLIED WITH THE UNIKRAFT SOFTWARE, AND RECEIVER AGREES TO LOOK ONLY TO SUCH
+# THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO.  RECEIVER EXPRESSLY
+# ACKNOWLEDGES THAT IT IS RECEIVER'S SOLE RESPONSIBILITY TO OBTAIN FROM ANY
+# THIRD PARTY ALL PROPER LICENSES CONTAINED IN UNIKRAFT SOFTWARE.  UNIKRAFT
+# SHALL ALSO NOT BE RESPONSIBLE FOR ANY UNIKRAFT SOFTWARE RELEASES MADE TO
+# RECEIVER'S SPECIFICATION OR TO CONFORM TO A PARTICULAR STANDARD OR OPEN
+# FORUM.  RECEIVER'S SOLE AND EXCLUSIVE REMEDY AND UNIKRAFT'S ENTIRE AND
+# CUMULATIVE LIABILITY WITH RESPECT TO THE UNIKRAFT SOFTWARE RELEASED HEREUNDER
+# WILL BE, AT UNIKRAFT'S OPTION, TO REVISE OR REPLACE THE UNIKRAFT SOFTWARE AT
+# ISSUE, OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER
+# TO UNIKRAFT FOR SUCH UNIKRAFT SOFTWARE AT ISSUE.
+
 # Image URL to use all building/pushing image targets
 IMG ?= controller:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
@@ -147,12 +179,14 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
+SVU                ?= $(GO) run github.com/caarlos0/svu/v3@$(SVU_VERSION)
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.4.2
 CONTROLLER_TOOLS_VERSION ?= v0.16.5
 ENVTEST_VERSION ?= release-0.18
 GOLANGCI_LINT_VERSION ?= v1.59.1
+SVU_VERSION        ?= v3.2.3
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
@@ -228,3 +262,17 @@ platform.yaml:
 apifmt:
 	ls $(WORKDIR)/api/v1alpha1/platform/*.go | xargs $(GOIMPORTS) -l -w
 
+.PHONY: next-stable
+next-stable: PRERELEASE ?=
+next-stable:
+	$(Q)$(SVU) next --v0 --tag.prefix "v" --tag.pattern "v[0-9]*.[0-9]*.[0-9]*" --prerelease "$(PRERELEASE)"
+
+.PHONY: next-staging
+next-staging:
+	$(Q)NEXT=$$($(SVU) current); \
+	if [[ "$$NEXT" == *"staging"* ]]; then \
+		NEXT=$$(echo "$$NEXT" | awk -F. '{print $$1 "." $$2 "." $$3 "." $$4 + 1}'); \
+	else \
+		NEXT=$$(PRERELEASE=staging.1 $(MAKE) next-stable); \
+	fi; \
+	echo $$NEXT

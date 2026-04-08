@@ -48,6 +48,16 @@ spec:
             type: object
           spec:
             properties:
+              autokill:
+                description: Automatic delete-on-idle configuration.
+                properties:
+                  time_ms:
+                    description: |-
+                      Time in milliseconds after the service group becomes empty before it is
+                      deleted. A value of 0 disables autokill.
+                    format: int64
+                    type: integer
+                type: object
               domains:
                 description: Description of domains associated with the service group.
                 items:
@@ -170,6 +180,15 @@ spec:
                       will always contain a single entry.
                     items:
                       properties:
+                        autokill:
+                          properties:
+                            time_ms:
+                              description: |-
+                                Time in milliseconds after the service group becomes empty before it is
+                                deleted. A value of 0 disables autokill.
+                              format: int64
+                              type: integer
+                          type: object
                         autoscale:
                           description: |-
                             Indicates if the service has autoscale enabled.  See the associated

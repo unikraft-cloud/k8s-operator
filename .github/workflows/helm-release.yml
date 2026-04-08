@@ -3,7 +3,7 @@ name: release/helm
 on:
   push:
     branches:
-      - prod-stable
+      - prod-staging
     paths:
       - 'charts/**'
 

@@ -37,4 +37,6 @@ type CreateServiceGroupRequest struct {
 	// case there are no other instances available, excess requests fail (i.e.,
 	// they are blocked and not queued).
 	HardLimit *uint64 `json:"hard_limit,omitempty"`
+	// Automatic delete-on-idle configuration.
+	Autokill *CreateServiceGroupRequestAutokill `json:"autokill,omitempty"`
 }

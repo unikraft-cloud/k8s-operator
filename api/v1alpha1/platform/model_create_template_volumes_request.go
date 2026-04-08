@@ -7,11 +7,10 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// UUID or name of the instance to detach the volume from.
+// The request message for creating one or more template volumes.
 
-type DetachVolumesRequestFrom struct {
-	// The UUID of the instance that the volume is detached from.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance that the volume is detached from.
-	Name *string `json:"name,omitempty"`
+type CreateTemplateVolumesRequest struct {
+	// The list of IDs of the volumes that will be converted into templates.
+	// Each ID can be either a UUID or a name.
+	Ids []NameOrUUID `json:"ids"`
 }

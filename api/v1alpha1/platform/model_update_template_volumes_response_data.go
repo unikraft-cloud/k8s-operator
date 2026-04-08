@@ -7,7 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CreateVolumeRequestAllOf struct {
-	// The size of the volume in megabytes.
-	SizeMb *uint64 `json:"size_mb,omitempty"`
+type UpdateTemplateVolumesResponseData struct {
+	// The template volume(s) which were updated by the request.
+	Volumes []UpdateTemplateVolumesResponseTemplateVolume `json:"volumes,omitempty"`
 }
