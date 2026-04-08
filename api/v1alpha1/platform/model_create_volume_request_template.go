@@ -7,11 +7,11 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-type CreateCertificateRequestAllOf struct {
-	// The common name (CN) of the certificate.
-	Cn *string `json:"cn,omitempty"`
-	// The chain of the certificate.
-	Chain *string `json:"chain,omitempty"`
-	// The private key of the certificate.
-	Pkey *string `json:"pkey,omitempty"`
+// Source template volume to clone from.
+
+type CreateVolumeRequestTemplate struct {
+	// Mutually exclusive with name.
+	Uuid string `json:"uuid"`
+	// Mutually exclusive with UUID.
+	Name string `json:"name"`
 }
