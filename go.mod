@@ -3,7 +3,7 @@ module github.com/unikraft-cloud/k8s-operator
 go 1.25.5
 
 require (
-	github.com/alecthomas/kong v1.12.1
+	github.com/alecthomas/kong v1.14.0
 	github.com/go-logr/logr v1.4.1
 	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.17.1
