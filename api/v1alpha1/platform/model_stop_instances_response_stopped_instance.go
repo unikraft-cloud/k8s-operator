@@ -40,12 +40,14 @@ type StopInstancesResponseStoppedInstance struct {
 	Uuid *string `json:"uuid,omitempty"`
 	// The name of the instance.
 	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro of the instance.
+	Metro *string `json:"metro,omitempty"`
 	// The current state of the instance.
 	State *StopInstancesResponseStoppedInstanceState `json:"state,omitempty"`
 	// The previous state of the instance before the stop operation was invoked.
 	PreviousState *StopInstancesResponseStoppedInstancePreviousState `json:"previous_state,omitempty"`
-	// An optional field representing the status of the request.  This field is
-	// only set when this message object is used as a response message.
+	// The status of the response.
 	Status *ResponseStatus `json:"status,omitempty"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.

@@ -65,6 +65,11 @@ spec:
               host_path:
                 description: A host path to create a managed volume from.
                 type: string
+              metro:
+                description: |-
+                  (Only applies when using global control plane).
+                  The metro to route the request to.
+                type: string
               name:
                 description: |-
                   The name of the volume.
@@ -91,7 +96,13 @@ spec:
                   type: string
                 type: array
               template:
+                description: Source template volume to clone from.
                 properties:
+                  metro:
+                    description: |-
+                      (Only applies when using global control plane).
+                      The metro of the resource.
+                    type: string
                   name:
                     description: Mutually exclusive with UUID.
                     type: string
@@ -129,6 +140,11 @@ spec:
                           description: |-
                             An optional message providing additional information about the status.
                             This field is useful when the status is not `success`.
+                          type: string
+                        metro:
+                          description: |-
+                            (Only applies when using global control plane).
+                            The metro of the volume.
                           type: string
                         name:
                           description: The name of the newly created volume.

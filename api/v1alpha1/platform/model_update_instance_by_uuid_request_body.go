@@ -10,20 +10,24 @@ package platform
 import "k8s.io/apimachinery/pkg/runtime"
 
 // The property to modify.
-// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock;schedules;autokill
+// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock;schedules;autokill;hostname;roms;dependencies;sched_priority
 type UpdateInstanceByUUIDRequestBodyProp string
 
 const (
-	UpdateInstanceByUUIDRequestBodyPropImage         UpdateInstanceByUUIDRequestBodyProp = "image"
-	UpdateInstanceByUUIDRequestBodyPropArgs          UpdateInstanceByUUIDRequestBodyProp = "args"
-	UpdateInstanceByUUIDRequestBodyPropEnv           UpdateInstanceByUUIDRequestBodyProp = "env"
-	UpdateInstanceByUUIDRequestBodyPropMemory_mb     UpdateInstanceByUUIDRequestBodyProp = "memory_mb"
-	UpdateInstanceByUUIDRequestBodyPropVcpus         UpdateInstanceByUUIDRequestBodyProp = "vcpus"
-	UpdateInstanceByUUIDRequestBodyPropScale_to_zero UpdateInstanceByUUIDRequestBodyProp = "scale_to_zero"
-	UpdateInstanceByUUIDRequestBodyPropTags          UpdateInstanceByUUIDRequestBodyProp = "tags"
-	UpdateInstanceByUUIDRequestBodyPropDelete_lock   UpdateInstanceByUUIDRequestBodyProp = "delete_lock"
-	UpdateInstanceByUUIDRequestBodyPropSchedules     UpdateInstanceByUUIDRequestBodyProp = "schedules"
-	UpdateInstanceByUUIDRequestBodyPropAutokill      UpdateInstanceByUUIDRequestBodyProp = "autokill"
+	UpdateInstanceByUUIDRequestBodyPropImage          UpdateInstanceByUUIDRequestBodyProp = "image"
+	UpdateInstanceByUUIDRequestBodyPropArgs           UpdateInstanceByUUIDRequestBodyProp = "args"
+	UpdateInstanceByUUIDRequestBodyPropEnv            UpdateInstanceByUUIDRequestBodyProp = "env"
+	UpdateInstanceByUUIDRequestBodyPropMemory_mb      UpdateInstanceByUUIDRequestBodyProp = "memory_mb"
+	UpdateInstanceByUUIDRequestBodyPropVcpus          UpdateInstanceByUUIDRequestBodyProp = "vcpus"
+	UpdateInstanceByUUIDRequestBodyPropScale_to_zero  UpdateInstanceByUUIDRequestBodyProp = "scale_to_zero"
+	UpdateInstanceByUUIDRequestBodyPropTags           UpdateInstanceByUUIDRequestBodyProp = "tags"
+	UpdateInstanceByUUIDRequestBodyPropDelete_lock    UpdateInstanceByUUIDRequestBodyProp = "delete_lock"
+	UpdateInstanceByUUIDRequestBodyPropSchedules      UpdateInstanceByUUIDRequestBodyProp = "schedules"
+	UpdateInstanceByUUIDRequestBodyPropAutokill       UpdateInstanceByUUIDRequestBodyProp = "autokill"
+	UpdateInstanceByUUIDRequestBodyPropHostname       UpdateInstanceByUUIDRequestBodyProp = "hostname"
+	UpdateInstanceByUUIDRequestBodyPropRoms           UpdateInstanceByUUIDRequestBodyProp = "roms"
+	UpdateInstanceByUUIDRequestBodyPropDependencies   UpdateInstanceByUUIDRequestBodyProp = "dependencies"
+	UpdateInstanceByUUIDRequestBodyPropSched_priority UpdateInstanceByUUIDRequestBodyProp = "sched_priority"
 )
 
 // The operation to perform on the property.
@@ -53,7 +57,12 @@ type UpdateInstanceByUUIDRequestBody struct {
 	// - For "scale_to_zero": object with cooldown_time_ms, policy, and stateful fields
 	// - For "tags": array of strings
 	// - For "delete_lock": boolean
-	// - For "schedules": array of schedule objects (with name, when, and action fields)
+	// - For "schedules": array of schedule objects (with name, when, action, and optional args fields).
+	//   Use action "exec" together with args to execute a command at the scheduled time.
 	// - For "autokill": object with time_ms and num_requests fields
+	// - For "hostname": string (valid DNS label)
+	// - For "roms": array of ROM objects (with name and image fields) for SET/ADD, or array of ROM names for DEL
+	// - For "dependencies": array of instance identifiers (name or UUID)
+	// - For "sched_priority": integer (scheduling priority value)
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

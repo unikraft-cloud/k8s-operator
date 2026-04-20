@@ -11,12 +11,12 @@ package platform
 // `service_group` to be set.  Cannot be combined with the
 // `delete-on-stop` feature.
 // The specific policy to use for scaling the instance to zero.
-// +kubebuilder:validation:Enum=on;off;idle
+// +kubebuilder:validation:Enum=off;on;idle
 type CreateInstanceRequestScaleToZeroPolicy string
 
 const (
-	CreateInstanceRequestScaleToZeroPolicyOn   CreateInstanceRequestScaleToZeroPolicy = "on"
 	CreateInstanceRequestScaleToZeroPolicyOff  CreateInstanceRequestScaleToZeroPolicy = "off"
+	CreateInstanceRequestScaleToZeroPolicyOn   CreateInstanceRequestScaleToZeroPolicy = "on"
 	CreateInstanceRequestScaleToZeroPolicyIdle CreateInstanceRequestScaleToZeroPolicy = "idle"
 )
 

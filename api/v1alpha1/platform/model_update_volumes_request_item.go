@@ -34,10 +34,6 @@ const (
 type UpdateVolumesRequestItem struct {
 	// (Optional).  A client-provided identifier for tracking this operation in the response.
 	Id *string `json:"id,omitempty"`
-	// The UUID of the volume to update.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume to update.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
 	// The property to modify.
 	Prop UpdateVolumesRequestItemProp `json:"prop"`
 	// The operation to perform.
@@ -48,4 +44,8 @@ type UpdateVolumesRequestItem struct {
 	// - For "tags": array of Strings
 	// - For "delete_lock": boolean
 	Value *runtime.RawExtension `json:"value,omitempty"`
+	// The UUID of the volume to update.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the volume to update.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }
