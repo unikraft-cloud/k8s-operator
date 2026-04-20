@@ -74,6 +74,31 @@ spec:
                   Whether the instance should start automatically on creation.
                   Must be set to true when `timeout_s` is specified.
                 type: boolean
+              dependencies:
+                description: |-
+                  (Optional).  Dependencies of the instance.
+
+                  A list of instance identifiers (name or UUID) that this instance depends
+                  on.  Dependencies define startup ordering and can be used to ensure that
+                  prerequisite instances are running before this instance starts.
+                items:
+                  properties:
+                    metro:
+                      description: |-
+                        (Only applies when using global control plane).
+                        The metro of the resource.
+                      type: string
+                    name:
+                      description: Mutually exclusive with UUID.
+                      type: string
+                    uuid:
+                      description: Mutually exclusive with name.
+                      type: string
+                  required:
+                  - name
+                  - uuid
+                  type: object
+                type: array
               env:
                 additionalProperties:
                   type: string
@@ -92,9 +117,17 @@ spec:
                     instance.  The `scale-to-zero` and `delete-on-stop` features are
                     mutually exclusive.
                   enum:
-                  - delete_on_stop
+                  - delete-on-stop
                   type: string
                 type: array
+              hostname:
+                description: |-
+                  (Optional).  The hostname of the instance.
+
+                  If not provided, the hostname will be set to the instance name.  The
+                  hostname must be a valid DNS label (e.g., "my-instance") and is used for
+                  internal DNS resolution within the Unikraft Cloud network.
+                type: string
               image:
                 description: The image to use for the instance.
                 type: string
@@ -103,6 +136,11 @@ spec:
                   is 128.
                 format: int64
                 type: integer
+              metro:
+                description: |-
+                  (Only applies when using global control plane).
+                  The metro to route the request to.
+                type: string
               name:
                 description: |-
                   (Optional).  The name of the instance.
@@ -123,7 +161,7 @@ spec:
                 enum:
                 - never
                 - always
-                - on_failure
+                - on-failure
                 type: string
               roms:
                 description: |-
@@ -164,8 +202,8 @@ spec:
                     description: The specific policy to use for scaling the instance
                       to zero.
                     enum:
-                    - "on"
                     - "off"
+                    - "on"
                     - idle
                     type: string
                   stateful:
@@ -187,9 +225,10 @@ spec:
               schedules:
                 description: |-
                   (Optional).  Schedules for the instance.  Scheduled operations let you
-                  automatically start, stop, or delete the instance on a calendar-based
-                  schedule.  Each instance stores its own schedules, and cloning preserves
-                  them.
+                  automatically start, stop, delete, or exec a command in the instance on
+                  a calendar-based schedule.  For `exec` schedules, set the `args` field
+                  to the command and its arguments.  Each instance stores its own
+                  schedules, and cloning preserves them.
                 items:
                   properties:
                     action:
@@ -198,7 +237,17 @@ spec:
                       - start
                       - stop
                       - delete
+                      - exec
                       type: string
+                    args:
+                      description: |-
+                        The command to execute when the action is `exec`.
+
+                        Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+                        Each element is a separate argument; the first element is the executable.
+                      items:
+                        type: string
+                      type: array
                     name:
                       description: |-
                         The name of the schedule.
@@ -237,18 +286,21 @@ spec:
                     items:
                       properties:
                         certificate:
-                          description: |-
-                            A reference to an existing certificate which can be used for the
-                            specified domain.  If unspecified, Unikraft Cloud will
-                            automatically generate a new certificate for the domain based on Let's
-                            Encrypt and seek to accomplish a DNS-01 challenge.
                           properties:
+                            metro:
+                              description: |-
+                                (Only applies when using global control plane).
+                                The metro of the resource.
+                              type: string
                             name:
                               description: Mutually exclusive with UUID.
                               type: string
                             uuid:
                               description: Mutually exclusive with name.
                               type: string
+                          required:
+                          - name
+                          - uuid
                           type: object
                         name:
                           description: |-
@@ -432,6 +484,11 @@ spec:
                           This field is only set when this message object is used as a response
                           message, and is useful when the status is not `success`.
                         type: string
+                      metro:
+                        description: |-
+                          (Only applies when using global control plane).
+                          Where the instance is located.
+                        type: string
                       name:
                         description: |-
                           The name of the instance.
@@ -548,7 +605,7 @@ spec:
                         enum:
                         - never
                         - always
-                        - on_failure
+                        - on-failure
                         type: string
                       roms:
                         description: |-
@@ -559,6 +616,14 @@ spec:
                           ROM blobs.
                         items:
                           properties:
+                            at:
+                              description: |-
+                                (Optional).  The path at which the ROM should be automatically mounted
+                                inside the instance.  When set, the platform mounts the ROM device at
+                                the specified path so the guest does not need to mount it manually.
+                                When omitted, the ROM is exposed as a raw block device and the guest is
+                                responsible for mounting it.
+                              type: string
                             image:
                               description: The image of the ROM to use for the instance
                                 configuration.
@@ -595,8 +660,8 @@ spec:
                             description: The specific policy to use for scaling the
                               instance to zero.
                             enum:
-                            - "on"
                             - "off"
+                            - "on"
                             - idle
                             type: string
                           stateful:
@@ -614,7 +679,9 @@ spec:
                           Scheduled operations for this instance.
 
                           Each schedule defines a calendar expression and an action (`start`,
-                          `stop`, or `delete`) to perform at matching times.
+                          `stop`, `delete`, or `exec`) to perform at matching times.  When the
+                          action is `exec`, the `args` field of the schedule specifies the command
+                          to run inside the instance.
                         items:
                           properties:
                             action:
@@ -624,7 +691,17 @@ spec:
                               - start
                               - stop
                               - delete
+                              - exec
                               type: string
+                            args:
+                              description: |-
+                                The command to execute when the action is `exec`.
+
+                                Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+                                Each element is a separate argument; the first element is the executable.
+                              items:
+                                type: string
+                              type: array
                             name:
                               description: |-
                                 The name of the schedule.
@@ -660,20 +737,21 @@ spec:
                             items:
                               properties:
                                 certificate:
-                                  description: |-
-                                    The certificate associated with the domain.
-
-                                    The certificate is used to secure the domain with TLS/SSL.  If no
-                                    certificate is specified, Unikraft Cloud will automatically generate a
-                                    new certificate for the domain based on Let's Encrypt and seek to
-                                    accomplish a DNS-01 challenge.
                                   properties:
+                                    metro:
+                                      description: |-
+                                        (Only applies when using global control plane).
+                                        The metro of the resource.
+                                      type: string
                                     name:
                                       description: Mutually exclusive with UUID.
                                       type: string
                                     uuid:
                                       description: Mutually exclusive with name.
                                       type: string
+                                  required:
+                                  - name
+                                  - uuid
                                   type: object
                                 fqdn:
                                   description: |-
@@ -685,6 +763,11 @@ spec:
                                   type: string
                               type: object
                             type: array
+                          metro:
+                            description: |-
+                              (Only applies when using global control plane).
+                              Where the service group is located.
+                            type: string
                           name:
                             description: |-
                               The name of the service group.
@@ -892,6 +975,11 @@ spec:
                                 The mount point of the volume in the instance.  This is the directory in
                                 the instance where the volume will be mounted.
                               type: string
+                            metro:
+                              description: |-
+                                (Only applies when using global control plane).
+                                Where the volume is located.
+                              type: string
                             name:
                               description: |-
                                 The name of the volume.
@@ -915,22 +1003,25 @@ spec:
                           type: object
                         type: array
                     type: object
-                  nameOrUUID:
-                    properties:
-                      name:
-                        description: Mutually exclusive with UUID.
-                        type: string
-                      uuid:
-                        description: Mutually exclusive with name.
-                        type: string
-                    required:
-                    - name
-                    - uuid
-                    type: object
+                  metro:
+                    description: |-
+                      (Only applies when using global control plane).
+                      Where the volume is located.
+                    type: string
+                  name:
+                    description: |-
+                      (Optional).  The name of a template instance to create the instance from.
+                      Mutually exclusive with UUID.
+                    type: string
                   prepare:
                     description: (Optional).  Whether the instance needs to run in
                       order to reach template state
                     type: boolean
+                  uuid:
+                    description: |-
+                      (Optional).  The UUID of a template instance to create the instance from.
+                      Mutually exclusive with name.
+                    type: string
                 type: object
               timeout_s:
                 description: |-
@@ -1159,6 +1250,11 @@ spec:
                             This field is only set when this message object is used as a response
                             message, and is useful when the status is not `success`.
                           type: string
+                        metro:
+                          description: |-
+                            (Only applies when using global control plane).
+                            Where the instance is located.
+                          type: string
                         name:
                           description: |-
                             The name of the instance.
@@ -1276,7 +1372,7 @@ spec:
                           enum:
                           - never
                           - always
-                          - on_failure
+                          - on-failure
                           type: string
                         roms:
                           description: |-
@@ -1287,6 +1383,14 @@ spec:
                             ROM blobs.
                           items:
                             properties:
+                              at:
+                                description: |-
+                                  (Optional).  The path at which the ROM should be automatically mounted
+                                  inside the instance.  When set, the platform mounts the ROM device at
+                                  the specified path so the guest does not need to mount it manually.
+                                  When omitted, the ROM is exposed as a raw block device and the guest is
+                                  responsible for mounting it.
+                                type: string
                               image:
                                 description: The image of the ROM to use for the instance
                                   configuration.
@@ -1323,8 +1427,8 @@ spec:
                               description: The specific policy to use for scaling
                                 the instance to zero.
                               enum:
-                              - "on"
                               - "off"
+                              - "on"
                               - idle
                               type: string
                             stateful:
@@ -1342,7 +1446,9 @@ spec:
                             Scheduled operations for this instance.
 
                             Each schedule defines a calendar expression and an action (`start`,
-                            `stop`, or `delete`) to perform at matching times.
+                            `stop`, `delete`, or `exec`) to perform at matching times.  When the
+                            action is `exec`, the `args` field of the schedule specifies the command
+                            to run inside the instance.
                           items:
                             properties:
                               action:
@@ -1352,7 +1458,17 @@ spec:
                                 - start
                                 - stop
                                 - delete
+                                - exec
                                 type: string
+                              args:
+                                description: |-
+                                  The command to execute when the action is `exec`.
+
+                                  Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+                                  Each element is a separate argument; the first element is the executable.
+                                items:
+                                  type: string
+                                type: array
                               name:
                                 description: |-
                                   The name of the schedule.
@@ -1388,20 +1504,21 @@ spec:
                               items:
                                 properties:
                                   certificate:
-                                    description: |-
-                                      The certificate associated with the domain.
-
-                                      The certificate is used to secure the domain with TLS/SSL.  If no
-                                      certificate is specified, Unikraft Cloud will automatically generate a
-                                      new certificate for the domain based on Let's Encrypt and seek to
-                                      accomplish a DNS-01 challenge.
                                     properties:
+                                      metro:
+                                        description: |-
+                                          (Only applies when using global control plane).
+                                          The metro of the resource.
+                                        type: string
                                       name:
                                         description: Mutually exclusive with UUID.
                                         type: string
                                       uuid:
                                         description: Mutually exclusive with name.
                                         type: string
+                                    required:
+                                    - name
+                                    - uuid
                                     type: object
                                   fqdn:
                                     description: |-
@@ -1413,6 +1530,11 @@ spec:
                                     type: string
                                 type: object
                               type: array
+                            metro:
+                              description: |-
+                                (Only applies when using global control plane).
+                                Where the service group is located.
+                              type: string
                             name:
                               description: |-
                                 The name of the service group.
@@ -1619,6 +1741,11 @@ spec:
                                 description: |-
                                   The mount point of the volume in the instance.  This is the directory in
                                   the instance where the volume will be mounted.
+                                type: string
+                              metro:
+                                description: |-
+                                  (Only applies when using global control plane).
+                                  Where the volume is located.
                                 type: string
                               name:
                                 description: |-

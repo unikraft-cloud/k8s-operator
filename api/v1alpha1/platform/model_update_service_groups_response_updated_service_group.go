@@ -12,8 +12,11 @@ type UpdateServiceGroupsResponseUpdatedServiceGroup struct {
 	Uuid *string `json:"uuid,omitempty"`
 	// The name of the service group that was updated.
 	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro of the service group.
+	Metro *string `json:"metro,omitempty"`
 	// The status of this particular service group update operation.
-	Status *string `json:"status,omitempty"`
+	Status *ResponseStatus `json:"status,omitempty"`
 	// (Optional).  The client-provided ID from the request.
 	Id *string `json:"id,omitempty"`
 	// An optional message providing additional information about the status.

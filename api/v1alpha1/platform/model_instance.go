@@ -52,13 +52,13 @@ const (
 //
 // A manual start or stop of the instance aborts the restart sequence and
 // resets the back-off delay.
-// +kubebuilder:validation:Enum=never;always;on_failure
+// +kubebuilder:validation:Enum=never;always;on-failure
 type InstanceRestartPolicy string
 
 const (
 	InstanceRestartPolicyNever      InstanceRestartPolicy = "never"
 	InstanceRestartPolicyAlways     InstanceRestartPolicy = "always"
-	InstanceRestartPolicyOn_failure InstanceRestartPolicy = "on_failure"
+	InstanceRestartPolicyOn_failure InstanceRestartPolicy = "on-failure"
 )
 
 type Instance struct {
@@ -75,6 +75,9 @@ type Instance struct {
 	// The name must be unique within the context of your account.  The name can
 	// also be used to identify the instance in API calls.
 	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// Where the instance is located.
+	Metro *string `json:"metro,omitempty"`
 	// The time the instance was created.
 	CreatedAt *metav1.Time `json:"created_at,omitempty"`
 	// The state of the instance.  This indicates the current state of the
@@ -290,7 +293,9 @@ type Instance struct {
 	// Scheduled operations for this instance.
 	//
 	// Each schedule defines a calendar expression and an action (`start`,
-	// `stop`, or `delete`) to perform at matching times.
+	// `stop`, `delete`, or `exec`) to perform at matching times.  When the
+	// action is `exec`, the `args` field of the schedule specifies the command
+	// to run inside the instance.
 	Schedules        []Schedule                `json:"schedules,omitempty"`
 	Autokill         *InstanceAutokill         `json:"autokill,omitempty"`
 	TemplateAutokill *InstanceTemplateAutokill `json:"template_autokill,omitempty"`

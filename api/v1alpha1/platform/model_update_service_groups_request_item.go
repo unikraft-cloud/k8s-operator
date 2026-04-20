@@ -35,10 +35,6 @@ const (
 type UpdateServiceGroupsRequestItem struct {
 	// (Optional).  A client-provided identifier for tracking this operation in the response.
 	Id *string `json:"id,omitempty"`
-	// The UUID of the service group to update.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the service group to update.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
 	// The property to modify.
 	Prop UpdateServiceGroupsRequestItemProp `json:"prop"`
 	// The operation to perform.
@@ -50,4 +46,8 @@ type UpdateServiceGroupsRequestItem struct {
 	// - For "hard_limit": integer (1–65535), must be >= "soft_limit"
 	// - For "autokill": object with time_ms field
 	Value *runtime.RawExtension `json:"value,omitempty"`
+	// The UUID of the service group to update.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the service group to update.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }

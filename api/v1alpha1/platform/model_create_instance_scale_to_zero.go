@@ -8,12 +8,12 @@
 package platform
 
 // The specific policy to use for scaling the instance to zero.
-// +kubebuilder:validation:Enum=on;off;idle
+// +kubebuilder:validation:Enum=off;on;idle
 type CreateInstanceScaleToZeroPolicy string
 
 const (
-	CreateInstanceScaleToZeroPolicyOn   CreateInstanceScaleToZeroPolicy = "on"
 	CreateInstanceScaleToZeroPolicyOff  CreateInstanceScaleToZeroPolicy = "off"
+	CreateInstanceScaleToZeroPolicyOn   CreateInstanceScaleToZeroPolicy = "on"
 	CreateInstanceScaleToZeroPolicyIdle CreateInstanceScaleToZeroPolicy = "idle"
 )
 

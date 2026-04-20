@@ -11,24 +11,24 @@ package platform
 // Restart policy for the instance.  This defines how the instance
 // should behave when it stops or crashes.  Cannot be combined with
 // the `delete-on-stop` feature.
-// +kubebuilder:validation:Enum=never;always;on_failure
+// +kubebuilder:validation:Enum=never;always;on-failure
 type CreateInstanceRequestRestartPolicy string
 
 const (
 	CreateInstanceRequestRestartPolicyNever      CreateInstanceRequestRestartPolicy = "never"
 	CreateInstanceRequestRestartPolicyAlways     CreateInstanceRequestRestartPolicy = "always"
-	CreateInstanceRequestRestartPolicyOn_failure CreateInstanceRequestRestartPolicy = "on_failure"
+	CreateInstanceRequestRestartPolicyOn_failure CreateInstanceRequestRestartPolicy = "on-failure"
 )
 
 // Features to enable for the instance.  Features are specific
 // configurations or capabilities that can be enabled for the
 // instance.  The `scale-to-zero` and `delete-on-stop` features are
 // mutually exclusive.
-// +kubebuilder:validation:Enum=delete_on_stop
+// +kubebuilder:validation:Enum=delete-on-stop
 type CreateInstanceRequestFeatures string
 
 const (
-	CreateInstanceRequestFeaturesDelete_on_stop CreateInstanceRequestFeatures = "delete_on_stop"
+	CreateInstanceRequestFeaturesDelete_on_stop CreateInstanceRequestFeatures = "delete-on-stop"
 )
 
 type CreateInstanceRequest struct {
@@ -38,6 +38,9 @@ type CreateInstanceRequest struct {
 	Name *string `json:"name,omitempty"`
 	// The image to use for the instance.
 	Image *string `json:"image,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro to route the request to.
+	Metro *string `json:"metro,omitempty"`
 	// (Optional).  The arguments to pass to the instance when it starts.
 	Args []string `json:"args,omitempty"`
 	// (Optional).  Environment variables to set for the instance.
@@ -97,9 +100,22 @@ type CreateInstanceRequest struct {
 	// indicate higher priority.
 	SchedPriority *int32 `json:"sched_priority,omitempty"`
 	// (Optional).  Schedules for the instance.  Scheduled operations let you
-	// automatically start, stop, or delete the instance on a calendar-based
-	// schedule.  Each instance stores its own schedules, and cloning preserves
-	// them.
+	// automatically start, stop, delete, or exec a command in the instance on
+	// a calendar-based schedule.  For `exec` schedules, set the `args` field
+	// to the command and its arguments.  Each instance stores its own
+	// schedules, and cloning preserves them.
 	Schedules []Schedule                     `json:"schedules,omitempty"`
 	Autokill  *CreateInstanceRequestAutokill `json:"autokill,omitempty"`
+	// (Optional).  The hostname of the instance.
+	//
+	// If not provided, the hostname will be set to the instance name.  The
+	// hostname must be a valid DNS label (e.g., "my-instance") and is used for
+	// internal DNS resolution within the Unikraft Cloud network.
+	Hostname *string `json:"hostname,omitempty"`
+	// (Optional).  Dependencies of the instance.
+	//
+	// A list of instance identifiers (name or UUID) that this instance depends
+	// on.  Dependencies define startup ordering and can be used to ensure that
+	// prerequisite instances are running before this instance starts.
+	Dependencies []NameOrUUID `json:"dependencies,omitempty"`
 }
