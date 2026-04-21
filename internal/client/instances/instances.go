@@ -67,55 +67,61 @@ func (c *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Insta
 		return false, err
 	}
 
-	if resp == nil || resp.Data == nil || len(resp.Data.Instances) != 1 {
+	if resp == nil || resp.Data == nil || len(resp.Data.Instances) == 0 {
 		return false, nil
 	}
 
 	return true, nil
 }
 
-func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.CreateInstanceResponse, error) {
+func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.GetInstancesResponse, error) {
 	req, err := client.Convert[platform.CreateInstanceRequest, ukcplatform.CreateInstanceRequest](obj.Spec)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.client.CreateInstance(ctx, req)
+	createResp, err := c.client.CreateInstance(ctx, req)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
-		return &platform.CreateInstanceResponse{
+		return &platform.GetInstancesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	return client.Convert[*ukcplatform.Response[ukcplatform.CreateInstanceResponseData], *platform.CreateInstanceResponse](resp)
+	names := instanceNamesFromCreateResponse(createResp)
+	if len(names) == 0 {
+		names = []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}
+	}
+
+	return c.fetchInstances(ctx, names, obj.Status.Data)
 }
 
-func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.CreateInstanceResponse, error) {
-	resp, err := c.client.GetInstances(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, true)
+func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.GetInstancesResponse, error) {
+	names := instanceNamesFromStatus(obj)
+
+	resp, err := c.client.GetInstances(ctx, names, true)
 	if err != nil {
-		return &platform.CreateInstanceResponse{
+		return &platform.GetInstancesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	if len(resp.Data.Instances) != 1 {
-		return nil, errors.New("failed to fetch exactly one instance")
+	if len(resp.Data.Instances) == 0 {
+		return nil, errors.New("failed to fetch any instances")
 	}
 
-	instance := resp.Data.Instances[0]
-
-	updates := instanceUpdates(instance, obj)
+	// All replicas share the same config — compare against the first instance.
+	updates := instanceUpdates(resp.Data.Instances[0], obj)
 	if len(updates) == 0 {
-		return &obj.Status, nil
+		return c.fetchInstances(ctx, names, obj.Status.Data)
 	}
 
 	updateResp, err := c.client.UpdateInstances(ctx, updates)
 	if err != nil {
-		return &platform.CreateInstanceResponse{
+		return &platform.GetInstancesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
@@ -123,42 +129,78 @@ func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	}
 
 	if updateResp.Status == string(ukcplatform.ResponseStatusERROR) {
-		return &platform.CreateInstanceResponse{
+		return &platform.GetInstancesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(updateResp.Message),
 			Data:    obj.Status.Data,
 		}, nil
 	}
 
-	return &platform.CreateInstanceResponse{
-		Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusSUCCESS)),
-		Message: ukcplatform.Ptr(""),
-		Data:    obj.Status.Data,
-	}, nil
+	return c.fetchInstances(ctx, names, obj.Status.Data)
 }
 
-func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.CreateInstanceResponse, error) {
+func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Instance) (*platform.GetInstancesResponse, error) {
 	if obj == nil || obj.Status.Data == nil || len(obj.Status.Data.Instances) == 0 {
 		return nil, nil
 	}
 
-	instanceNames := make([]ukcplatform.NameOrUUID, 0)
-	for _, instance := range obj.Status.Data.Instances {
-		if instance.Name != nil {
-			instanceNames = append(instanceNames, ukcplatform.NameOrUUID{
-				Name: instance.Name,
-			})
-		}
-	}
+	instanceNames := instanceNamesFromStatus(obj)
 
-	resp, err := c.client.DeleteInstances(ctx, instanceNames)
+	_, err := c.client.DeleteInstances(ctx, instanceNames)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
-		return &platform.CreateInstanceResponse{
+		return &platform.GetInstancesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	return client.Convert[*ukcplatform.Response[ukcplatform.DeleteInstancesResponseData], *platform.CreateInstanceResponse](resp)
+	return nil, nil
+}
+
+func (c *Client) fetchInstances(ctx context.Context, names []ukcplatform.NameOrUUID, statusData *platform.GetInstancesResponseData) (*platform.GetInstancesResponse, error) {
+	resp, err := c.client.GetInstances(ctx, names, true)
+	if err != nil {
+		return &platform.GetInstancesResponse{
+			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
+			Message: ukcplatform.Ptr(err.Error()),
+			Data:    statusData,
+		}, err
+	}
+
+	return client.Convert[*ukcplatform.Response[ukcplatform.GetInstancesResponseData], *platform.GetInstancesResponse](resp)
+}
+
+func instanceNamesFromStatus(obj *unikraftv1alpha1.Instance) []ukcplatform.NameOrUUID {
+	if obj.Status.Data == nil {
+		return []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}
+	}
+
+	names := make([]ukcplatform.NameOrUUID, 0, len(obj.Status.Data.Instances))
+	for _, instance := range obj.Status.Data.Instances {
+		if instance.Name != nil {
+			names = append(names, ukcplatform.NameOrUUID{Name: instance.Name})
+		}
+	}
+
+	if len(names) == 0 {
+		return []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}
+	}
+
+	return names
+}
+
+func instanceNamesFromCreateResponse(resp *ukcplatform.Response[ukcplatform.CreateInstanceResponseData]) []ukcplatform.NameOrUUID {
+	if resp == nil || resp.Data == nil {
+		return nil
+	}
+
+	names := make([]ukcplatform.NameOrUUID, 0, len(resp.Data.Instances))
+	for _, instance := range resp.Data.Instances {
+		if instance.Name != nil {
+			names = append(names, ukcplatform.NameOrUUID{Name: instance.Name})
+		}
+	}
+
+	return names
 }

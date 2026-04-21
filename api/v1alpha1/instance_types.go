@@ -57,8 +57,8 @@ type Instance struct {
 	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.restart_policy) && !has(self.restart_policy)) || (has(oldSelf.restart_policy) && has(self.restart_policy) && self.restart_policy == oldSelf.restart_policy)",message="spec.restart_policy is immutable"
 	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.wait_timeout_ms) && !has(self.wait_timeout_ms)) || (has(oldSelf.wait_timeout_ms) && has(self.wait_timeout_ms) && self.wait_timeout_ms == oldSelf.wait_timeout_ms)",message="spec.wait_timeout_ms is immutable"
 	// +kubebuilder:validation:XValidation:rule="(!has(oldSelf.features) && !has(self.features)) || (has(oldSelf.features) && has(self.features) && self.features == oldSelf.features)",message="spec.features is immutable"
-	Spec   platform.CreateInstanceRequest  `json:"spec,omitempty"`
-	Status platform.CreateInstanceResponse `json:"status,omitempty"`
+	Spec   platform.CreateInstanceRequest `json:"spec,omitempty"`
+	Status platform.GetInstancesResponse  `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
