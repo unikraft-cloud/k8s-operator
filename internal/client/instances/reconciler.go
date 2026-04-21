@@ -49,12 +49,12 @@ func NewReconciler(
 ) *controller.Reconciler[
 	*alpha1.Instance,
 	platform.CreateInstanceRequest,
-	platform.CreateInstanceResponse,
+	platform.GetInstancesResponse,
 ] {
 	return &controller.Reconciler[
 		*alpha1.Instance,
 		platform.CreateInstanceRequest,
-		platform.CreateInstanceResponse,
+		platform.GetInstancesResponse,
 	]{
 		Client:         client,
 		Scheme:         scheme,
@@ -74,7 +74,7 @@ func getSpec(obj *alpha1.Instance) *platform.CreateInstanceRequest {
 	return &obj.Spec
 }
 
-func setStatus(obj *alpha1.Instance, status *platform.CreateInstanceResponse) {
+func setStatus(obj *alpha1.Instance, status *platform.GetInstancesResponse) {
 	if status == nil {
 		return
 	}

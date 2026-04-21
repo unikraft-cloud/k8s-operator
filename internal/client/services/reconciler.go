@@ -49,12 +49,12 @@ func NewReconciler(
 ) *controller.Reconciler[
 	*alpha1.Service,
 	platform.CreateServiceGroupRequest,
-	platform.CreateServiceGroupResponse,
+	platform.GetServiceGroupsResponse,
 ] {
 	return &controller.Reconciler[
 		*alpha1.Service,
 		platform.CreateServiceGroupRequest,
-		platform.CreateServiceGroupResponse,
+		platform.GetServiceGroupsResponse,
 	]{
 		Client:         client,
 		Scheme:         scheme,
@@ -74,7 +74,7 @@ func getSpec(obj *alpha1.Service) *platform.CreateServiceGroupRequest {
 	return &obj.Spec
 }
 
-func setStatus(obj *alpha1.Service, status *platform.CreateServiceGroupResponse) {
+func setStatus(obj *alpha1.Service, status *platform.GetServiceGroupsResponse) {
 	if status == nil {
 		return
 	}

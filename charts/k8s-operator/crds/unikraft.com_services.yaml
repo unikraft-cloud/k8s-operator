@@ -182,11 +182,8 @@ spec:
               data:
                 properties:
                   service_groups:
-                    description: |-
-                      The service group which was created by this request.
-
-                      Note: only one service group can be specified in the request, so this
-                      will always contain a single entry.
+                    description: The service group(s) which were retrieved by the
+                      request.
                     items:
                       properties:
                         autokill:

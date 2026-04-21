@@ -1161,7 +1161,7 @@ spec:
               data:
                 properties:
                   instances:
-                    description: The instance that was created in this request.
+                    description: The instance(s) that were retrieved by the request.
                     items:
                       properties:
                         args:

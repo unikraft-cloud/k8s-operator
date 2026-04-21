@@ -127,30 +127,116 @@ spec:
               data:
                 properties:
                   volumes:
-                    description: The volume(s) which were created by the request.
+                    description: The volume(s) which were retrieved by the request.
                     items:
                       properties:
+                        args:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Optional script arguments that were applied to the custom volume filesystem
+                            initialization scripts.
+                          type: object
+                        attached_to:
+                          description: List of instances that this volume is attached
+                            to.
+                          items:
+                            properties:
+                              name:
+                                description: The name of the instance that the volume
+                                  is attached to.
+                                type: string
+                              uuid:
+                                description: The UUID of the instance that the volume
+                                  is attached to.
+                                type: string
+                            type: object
+                          type: array
+                        created_at:
+                          description: The time the volume was created.
+                          format: date-time
+                          type: string
+                        delete_lock:
+                          description: If set to true, the volume cannot be deleted.
+                          type: boolean
                         error:
                           description: |-
                             An optional error code providing additional information about the status.
-                            This field is useful when the status is not `success`.
+                            This field is only set when this message object is used as a response
+                            message, and is useful when the status is not `success`.
                           format: int32
                           type: integer
+                        filesystem:
+                          description: |-
+                            The filesystem type of this volume.
+                            Without custom configuration, this is either `ext4` or `virtiofs`.
+                          type: string
+                        free_mb:
+                          description: The amount of free space in the volume in megabytes.
+                          format: int32
+                          type: integer
+                        host_path:
+                          description: |-
+                            Host path backing this managed volume.
+                            This field is only available for managed volumes and users with
+                            appropriate permissions.
+                          type: string
                         message:
                           description: |-
                             An optional message providing additional information about the status.
-                            This field is useful when the status is not `success`.
+                            This field is only set when this message object is used as a response
+                            message, and is useful when the status is not `success`.
                           type: string
                         metro:
                           description: |-
                             (Only applies when using global control plane).
-                            The metro of the volume.
+                            Where the volume is located.
                           type: string
+                        mounted_by:
+                          description: |-
+                            List of instances that have this volume mounted.
+                            This does not apply to template volumes.
+                          items:
+                            properties:
+                              name:
+                                description: The name of the instance that the volume
+                                  is mounted in.
+                                type: string
+                              readonly:
+                                description: Whether the volume is mounted read-only
+                                  or read-write.
+                                type: boolean
+                              uuid:
+                                description: The UUID of the instance that the volume
+                                  is mounted in.
+                                type: string
+                            type: object
+                          type: array
                         name:
-                          description: The name of the newly created volume.
+                          description: |-
+                            The name of the volume.
+
+                            This is a human-readable name that can be used to identify the volume.
+                            The name must be unique within the context of your account.  The name can
+                            also be used to identify the volume in API calls.
                           type: string
+                        persistent:
+                          description: |-
+                            Indicates if the volume will stay alive when the last instance is deleted
+                            that this volume is attached to.
+                          type: boolean
+                        quota_policy:
+                          description: Either static or dynamic reservation.
+                          enum:
+                          - static
+                          - dynamic
+                          type: string
+                        size_mb:
+                          description: The size of the volume in megabytes.
+                          format: int64
+                          type: integer
                         state:
-                          description: The state of the volume.
+                          description: Current state of the volume.
                           enum:
                           - uninitialized
                           - initializing
@@ -162,13 +248,28 @@ spec:
                           - template
                           type: string
                         status:
-                          description: The status of the response.
+                          description: |-
+                            An optional field representing the status of the request.  This field is
+                            only set when this message object is used as a response message.
                           enum:
                           - success
                           - error
                           type: string
+                        tags:
+                          description: |-
+                            The tags associated with the volume.
+                            Maximum 16 tags are allowed, and each tag may not be longer than 256 characters.
+                          items:
+                            type: string
+                          type: array
                         uuid:
-                          description: UUID of the newly created volume.
+                          description: |-
+                            The UUID of the volume.
+
+                            This is a unique identifier for the volume that is generated when the
+                            volume is created.  The UUID is used to reference the volume in
+                            API calls and can be used to identify the volume in all API calls that
+                            require an identifier.
                           type: string
                       type: object
                     type: array

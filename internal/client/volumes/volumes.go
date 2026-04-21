@@ -66,57 +66,69 @@ func (m *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Volum
 		return false, err
 	}
 
-	if resp == nil || resp.Data == nil || len(resp.Data.Volumes) != 1 {
+	if resp == nil || resp.Data == nil || len(resp.Data.Volumes) == 0 {
 		return false, nil
 	}
 
 	return true, nil
 }
 
-func (m *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.CreateVolumeResponse, error) {
+func (m *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.GetVolumesResponse, error) {
 	req, err := client.Convert[platform.CreateVolumeRequest, ukcplatform.CreateVolumeRequest](obj.Spec)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := m.client.CreateVolume(ctx, req)
+
+	_, err = m.client.CreateVolume(ctx, req)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
-		return &platform.CreateVolumeResponse{
+		return &platform.GetVolumesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	return client.Convert[*ukcplatform.Response[ukcplatform.CreateVolumeResponseData], *platform.CreateVolumeResponse](resp)
+	return m.fetchVolume(ctx, obj)
 }
 
-func (m *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.CreateVolumeResponse, error) {
+func (m *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.GetVolumesResponse, error) {
 	// TODO(petar-cvit): implement updates
 	return nil, nil
 }
 
-func (m *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.CreateVolumeResponse, error) {
+func (m *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.GetVolumesResponse, error) {
 	if obj.Status.Data == nil || len(obj.Status.Data.Volumes) == 0 {
 		return nil, nil
 	}
 
-	volumeNames := make([]ukcplatform.NameOrUUID, 0)
-	for _, volume := range obj.Status.Data.Volumes {
-		if volume.Name != nil {
-			volumeNames = append(volumeNames, ukcplatform.NameOrUUID{
-				Name: volume.Name,
-			})
+	volumeNames := make([]ukcplatform.NameOrUUID, 0, len(obj.Status.Data.Volumes))
+	for _, vol := range obj.Status.Data.Volumes {
+		if vol.Name != nil {
+			volumeNames = append(volumeNames, ukcplatform.NameOrUUID{Name: vol.Name})
 		}
 	}
 
-	resp, err := m.client.DeleteVolumes(ctx, volumeNames)
+	_, err := m.client.DeleteVolumes(ctx, volumeNames)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
-		return &platform.CreateVolumeResponse{
+		return &platform.GetVolumesResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	return client.Convert[*ukcplatform.Response[ukcplatform.DeleteVolumesResponseData], *platform.CreateVolumeResponse](resp)
+	return nil, nil
+}
+
+func (m *Client) fetchVolume(ctx context.Context, obj *unikraftv1alpha1.Volume) (*platform.GetVolumesResponse, error) {
+	resp, err := m.client.GetVolumes(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, false)
+	if err != nil {
+		return &platform.GetVolumesResponse{
+			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
+			Message: ukcplatform.Ptr(err.Error()),
+			Data:    obj.Status.Data,
+		}, err
+	}
+
+	return client.Convert[*ukcplatform.Response[ukcplatform.GetVolumesResponseData], *platform.GetVolumesResponse](resp)
 }

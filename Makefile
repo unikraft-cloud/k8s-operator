@@ -240,6 +240,8 @@ crds: platform apifmt generate manifests
 .PHONY: platform
 platform: platform.yaml
 	rm -rf $(WORKDIR)/api/v1alpha1/platform/model_*
+	rm -rf $(WORKDIR)/api/v1alpha1/platform/zz_generated_deepcopy.go
+	rm -rf $(WORKDIR)/api/v1alpha1/zz_generated.deepcopy.go
 	$(DOCKER) run \
 		--rm \
 		--volume "$(WORKDIR):/local" \
