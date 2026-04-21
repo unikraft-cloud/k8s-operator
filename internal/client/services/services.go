@@ -66,36 +66,37 @@ func (c *Client) ResourceExists(ctx context.Context, obj *unikraftv1alpha1.Servi
 		return false, err
 	}
 
-	if resp == nil || resp.Data == nil || len(resp.Data.ServiceGroups) != 1 {
+	if resp == nil || resp.Data == nil || len(resp.Data.ServiceGroups) == 0 {
 		return false, nil
 	}
 
 	return true, nil
 }
 
-func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.CreateServiceGroupResponse, error) {
+func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.GetServiceGroupsResponse, error) {
 	req, err := client.Convert[platform.CreateServiceGroupRequest, ukcplatform.CreateServiceGroupRequest](obj.Spec)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.client.CreateServiceGroup(ctx, req)
+
+	_, err = c.client.CreateServiceGroup(ctx, req)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
-		return &platform.CreateServiceGroupResponse{
+		return &platform.GetServiceGroupsResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	return client.Convert[*ukcplatform.Response[ukcplatform.CreateServiceGroupResponseData], *platform.CreateServiceGroupResponse](resp)
+	return c.fetchServiceGroup(ctx, obj)
 }
 
-func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.CreateServiceGroupResponse, error) {
+func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.GetServiceGroupsResponse, error) {
 	// TODO(petar-cvit): implement updates
 	return nil, nil
 }
 
-func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.CreateServiceGroupResponse, error) {
+func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.GetServiceGroupsResponse, error) {
 	if obj.Status.Data == nil || len(obj.Status.Data.ServiceGroups) == 0 {
 		return nil, nil
 	}
@@ -109,14 +110,29 @@ func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Servi
 		}
 	}
 
-	resp, err := c.client.DeleteServiceGroups(ctx, serviceNames)
-	if err != nil {
-		return &platform.CreateServiceGroupResponse{
+	_, err := c.client.DeleteServiceGroups(ctx, serviceNames)
+	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
+		return &platform.GetServiceGroupsResponse{
 			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
 			Message: ukcplatform.Ptr(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
-	return client.Convert[*ukcplatform.Response[ukcplatform.DeleteServiceGroupsResponseData], *platform.CreateServiceGroupResponse](resp)
+	return nil, nil
+}
+
+// fetchServiceGroup fetches the current state of the service group by spec name
+// and returns it mapped to a GetServiceGroupsResponse for use as the CRD status.
+func (c *Client) fetchServiceGroup(ctx context.Context, obj *unikraftv1alpha1.Service) (*platform.GetServiceGroupsResponse, error) {
+	resp, err := c.client.GetServiceGroups(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, true)
+	if err != nil {
+		return &platform.GetServiceGroupsResponse{
+			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
+			Message: ukcplatform.Ptr(err.Error()),
+			Data:    obj.Status.Data,
+		}, err
+	}
+
+	return client.Convert[*ukcplatform.Response[ukcplatform.GetServiceGroupsResponseData], *platform.GetServiceGroupsResponse](resp)
 }
