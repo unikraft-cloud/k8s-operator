@@ -49,12 +49,12 @@ func NewReconciler(
 ) *controller.Reconciler[
 	*alpha1.Volume,
 	platform.CreateVolumeRequest,
-	platform.CreateVolumeResponse,
+	platform.GetVolumesResponse,
 ] {
 	return &controller.Reconciler[
 		*alpha1.Volume,
 		platform.CreateVolumeRequest,
-		platform.CreateVolumeResponse,
+		platform.GetVolumesResponse,
 	]{
 		Client:         client,
 		Scheme:         scheme,
@@ -74,7 +74,7 @@ func getSpec(obj *alpha1.Volume) *platform.CreateVolumeRequest {
 	return &obj.Spec
 }
 
-func setStatus(obj *alpha1.Volume, status *platform.CreateVolumeResponse) {
+func setStatus(obj *alpha1.Volume, status *platform.GetVolumesResponse) {
 	if status == nil {
 		return
 	}
