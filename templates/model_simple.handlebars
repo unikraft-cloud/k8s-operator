@@ -17,7 +17,7 @@ type {{classname}}{{name}} string
 
 const (
 {{~#each allowableValues.values}}
-	{{classname}}{{name}}{{capitalize .}} {{classname}}{{name}} = "{{.}}"
+	{{classname}}{{name}}{{replace (capitalize .) "-" "_"}} {{classname}}{{name}} = "{{.}}"
 {{~/each}}
 )
 {{~/if}}

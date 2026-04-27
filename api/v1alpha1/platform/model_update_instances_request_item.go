@@ -11,20 +11,24 @@ import "k8s.io/apimachinery/pkg/runtime"
 
 // A single update operation to be applied to an instance.
 // The property to modify.
-// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock;schedules;autokill
+// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock;schedules;autokill;hostname;roms;dependencies;sched_priority
 type UpdateInstancesRequestItemProp string
 
 const (
-	UpdateInstancesRequestItemPropImage         UpdateInstancesRequestItemProp = "image"
-	UpdateInstancesRequestItemPropArgs          UpdateInstancesRequestItemProp = "args"
-	UpdateInstancesRequestItemPropEnv           UpdateInstancesRequestItemProp = "env"
-	UpdateInstancesRequestItemPropMemory_mb     UpdateInstancesRequestItemProp = "memory_mb"
-	UpdateInstancesRequestItemPropVcpus         UpdateInstancesRequestItemProp = "vcpus"
-	UpdateInstancesRequestItemPropScale_to_zero UpdateInstancesRequestItemProp = "scale_to_zero"
-	UpdateInstancesRequestItemPropTags          UpdateInstancesRequestItemProp = "tags"
-	UpdateInstancesRequestItemPropDelete_lock   UpdateInstancesRequestItemProp = "delete_lock"
-	UpdateInstancesRequestItemPropSchedules     UpdateInstancesRequestItemProp = "schedules"
-	UpdateInstancesRequestItemPropAutokill      UpdateInstancesRequestItemProp = "autokill"
+	UpdateInstancesRequestItemPropImage          UpdateInstancesRequestItemProp = "image"
+	UpdateInstancesRequestItemPropArgs           UpdateInstancesRequestItemProp = "args"
+	UpdateInstancesRequestItemPropEnv            UpdateInstancesRequestItemProp = "env"
+	UpdateInstancesRequestItemPropMemory_mb      UpdateInstancesRequestItemProp = "memory_mb"
+	UpdateInstancesRequestItemPropVcpus          UpdateInstancesRequestItemProp = "vcpus"
+	UpdateInstancesRequestItemPropScale_to_zero  UpdateInstancesRequestItemProp = "scale_to_zero"
+	UpdateInstancesRequestItemPropTags           UpdateInstancesRequestItemProp = "tags"
+	UpdateInstancesRequestItemPropDelete_lock    UpdateInstancesRequestItemProp = "delete_lock"
+	UpdateInstancesRequestItemPropSchedules      UpdateInstancesRequestItemProp = "schedules"
+	UpdateInstancesRequestItemPropAutokill       UpdateInstancesRequestItemProp = "autokill"
+	UpdateInstancesRequestItemPropHostname       UpdateInstancesRequestItemProp = "hostname"
+	UpdateInstancesRequestItemPropRoms           UpdateInstancesRequestItemProp = "roms"
+	UpdateInstancesRequestItemPropDependencies   UpdateInstancesRequestItemProp = "dependencies"
+	UpdateInstancesRequestItemPropSched_priority UpdateInstancesRequestItemProp = "sched_priority"
 )
 
 // The operation to perform on the property.
@@ -41,10 +45,9 @@ type UpdateInstancesRequestItem struct {
 	// (Optional).  A client-provided identifier for tracking this operation in
 	// the response.
 	Id *string `json:"id,omitempty"`
-	// The UUID of the instance to update. Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to update. Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro to route the request to.
+	Metro *string `json:"metro,omitempty"`
 	// The property to modify.
 	Prop UpdateInstancesRequestItemProp `json:"prop"`
 	// The operation to perform on the property.
@@ -58,7 +61,16 @@ type UpdateInstancesRequestItem struct {
 	// - For "scale_to_zero": object with cooldown_time_ms, policy, and stateful fields
 	// - For "tags": array of strings
 	// - For "delete_lock": boolean
-	// - For "schedules": array of schedule objects (with name, when, and action fields)
+	// - For "schedules": array of schedule objects (with name, when, action, and optional args fields).
+	//   Use action "exec" together with args to execute a command at the scheduled time.
 	// - For "autokill": object with time_ms and num_requests fields
+	// - For "hostname": string (valid DNS label)
+	// - For "roms": array of ROM objects (with name and image fields) for SET/ADD, or array of ROM names for DEL
+	// - For "dependencies": array of instance identifiers (name or UUID)
+	// - For "sched_priority": integer (scheduling priority value)
 	Value *runtime.RawExtension `json:"value,omitempty"`
+	// The UUID of the instance to update. Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the instance to update. Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }

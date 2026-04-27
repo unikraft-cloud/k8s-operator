@@ -26,12 +26,12 @@ package platform
 // bad first request latency (e.g., with JIT compilation) consider to enable
 // stateful scale-to-zero.
 // The specific policy to use for scaling the instance to zero.
-// +kubebuilder:validation:Enum=on;off;idle
+// +kubebuilder:validation:Enum=off;on;idle
 type InstanceScaleToZeroPolicy string
 
 const (
-	InstanceScaleToZeroPolicyOn   InstanceScaleToZeroPolicy = "on"
 	InstanceScaleToZeroPolicyOff  InstanceScaleToZeroPolicy = "off"
+	InstanceScaleToZeroPolicyOn   InstanceScaleToZeroPolicy = "on"
 	InstanceScaleToZeroPolicyIdle InstanceScaleToZeroPolicy = "idle"
 )
 

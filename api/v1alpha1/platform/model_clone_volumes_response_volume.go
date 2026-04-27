@@ -29,6 +29,9 @@ type CloneVolumesResponseVolume struct {
 	Uuid *string `json:"uuid,omitempty"`
 	// The name of the newly cloned volume.
 	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro of the volume.
+	Metro *string `json:"metro,omitempty"`
 	// The state of the volume.
 	State *CloneVolumesResponseVolumeState `json:"state,omitempty"`
 	// An optional message providing additional information about the status.

@@ -14,6 +14,9 @@ type DeleteAutoscaleConfigurationsResponseServiceGroup struct {
 	Uuid *string `json:"uuid,omitempty"`
 	// The name of the service where the configuration was deleted.
 	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro of the resource.
+	Metro *string `json:"metro,omitempty"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`

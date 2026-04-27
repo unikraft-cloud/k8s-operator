@@ -19,10 +19,6 @@ const (
 )
 
 type CloneVolumesRequestItem struct {
-	// The UUID of the volume to clone.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume to clone.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
 	// The name of the new cloned volume.  If not provided, a random name
 	// of the form `vol-X` is generated for you, where `X` is a 5 character
 	// long random alphanumeric suffix.
@@ -32,4 +28,8 @@ type CloneVolumesRequestItem struct {
 	QuotaPolicy *CloneVolumesRequestItemQuotaPolicy `json:"quota_policy,omitempty"`
 	// A list of tags to assign to the new cloned volume.
 	Tags []string `json:"tags,omitempty"`
+	// The UUID of the volume to clone.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the volume to clone.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }
