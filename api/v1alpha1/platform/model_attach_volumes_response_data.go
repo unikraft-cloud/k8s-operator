@@ -7,6 +7,8 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// The response data for this request.
+
 type AttachVolumesResponseData struct {
 	// The volume(s) which were attached by the request.
 	Volumes []AttachVolumesResponseAttachedVolume `json:"volumes,omitempty"`

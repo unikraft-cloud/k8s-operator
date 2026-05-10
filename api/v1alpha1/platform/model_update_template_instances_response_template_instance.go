@@ -9,11 +9,14 @@ package platform
 
 type UpdateTemplateInstancesResponseTemplateInstance struct {
 	// The UUID of the template instance that was updated.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the template instance that was updated.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
+	// (Only applies when using global control plane).
+	// The metro of the template instance.
+	Metro *string `json:"metro,omitempty"`
 	// The status of this particular template instance update operation.
-	Status *string `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// (Optional).  The client-provided ID from the request.
 	Id *string `json:"id,omitempty"`
 	// An optional message providing additional information about the status.

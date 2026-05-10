@@ -7,6 +7,8 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// The response data for this request.
+
 type GetAutoscaleConfigurationPolicyResponseData struct {
 	// The policy which was retrieved by the request.
 	Policies []GetAutoscaleConfigurationPolicyResponsePolicyResponse `json:"policies,omitempty"`
