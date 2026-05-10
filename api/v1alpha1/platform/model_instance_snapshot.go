@@ -11,5 +11,5 @@ package platform
 
 type InstanceSnapshot struct {
 	// The UUID of the snapshot.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 }
