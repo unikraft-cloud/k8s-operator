@@ -16,12 +16,6 @@ package platform
 // Not used by template instances.
 
 type CreateInstanceRequestServiceGroup struct {
-	// (Optional).  Reference an existing (persistent) service group by its
-	// UUID.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// (Optional).  Reference an existing (persistent) service group by its
-	// name.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
 	// If no existing (persistent) service group is specified via its
 	// identifier, a new (ephemeral) service group can be created.  In addition
 	// to the services it must expose, you can specify which domains it should
@@ -37,4 +31,10 @@ type CreateInstanceRequestServiceGroup struct {
 	// The hard limit for the number of services that can be created in this
 	// service group.
 	HardLimit *uint32 `json:"hard_limit,omitempty"`
+	// (Optional).  Reference an existing (persistent) service group by its
+	// UUID.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// (Optional).  Reference an existing (persistent) service group by its
+	// name.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }
