@@ -7,29 +7,18 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The current state of the instance.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type CreateTemplateInstancesResponseTemplateInstanceState string
-
-const (
-	CreateTemplateInstancesResponseTemplateInstanceStateStopped  CreateTemplateInstancesResponseTemplateInstanceState = "stopped"
-	CreateTemplateInstancesResponseTemplateInstanceStateStarting CreateTemplateInstancesResponseTemplateInstanceState = "starting"
-	CreateTemplateInstancesResponseTemplateInstanceStateRunning  CreateTemplateInstancesResponseTemplateInstanceState = "running"
-	CreateTemplateInstancesResponseTemplateInstanceStateDraining CreateTemplateInstancesResponseTemplateInstanceState = "draining"
-	CreateTemplateInstancesResponseTemplateInstanceStateStopping CreateTemplateInstancesResponseTemplateInstanceState = "stopping"
-	CreateTemplateInstancesResponseTemplateInstanceStateTemplate CreateTemplateInstancesResponseTemplateInstanceState = "template"
-	CreateTemplateInstancesResponseTemplateInstanceStateStandby  CreateTemplateInstancesResponseTemplateInstanceState = "standby"
-)
-
 type CreateTemplateInstancesResponseTemplateInstance struct {
 	// The status of this particular template instance creation operation.
-	Status *string `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// The UUID of the template instance that was created.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the template instance that was created.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
+	// (Only applies when using global control plane).
+	// The metro of the template instance.
+	Metro *string `json:"metro,omitempty"`
 	// The current state of the instance.
-	State *CreateTemplateInstancesResponseTemplateInstanceState `json:"state,omitempty"`
+	State InstanceState `json:"state"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
