@@ -25,15 +25,6 @@ package platform
 // If you have a heavyweight application that takes long to cold boot or has
 // bad first request latency (e.g., with JIT compilation) consider to enable
 // stateful scale-to-zero.
-// The specific policy to use for scaling the instance to zero.
-// +kubebuilder:validation:Enum=on;off;idle
-type InstanceScaleToZeroPolicy string
-
-const (
-	InstanceScaleToZeroPolicyOn   InstanceScaleToZeroPolicy = "on"
-	InstanceScaleToZeroPolicyOff  InstanceScaleToZeroPolicy = "off"
-	InstanceScaleToZeroPolicyIdle InstanceScaleToZeroPolicy = "idle"
-)
 
 type InstanceScaleToZero struct {
 	// Indicates whether scale-to-zero is enabled for the instance.

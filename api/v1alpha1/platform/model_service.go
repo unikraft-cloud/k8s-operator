@@ -13,20 +13,6 @@ package platform
 // incoming connections and forward traffic from the Internet to your
 // application.  For example, a service can be configured to terminate TLS
 // connections, redirect HTTP traffic, or enable HTTP mode for load balancing.
-// Connection handlers to use for the service.  Handlers define how the
-// service will handle incoming connections and forward traffic from the
-// Internet to your application.  For example, a service can be configured
-// to terminate TLS connections, redirect HTTP traffic, or enable HTTP mode
-// for load balancing.  You configure the handlers for every published
-// service port individually.
-// +kubebuilder:validation:Enum=tls;http;redirect
-type ServiceHandlers string
-
-const (
-	ServiceHandlersTls      ServiceHandlers = "tls"
-	ServiceHandlersHttp     ServiceHandlers = "http"
-	ServiceHandlersRedirect ServiceHandlers = "redirect"
-)
 
 type Service struct {
 	// This is the public-facing port that the service will be accessible from
@@ -41,5 +27,5 @@ type Service struct {
 	// to terminate TLS connections, redirect HTTP traffic, or enable HTTP mode
 	// for load balancing.  You configure the handlers for every published
 	// service port individually.
-	Handlers []ServiceHandlers `json:"handlers,omitempty"`
+	Handlers []ConnectionHandler `json:"handlers,omitempty"`
 }
