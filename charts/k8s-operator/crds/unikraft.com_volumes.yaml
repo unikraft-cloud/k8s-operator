@@ -48,6 +48,15 @@ spec:
             type: object
           spec:
             properties:
+              access_mode:
+                description: |-
+                  The access mode of the volume, controlling volume sharing behavior.
+                  Defaults to `rwo` if not specified.
+                enum:
+                - rwo
+                - rox
+                - rwx
+                type: string
               args:
                 additionalProperties:
                   type: string
@@ -64,6 +73,11 @@ spec:
                 type: integer
               host_path:
                 description: A host path to create a managed volume from.
+                type: string
+              metro:
+                description: |-
+                  (Only applies when using global control plane).
+                  The metro to route the request to.
                 type: string
               name:
                 description: |-
@@ -91,7 +105,13 @@ spec:
                   type: string
                 type: array
               template:
+                description: Source template volume to clone from.
                 properties:
+                  metro:
+                    description: |-
+                      (Only applies when using global control plane).
+                      The metro of the resource.
+                    type: string
                   name:
                     description: Mutually exclusive with UUID.
                     type: string
@@ -130,6 +150,11 @@ spec:
                             An optional message providing additional information about the status.
                             This field is useful when the status is not `success`.
                           type: string
+                        metro:
+                          description: |-
+                            (Only applies when using global control plane).
+                            The metro of the volume.
+                          type: string
                         name:
                           description: The name of the newly created volume.
                           type: string
@@ -154,6 +179,11 @@ spec:
                         uuid:
                           description: UUID of the newly created volume.
                           type: string
+                      required:
+                      - name
+                      - state
+                      - status
+                      - uuid
                       type: object
                     type: array
                 type: object
@@ -165,6 +195,8 @@ spec:
                       description: The HTTP status code of the error.
                       format: int64
                       type: integer
+                  required:
+                  - status
                   type: object
                 type: array
               message:
@@ -184,6 +216,10 @@ spec:
                 - success
                 - error
                 type: string
+            required:
+            - data
+            - op_time_us
+            - status
             type: object
         type: object
     served: true
