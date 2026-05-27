@@ -8,30 +8,17 @@
 package platform
 
 // A single wait operation to be applied to an instance.
-// The desired state to wait for.  Default is `running`.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type WaitInstancesRequestItemState string
-
-const (
-	WaitInstancesRequestItemStateStopped  WaitInstancesRequestItemState = "stopped"
-	WaitInstancesRequestItemStateStarting WaitInstancesRequestItemState = "starting"
-	WaitInstancesRequestItemStateRunning  WaitInstancesRequestItemState = "running"
-	WaitInstancesRequestItemStateDraining WaitInstancesRequestItemState = "draining"
-	WaitInstancesRequestItemStateStopping WaitInstancesRequestItemState = "stopping"
-	WaitInstancesRequestItemStateTemplate WaitInstancesRequestItemState = "template"
-	WaitInstancesRequestItemStateStandby  WaitInstancesRequestItemState = "standby"
-)
 
 type WaitInstancesRequestItem struct {
-	// The UUID of the instance to wait for.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to wait for.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
 	// The desired state to wait for.  Default is `running`.
-	State *WaitInstancesRequestItemState `json:"state,omitempty"`
+	State *InstanceState `json:"state,omitempty"`
 	// Timeout in milliseconds to wait for the instance to reach the desired
 	// state.  If the timeout is reached, the request will fail with an error.
 	// A value of -1 means to wait indefinitely until the instance reaches the
 	// desired state.
 	TimeoutMs *int64 `json:"timeout_ms,omitempty"`
+	// The UUID of the instance to wait for.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the instance to wait for.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }

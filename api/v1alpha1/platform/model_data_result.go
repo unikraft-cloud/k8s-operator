@@ -8,6 +8,6 @@
 package platform
 
 type DataResult struct {
-	Uuid  *string `json:"uuid,omitempty"`
-	Added *bool   `json:"added,omitempty"`
+	Uuid  string `json:"uuid"`
+	Added bool   `json:"added"`
 }
