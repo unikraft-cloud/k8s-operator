@@ -11,6 +11,9 @@ package platform
 // specified, the domain must be associated with a valid certificate.
 
 type CreateServiceGroupRequestDomainCertificate struct {
+	// (Only applies when using global control plane).
+	// The metro of the resource.
+	Metro *string `json:"metro,omitempty"`
 	// Mutually exclusive with name.
 	Uuid string `json:"uuid"`
 	// Mutually exclusive with UUID.
