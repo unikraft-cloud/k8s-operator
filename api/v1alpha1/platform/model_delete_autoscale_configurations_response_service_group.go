@@ -9,11 +9,14 @@ package platform
 
 type DeleteAutoscaleConfigurationsResponseServiceGroup struct {
 	// The status of the response.
-	Status *ResponseStatus `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// The UUID of the service where the configuration was deleted.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the service where the configuration was deleted.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
+	// (Only applies when using global control plane).
+	// The metro of the resource.
+	Metro *string `json:"metro,omitempty"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`

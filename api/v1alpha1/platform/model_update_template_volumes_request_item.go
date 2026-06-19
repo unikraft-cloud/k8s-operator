@@ -10,41 +10,23 @@ package platform
 import "k8s.io/apimachinery/pkg/runtime"
 
 // A single update operation to be applied to a template volume.
-// The property to modify.
-// +kubebuilder:validation:Enum=tags;delete_lock
-type UpdateTemplateVolumesRequestItemProp string
-
-const (
-	UpdateTemplateVolumesRequestItemPropTags        UpdateTemplateVolumesRequestItemProp = "tags"
-	UpdateTemplateVolumesRequestItemPropDelete_lock UpdateTemplateVolumesRequestItemProp = "delete_lock"
-)
-
-// The operation to perform.
-// +kubebuilder:validation:Enum=set;add;del
-type UpdateTemplateVolumesRequestItemOp string
-
-const (
-	UpdateTemplateVolumesRequestItemOpSet UpdateTemplateVolumesRequestItemOp = "set"
-	UpdateTemplateVolumesRequestItemOpAdd UpdateTemplateVolumesRequestItemOp = "add"
-	UpdateTemplateVolumesRequestItemOpDel UpdateTemplateVolumesRequestItemOp = "del"
-)
 
 type UpdateTemplateVolumesRequestItem struct {
 	// (Optional).  A client-provided identifier for tracking this operation in
 	// the response.
 	Id *string `json:"id,omitempty"`
+	// The property to modify.
+	Prop MutableTemplateVolumeProperty `json:"prop"`
+	// The operation to perform.
+	Op MutableTemplateVolumeOperation `json:"op"`
+	// The value for the update operation. The type depends on the property and operation:
+	// - For "tags": array of Strings
+	// - For "delete_lock": boolean
+	Value *runtime.RawExtension `json:"value,omitempty"`
 	// The UUID of the template volume to update.  Mutually exclusive with
 	// name.
 	Uuid *string `json:"uuid,omitempty"`
 	// The name of the template volume to update.  Mutually exclusive with
 	// UUID.
 	Name *string `json:"name,omitempty"`
-	// The property to modify.
-	Prop UpdateTemplateVolumesRequestItemProp `json:"prop"`
-	// The operation to perform.
-	Op UpdateTemplateVolumesRequestItemOp `json:"op"`
-	// The value for the update operation. The type depends on the property and operation:
-	// - For "tags": array of Strings
-	// - For "delete_lock": boolean
-	Value *runtime.RawExtension `json:"value,omitempty"`
 }
