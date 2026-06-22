@@ -10,6 +10,9 @@ package platform
 // The ID of the certificate to update.
 
 type UpdateCertificateRequestId struct {
+	// (Only applies when using global control plane).
+	// The metro of the resource.
+	Metro *string `json:"metro,omitempty"`
 	// Mutually exclusive with name.
 	Uuid string `json:"uuid"`
 	// Mutually exclusive with UUID.
