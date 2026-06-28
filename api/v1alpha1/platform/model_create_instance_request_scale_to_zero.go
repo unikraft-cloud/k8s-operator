@@ -10,19 +10,10 @@ package platform
 // Scale-to-zero configuration for the instance.  Requires
 // `service_group` to be set.  Cannot be combined with the
 // `delete-on-stop` feature.
-// The specific policy to use for scaling the instance to zero.
-// +kubebuilder:validation:Enum=on;off;idle
-type CreateInstanceRequestScaleToZeroPolicy string
-
-const (
-	CreateInstanceRequestScaleToZeroPolicyOn   CreateInstanceRequestScaleToZeroPolicy = "on"
-	CreateInstanceRequestScaleToZeroPolicyOff  CreateInstanceRequestScaleToZeroPolicy = "off"
-	CreateInstanceRequestScaleToZeroPolicyIdle CreateInstanceRequestScaleToZeroPolicy = "idle"
-)
 
 type CreateInstanceRequestScaleToZero struct {
 	// The specific policy to use for scaling the instance to zero.
-	Policy *CreateInstanceRequestScaleToZeroPolicy `json:"policy,omitempty"`
+	Policy *InstanceScaleToZeroPolicy `json:"policy,omitempty"`
 	// Whether the instance should be stateful when scaled to zero. If set to
 	// true, the instance will retain its state (e.g., RAM contents) when scaled
 	// to zero.  This is useful for instances that need to maintain their state
