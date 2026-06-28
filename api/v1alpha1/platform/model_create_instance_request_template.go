@@ -14,7 +14,15 @@ package platform
 
 type CreateInstanceRequestTemplate struct {
 	// (Optional).  Whether the instance needs to run in order to reach template state
-	Prepare    *bool                                    `json:"prepare,omitempty"`
-	NameOrUUID *CreateInstanceRequestTemplateNameOrUUID `json:"nameOrUUID,omitempty"`
+	Prepare *bool `json:"prepare,omitempty"`
+	// (Optional).  The UUID of a template instance to create the instance from.
+	// Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// (Optional).  The name of a template instance to create the instance from.
+	// Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// Where the volume is located.
+	Metro      *string                                  `json:"metro,omitempty"`
 	CreateArgs *CreateInstanceRequestTemplateCreateArgs `json:"create_args,omitempty"`
 }
