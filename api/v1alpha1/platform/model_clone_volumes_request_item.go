@@ -8,28 +8,22 @@
 package platform
 
 // A single request item describing the volume to clone.
-// The quota policy for the new cloned volume.  If not provided, the quota
-// policy of the source volume is used.
-// +kubebuilder:validation:Enum=static;dynamic
-type CloneVolumesRequestItemQuotaPolicy string
-
-const (
-	CloneVolumesRequestItemQuotaPolicyStatic  CloneVolumesRequestItemQuotaPolicy = "static"
-	CloneVolumesRequestItemQuotaPolicyDynamic CloneVolumesRequestItemQuotaPolicy = "dynamic"
-)
 
 type CloneVolumesRequestItem struct {
-	// The UUID of the volume to clone.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume to clone.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro to route the request to.
+	Metro *string `json:"metro,omitempty"`
 	// The name of the new cloned volume.  If not provided, a random name
 	// of the form `vol-X` is generated for you, where `X` is a 5 character
 	// long random alphanumeric suffix.
 	VolName *string `json:"vol_name,omitempty"`
 	// The quota policy for the new cloned volume.  If not provided, the quota
 	// policy of the source volume is used.
-	QuotaPolicy *CloneVolumesRequestItemQuotaPolicy `json:"quota_policy,omitempty"`
+	QuotaPolicy *VolumeQuotaPolicy `json:"quota_policy,omitempty"`
 	// A list of tags to assign to the new cloned volume.
 	Tags []string `json:"tags,omitempty"`
+	// The UUID of the volume to clone.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the volume to clone.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }

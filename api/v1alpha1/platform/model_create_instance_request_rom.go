@@ -11,7 +11,18 @@ package platform
 
 type CreateInstanceRequestRom struct {
 	// The name of the ROM to use for the instance configuration.
-	Name *string `json:"name,omitempty"`
-	// The image of the ROM to use for the instance configuration.
-	Image string `json:"image"`
+	Name string `json:"name"`
+	// (Optional).  The image of the ROM to use for the instance configuration.
+	// Mutually exclusive with `files`.
+	Image *string `json:"image,omitempty"`
+	// (Optional).  Inline files to use as the ROM content.  When specified,
+	// the platform creates an EROFS image from the provided files.
+	// Mutually exclusive with `image`.
+	Files []InlineFile `json:"files,omitempty"`
+	// (Optional).  The path at which the ROM should be automatically mounted
+	// inside the instance.  When set, the platform mounts the ROM device at
+	// the specified path so the guest does not need to mount it manually.
+	// When omitted, the ROM is exposed as a raw block device and the guest is
+	// responsible for mounting it.
+	At *string `json:"at,omitempty"`
 }
