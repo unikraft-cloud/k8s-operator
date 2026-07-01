@@ -10,10 +10,9 @@ package platform
 // A single request item to start an instance.
 
 type StartInstancesRequestItem struct {
-	// The UUID of the instance to start.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to start.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
+	// (Only applies when using global control plane).
+	// The metro to route the request to.
+	Metro *string `json:"metro,omitempty"`
 	// Deprecated: Use `timeout_s` instead.  Timeout in milliseconds to
 	// wait for the instance to reach running state.  If `timeout_s` is
 	// not set, this value is converted by rounding up to the next full
@@ -24,4 +23,8 @@ type StartInstancesRequestItem struct {
 	// finish starting with a blocking API call if you specify a wait
 	// timeout greater than zero.  No wait performed for a value of 0.
 	TimeoutS *int64 `json:"timeout_s,omitempty"`
+	// The UUID of the instance to start.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the instance to start.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }
