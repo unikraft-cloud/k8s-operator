@@ -8,6 +8,9 @@
 package platform
 
 type DataResult struct {
-	Uuid  *string `json:"uuid,omitempty"`
-	Added *bool   `json:"added,omitempty"`
+	Uuid string `json:"uuid"`
+	// (Only applies when using global control plane).
+	// The metro of the user.
+	Metro *string `json:"metro,omitempty"`
+	Added bool    `json:"added"`
 }
