@@ -7,19 +7,9 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The specific policy to use for scaling the instance to zero.
-// +kubebuilder:validation:Enum=on;off;idle
-type CreateInstanceScaleToZeroPolicy string
-
-const (
-	CreateInstanceScaleToZeroPolicyOn   CreateInstanceScaleToZeroPolicy = "on"
-	CreateInstanceScaleToZeroPolicyOff  CreateInstanceScaleToZeroPolicy = "off"
-	CreateInstanceScaleToZeroPolicyIdle CreateInstanceScaleToZeroPolicy = "idle"
-)
-
 type CreateInstanceScaleToZero struct {
 	// The specific policy to use for scaling the instance to zero.
-	Policy *CreateInstanceScaleToZeroPolicy `json:"policy,omitempty"`
+	Policy *InstanceScaleToZeroPolicy `json:"policy,omitempty"`
 	// Whether the instance should be stateful when scaled to zero. If set to
 	// true, the instance will retain its state (e.g., RAM contents) when scaled
 	// to zero.  This is useful for instances that need to maintain their state
