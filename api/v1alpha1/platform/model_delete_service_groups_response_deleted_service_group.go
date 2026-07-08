@@ -12,11 +12,14 @@ package platform
 type DeleteServiceGroupsResponseDeletedServiceGroup struct {
 	// Indicates whether the delete operation was successful or not for this
 	// service group.
-	Status *ResponseStatus `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// The UUID of the service group which was deleted.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the service group which was deleted.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
+	// (Only applies when using global control plane).
+	// The metro of the service group.
+	Metro *string `json:"metro,omitempty"`
 	// An optional message providing additional information about the status.
 	// This field is only set when this message object is used as a response
 	// message, and is useful when the status is not `success`.
