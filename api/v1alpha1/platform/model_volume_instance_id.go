@@ -11,7 +11,7 @@ package platform
 
 type VolumeInstanceID struct {
 	// The UUID of the instance that the volume is attached to.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the instance that the volume is attached to.
 	Name *string `json:"name,omitempty"`
 }
