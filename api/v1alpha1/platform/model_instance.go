@@ -9,57 +9,7 @@ package platform
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// An instance is a unikernel virtual machine running an application.
-// The state of the instance.  This indicates the current state of the
-// instance, such as whether it is running, stopped, or in an error state.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type InstanceState string
-
-const (
-	InstanceStateStopped  InstanceState = "stopped"
-	InstanceStateStarting InstanceState = "starting"
-	InstanceStateRunning  InstanceState = "running"
-	InstanceStateDraining InstanceState = "draining"
-	InstanceStateStopping InstanceState = "stopping"
-	InstanceStateTemplate InstanceState = "template"
-	InstanceStateStandby  InstanceState = "standby"
-)
-
-// The restart configuration for the instance.
-//
-// When an instance stops either because the application exits or the instance
-// crashes, Unikraft Cloud can auto-restart your instance.  Auto-restarts are
-// performed according to the restart policy configured for a particular
-// instance.
-//
-// The policy can have the following values:
-//
-// | Policy       | Description |
-// |--------------|-------------|
-// | `never`      | Never restart the instance (default). |
-// | `always`     | Always restart the instance when the stop is initiated from within the instance (i.e., the application exits or the instance crashes). |
-// | `on-failure` | Only restart the instance if it crashes. |
-//
-// When an instance stops, the stop reason and the configured restart policy
-// are evaluated to decide if a restart should be performed.  Unikraft Cloud
-// uses an exponential back-off delay (immediate, 5s, 10s, 20s, 40s, ..., 5m)
-// to slow down restarts in tight crash loops.  If an instance runs without
-// problems for 10s the back-off delay is reset and the restart sequence ends.
-//
-// The `restart.attempt` attribute reported in counts the number of restarts
-// performed in the current sequence.  The `restart.next_at` field indicates
-// when the next restart will take place if a back-off delay is in effect.
-//
-// A manual start or stop of the instance aborts the restart sequence and
-// resets the back-off delay.
-// +kubebuilder:validation:Enum=never;always;on_failure
-type InstanceRestartPolicy string
-
-const (
-	InstanceRestartPolicyNever      InstanceRestartPolicy = "never"
-	InstanceRestartPolicyAlways     InstanceRestartPolicy = "always"
-	InstanceRestartPolicyOn_failure InstanceRestartPolicy = "on_failure"
-)
+// An instance is a micro vm running an application.
 
 type Instance struct {
 	// The UUID of the instance.
@@ -68,33 +18,36 @@ type Instance struct {
 	// instance is created.  The UUID is used to reference the instance in API
 	// calls and can be used to identify the instance in all API calls that
 	// require an instance identifier.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the instance.
 	//
 	// This is a human-readable name that can be used to identify the instance.
 	// The name must be unique within the context of your account.  The name can
 	// also be used to identify the instance in API calls.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
+	// (Only applies when using global control plane).
+	// Where the instance is located.
+	Metro *string `json:"metro,omitempty"`
 	// The time the instance was created.
-	CreatedAt *metav1.Time `json:"created_at,omitempty"`
+	CreatedAt metav1.Time `json:"created_at"`
 	// The state of the instance.  This indicates the current state of the
 	// instance, such as whether it is running, stopped, or in an error state.
-	State *InstanceState `json:"state,omitempty"`
+	State InstanceState `json:"state"`
 	// The internal hostname of the instance.  This address can be used privately
 	// within the Unikraft Cloud network to access the instance.  It is not
 	// accessible from the public Internet.
 	PrivateFqdn *string `json:"private_fqdn,omitempty"`
 	// The image used to create the instance.  This is a reference to the
 	// Unikraft image that was used to create the instance.
-	Image *string `json:"image,omitempty"`
+	Image string `json:"image"`
 	// The amount of memory in megabytes allocated for the instance.  This is the
 	// total amount of memory that is available to the instance for its
 	// operations.
-	MemoryMb *uint64 `json:"memory_mb,omitempty"`
+	MemoryMb uint64 `json:"memory_mb"`
 	// The number of vCPUs allocated for the instance.  This is the total
 	// number of virtual CPUs that are available to the instance for its
 	// operations.
-	Vcpus *uint32 `json:"vcpus,omitempty"`
+	Vcpus uint32 `json:"vcpus"`
 	// The arguments passed to the instance when it was started.  This is a
 	// list of command-line arguments that were provided to the instance at
 	// startup.  These arguments can be used to configure the behavior of the
@@ -256,8 +209,8 @@ type Instance struct {
 	//
 	// A manual start or stop of the instance aborts the restart sequence and
 	// resets the back-off delay.
-	RestartPolicy *InstanceRestartPolicy `json:"restart_policy,omitempty"`
-	ScaleToZero   *InstanceScaleToZero   `json:"scale_to_zero,omitempty"`
+	RestartPolicy InstanceRestartPolicy `json:"restart_policy"`
+	ScaleToZero   *InstanceScaleToZero  `json:"scale_to_zero,omitempty"`
 	// The list of volumes attached to the instance.
 	Volumes      []InstanceVolume      `json:"volumes,omitempty"`
 	ServiceGroup *InstanceServiceGroup `json:"service_group,omitempty"`
@@ -290,8 +243,22 @@ type Instance struct {
 	// Scheduled operations for this instance.
 	//
 	// Each schedule defines a calendar expression and an action (`start`,
-	// `stop`, or `delete`) to perform at matching times.
+	// `stop`, `delete`, or `exec`) to perform at matching times.  When the
+	// action is `exec`, the `args` field of the schedule specifies the command
+	// to run inside the instance.
 	Schedules        []Schedule                `json:"schedules,omitempty"`
 	Autokill         *InstanceAutokill         `json:"autokill,omitempty"`
 	TemplateAutokill *InstanceTemplateAutokill `json:"template_autokill,omitempty"`
+	// Queued property changes awaiting application.
+	Updates []InstancePendingUpdate `json:"updates,omitempty"`
+	// The scheduling priority for the instance. Only present for
+	// users with scheduling priority override permissions.
+	SchedPriority      *SchedPriority              `json:"sched_priority,omitempty"`
+	CheckpointAutokill *InstanceCheckpointAutokill `json:"checkpoint_autokill,omitempty"`
+	// The private IP address of the instance.
+	PrivateIp *string `json:"private_ip,omitempty"`
+	// The default gateway configured inside the guest.
+	Gateway *string `json:"gateway,omitempty"`
+	// The DNS resolver configured inside the guest.
+	Nameserver *string `json:"nameserver,omitempty"`
 }
