@@ -10,29 +10,6 @@ package platform
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // A volume represents a storage device that can be attached to an instance.
-// Current state of the volume.
-// +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error;template
-type VolumeState string
-
-const (
-	VolumeStateUninitialized VolumeState = "uninitialized"
-	VolumeStateInitializing  VolumeState = "initializing"
-	VolumeStateAvailable     VolumeState = "available"
-	VolumeStateIdle          VolumeState = "idle"
-	VolumeStateMounted       VolumeState = "mounted"
-	VolumeStateBusy          VolumeState = "busy"
-	VolumeStateError         VolumeState = "error"
-	VolumeStateTemplate      VolumeState = "template"
-)
-
-// Either static or dynamic reservation.
-// +kubebuilder:validation:Enum=static;dynamic
-type VolumeQuotaPolicy string
-
-const (
-	VolumeQuotaPolicyStatic  VolumeQuotaPolicy = "static"
-	VolumeQuotaPolicyDynamic VolumeQuotaPolicy = "dynamic"
-)
 
 type Volume struct {
 	// The UUID of the volume.
@@ -41,22 +18,22 @@ type Volume struct {
 	// volume is created.  The UUID is used to reference the volume in
 	// API calls and can be used to identify the volume in all API calls that
 	// require an identifier.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the volume.
 	//
 	// This is a human-readable name that can be used to identify the volume.
 	// The name must be unique within the context of your account.  The name can
 	// also be used to identify the volume in API calls.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// The time the volume was created.
-	CreatedAt *metav1.Time `json:"created_at,omitempty"`
+	CreatedAt metav1.Time `json:"created_at"`
 	// Current state of the volume.
-	State *VolumeState `json:"state,omitempty"`
+	State VolumeState `json:"state"`
 	// The size of the volume in megabytes.
-	SizeMb *uint64 `json:"size_mb,omitempty"`
+	SizeMb uint64 `json:"size_mb"`
 	// Indicates if the volume will stay alive when the last instance is deleted
 	// that this volume is attached to.
-	Persistent *bool `json:"persistent,omitempty"`
+	Persistent bool `json:"persistent"`
 	// List of instances that this volume is attached to.
 	AttachedTo []VolumeInstanceID `json:"attached_to,omitempty"`
 	// List of instances that have this volume mounted.
@@ -77,7 +54,7 @@ type Volume struct {
 	// message, and is useful when the status is not `success`.
 	Error *int32 `json:"error,omitempty"`
 	// Either static or dynamic reservation.
-	QuotaPolicy *VolumeQuotaPolicy `json:"quota_policy,omitempty"`
+	QuotaPolicy VolumeQuotaPolicy `json:"quota_policy"`
 	// If set to true, the volume cannot be deleted.
 	DeleteLock *bool `json:"delete_lock,omitempty"`
 	// The amount of free space in the volume in megabytes.
@@ -92,4 +69,11 @@ type Volume struct {
 	// Optional script arguments that were applied to the custom volume filesystem
 	// initialization scripts.
 	Args map[string]string `json:"args,omitempty"`
+	// The access mode of the volume, controlling volume sharing behavior.
+	// Defaults to `rwo` if not specified.
+	AccessMode *VolumeAccessMode `json:"access_mode,omitempty"`
+	// Guest UID for managed volumes (host_path mode only).
+	Uid *uint32 `json:"uid,omitempty"`
+	// Guest GID for managed volumes (host_path mode only).
+	Gid *uint32 `json:"gid,omitempty"`
 }
