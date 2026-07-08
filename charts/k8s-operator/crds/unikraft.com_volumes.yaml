@@ -48,6 +48,15 @@ spec:
             type: object
           spec:
             properties:
+              access_mode:
+                description: |-
+                  The access mode of the volume, controlling volume sharing behavior.
+                  Defaults to `rwo` if not specified.
+                enum:
+                - rwo
+                - rox
+                - rwx
+                type: string
               args:
                 additionalProperties:
                   type: string
@@ -91,6 +100,7 @@ spec:
                   type: string
                 type: array
               template:
+                description: Source template volume to clone from.
                 properties:
                   name:
                     description: Mutually exclusive with UUID.
@@ -98,9 +108,6 @@ spec:
                   uuid:
                     description: Mutually exclusive with name.
                     type: string
-                required:
-                - name
-                - uuid
                 type: object
               uid:
                 description: Guest UID for managed volumes (host_path mode only).
@@ -154,6 +161,11 @@ spec:
                         uuid:
                           description: UUID of the newly created volume.
                           type: string
+                      required:
+                      - name
+                      - state
+                      - status
+                      - uuid
                       type: object
                     type: array
                 type: object
@@ -165,6 +177,8 @@ spec:
                       description: The HTTP status code of the error.
                       format: int64
                       type: integer
+                  required:
+                  - status
                   type: object
                 type: array
               message:
@@ -184,6 +198,10 @@ spec:
                 - success
                 - error
                 type: string
+            required:
+            - data
+            - op_time_us
+            - status
             type: object
         type: object
     served: true
