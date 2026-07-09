@@ -8,33 +8,16 @@
 package platform
 
 // The policy which was retrieved by the request.
-// Metric to use for the step policy.
-// +kubebuilder:validation:Enum=cpu
-type GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyMetric string
-
-const (
-	GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyMetricCpu GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyMetric = "cpu"
-)
-
-// The type of adjustment to be made in the step policy.
-// +kubebuilder:validation:Enum=change;exact;percentage
-type GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentType string
-
-const (
-	GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentTypeChange     GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentType = "change"
-	GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentTypeExact      GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentType = "exact"
-	GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentTypePercentage GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentType = "percentage"
-)
 
 type GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicy struct {
 	// The name of the policy.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// If the policy is enabled.
 	Enabled *bool `json:"enabled,omitempty"`
 	// Metric to use for the step policy.
-	Metric *GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyMetric `json:"metric,omitempty"`
+	Metric *StepPolicyMetric `json:"metric,omitempty"`
 	// The type of adjustment to be made in the step policy.
-	AdjustmentType *GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicyAdjustmentType `json:"adjustment_type,omitempty"`
+	AdjustmentType *AdjustmentType `json:"adjustment_type,omitempty"`
 	// The steps for the step policy.
 	// Each step defines an adjustment value and optional bounds.
 	Steps []AutoscalePolicyStep `json:"steps,omitempty"`

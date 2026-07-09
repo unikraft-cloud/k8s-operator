@@ -7,6 +7,8 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// The response data for this request.
+
 type QuotasResponseData struct {
 	// The quota(s) which were retrieved by the request.
 	Quotas []Quotas `json:"quotas,omitempty"`
