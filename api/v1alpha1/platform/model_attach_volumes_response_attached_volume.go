@@ -9,11 +9,11 @@ package platform
 
 type AttachVolumesResponseAttachedVolume struct {
 	// The status of the response.
-	Status *ResponseStatus `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// The UUID of the volume that was attached.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the volume that was attached.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
