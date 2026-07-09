@@ -10,7 +10,7 @@ package platform
 // A schedule defines when an action should be performed on an instance.
 //
 // Each schedule specifies a name, a calendar expression following systemd
-// calendar event syntax, and an action (start, stop, or delete).
+// calendar event syntax, and an action (start, stop, delete, or exec).
 //
 // Calendar expressions format: [weekday] [[year-]month-day] [hour:minute[:second]]
 //
@@ -23,15 +23,6 @@ package platform
 //
 // Example: `*-*-* 09:00:00` - Every day at 09:00 UTC
 // Example: `Sat,Sun *-*-* 20:00:00` - Every Saturday and Sunday at 20:00 UTC
-// The action to perform at the scheduled time.
-// +kubebuilder:validation:Enum=start;stop;delete
-type ScheduleAction string
-
-const (
-	ScheduleActionStart  ScheduleAction = "start"
-	ScheduleActionStop   ScheduleAction = "stop"
-	ScheduleActionDelete ScheduleAction = "delete"
-)
 
 type Schedule struct {
 	// The name of the schedule.
@@ -49,5 +40,10 @@ type Schedule struct {
 	//
 	// This field is populated only in responses (not settable in requests).
 	// Unix timestamp in seconds.  Omitted if no next execution is scheduled.
-	NextAt *int64 `json:"next_at,omitempty"`
+	NextAt int64 `json:"next_at"`
+	// The command to execute when the action is `exec`.
+	//
+	// Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+	// Each element is a separate argument; the first element is the executable.
+	Args []string `json:"args,omitempty"`
 }
