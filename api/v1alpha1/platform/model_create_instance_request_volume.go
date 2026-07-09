@@ -23,13 +23,6 @@ type CreateInstanceRequestVolume struct {
 	// specified along with the mount point in the instance and a provisioning
 	// source (size_mb or host_path).
 	Name *string `json:"name,omitempty"`
-	// The size of the volume when creating a new volume.
-	//
-	// When creating a new volume as part of the instance create request,
-	// specify the size of the volume in MiB.
-	SizeMb *uint64 `json:"size_mb,omitempty"`
-	// A host path to create a managed volume from.
-	HostPath *string `json:"host_path,omitempty"`
 	// The mount point for the volume in the instance.
 	At string `json:"at"`
 	// Whether the volume is read-only.
@@ -51,4 +44,14 @@ type CreateInstanceRequestVolume struct {
 	Gid *uint32 `json:"gid,omitempty"`
 	// Script arguments passed to volume initialization scripts.
 	Args map[string]string `json:"args,omitempty"`
+	// Access mode of the volume, controlling sharing behavior.
+	// Defaults to read-write by a single instance (RWO).
+	AccessMode *VolumeAccessMode `json:"access_mode,omitempty"`
+	// The size of the volume when creating a new volume.
+	//
+	// When creating a new volume as part of the instance create request,
+	// specify the size of the volume in MiB.
+	SizeMb *uint64 `json:"size_mb,omitempty"`
+	// A host path to create a managed volume from.
+	HostPath *string `json:"host_path,omitempty"`
 }
