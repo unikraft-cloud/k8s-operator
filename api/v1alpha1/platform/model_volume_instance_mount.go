@@ -9,9 +9,9 @@ package platform
 
 type VolumeInstanceMount struct {
 	// The UUID of the instance that the volume is mounted in.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the instance that the volume is mounted in.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// Whether the volume is mounted read-only or read-write.
-	Readonly *bool `json:"readonly,omitempty"`
+	Readonly bool `json:"readonly"`
 }
