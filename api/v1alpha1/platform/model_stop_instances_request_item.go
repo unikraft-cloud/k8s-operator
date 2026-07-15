@@ -10,10 +10,6 @@ package platform
 // A single request item to stop an instance.
 
 type StopInstancesRequestItem struct {
-	// The UUID of the instance to stop.  Mutually exclusive with name.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to stop.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
 	// Whether to immediately force stop the instance.
 	Force *bool `json:"force,omitempty"`
 	// Timeout for draining connections in milliseconds.  The instance does not
@@ -29,4 +25,11 @@ type StopInstancesRequestItem struct {
 	Quick *bool `json:"quick,omitempty"`
 	// Only stop the instance if it is in this state.
 	Ifstate *string `json:"ifstate,omitempty"`
+	// If set, forces the VMM to shutdown immediately and generate a coredump.
+	// Can only be used in conjunction with force.
+	Dump *bool `json:"dump,omitempty"`
+	// The UUID of the instance to stop.  Mutually exclusive with name.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the instance to stop.  Mutually exclusive with UUID.
+	Name *string `json:"name,omitempty"`
 }
