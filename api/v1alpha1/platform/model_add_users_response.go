@@ -9,15 +9,14 @@ package platform
 
 type AddUsersResponse struct {
 	// The status of the response.
-	Status *ResponseStatus `json:"status,omitempty"`
-	// A list of errors which may have occurred during the request.
-	Errors []ResponseError `json:"errors,omitempty"`
-	// The response data for this request.
-	Data *AddUsersResponseData `json:"data,omitempty"`
-	// The operation time in microseconds.  This is the time it took to process
-	// the request and generate the response.
-	OpTimeUs *uint64 `json:"op_time_us,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
+	// A list of errors which may have occurred during the request.
+	Errors []ResponseError      `json:"errors,omitempty"`
+	Data   AddUsersResponseData `json:"data"`
+	// The operation time in microseconds.  This is the time it took to process
+	// the request and generate the response.
+	OpTimeUs uint64 `json:"op_time_us"`
 }
