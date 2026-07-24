@@ -10,5 +10,7 @@ package platform
 // The response data for this request.
 
 type HealthzResponseData struct {
-	Services map[string]string `json:"services,omitempty"`
+	Checks   map[string]string `json:"checks,omitempty"`
+	Versions map[string]string `json:"versions,omitempty"`
+	License  *DataLicense      `json:"license,omitempty"`
 }
