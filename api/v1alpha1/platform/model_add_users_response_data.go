@@ -7,6 +7,8 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// The response data for this request.
+
 type AddUsersResponseData struct {
 	// The status of the operation for each user in the request.
 	Results []DataResult `json:"results,omitempty"`
