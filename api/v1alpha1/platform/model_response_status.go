@@ -9,10 +9,11 @@ package platform
 
 //	The response status of an API request.
 //
-// +kubebuilder:validation:Enum=success;error
+// +kubebuilder:validation:Enum=success;error;partial_success
 type ResponseStatus string
 
 const (
-	ResponseStatusSUCCESS ResponseStatus = "success"
-	ResponseStatusERROR   ResponseStatus = "error"
+	ResponseStatusSUCCESS         ResponseStatus = "success"
+	ResponseStatusERROR           ResponseStatus = "error"
+	ResponseStatusPARTIAL_SUCCESS ResponseStatus = "partial_success"
 )
