@@ -8,36 +8,13 @@
 package platform
 
 // The request message for creating a new instance.
-// Restart policy for the instance.  This defines how the instance
-// should behave when it stops or crashes.  Cannot be combined with
-// the `delete-on-stop` feature.
-// +kubebuilder:validation:Enum=never;always;on_failure
-type CreateInstanceRequestRestartPolicy string
-
-const (
-	CreateInstanceRequestRestartPolicyNever      CreateInstanceRequestRestartPolicy = "never"
-	CreateInstanceRequestRestartPolicyAlways     CreateInstanceRequestRestartPolicy = "always"
-	CreateInstanceRequestRestartPolicyOn_failure CreateInstanceRequestRestartPolicy = "on_failure"
-)
-
-// Features to enable for the instance.  Features are specific
-// configurations or capabilities that can be enabled for the
-// instance.  The `scale-to-zero` and `delete-on-stop` features are
-// mutually exclusive.
-// +kubebuilder:validation:Enum=delete_on_stop
-type CreateInstanceRequestFeatures string
-
-const (
-	CreateInstanceRequestFeaturesDelete_on_stop CreateInstanceRequestFeatures = "delete_on_stop"
-)
 
 type CreateInstanceRequest struct {
 	// (Optional).  The name of the instance.
 	//
 	// If not provided, a random name will be generated.  The name must be unique.
-	Name *string `json:"name,omitempty"`
-	// The image to use for the instance.
-	Image *string `json:"image,omitempty"`
+	Name  *string                     `json:"name,omitempty"`
+	Image *CreateInstanceRequestImage `json:"image,omitempty"`
 	// (Optional).  The arguments to pass to the instance when it starts.
 	Args []string `json:"args,omitempty"`
 	// (Optional).  Environment variables to set for the instance.
@@ -62,8 +39,8 @@ type CreateInstanceRequest struct {
 	// Restart policy for the instance.  This defines how the instance
 	// should behave when it stops or crashes.  Cannot be combined with
 	// the `delete-on-stop` feature.
-	RestartPolicy *CreateInstanceRequestRestartPolicy `json:"restart_policy,omitempty"`
-	ScaleToZero   *CreateInstanceRequestScaleToZero   `json:"scale_to_zero,omitempty"`
+	RestartPolicy *InstanceRestartPolicy            `json:"restart_policy,omitempty"`
+	ScaleToZero   *CreateInstanceRequestScaleToZero `json:"scale_to_zero,omitempty"`
 	// (Optional).  Number of vCPUs to allocate for the instance.
 	// Defaults to 1.
 	Vcpus *int32 `json:"vcpus,omitempty"`
@@ -77,7 +54,7 @@ type CreateInstanceRequest struct {
 	// configurations or capabilities that can be enabled for the
 	// instance.  The `scale-to-zero` and `delete-on-stop` features are
 	// mutually exclusive.
-	Features []CreateInstanceRequestFeatures `json:"features,omitempty"`
+	Features []InstanceFeature `json:"features,omitempty"`
 	// Timeout in seconds to wait for all new instances to reach running
 	// state.  Requires `autostart` to be set.  If you autostart your
 	// new instance, you can wait for it to finish starting with a
@@ -90,16 +67,44 @@ type CreateInstanceRequest struct {
 	// then customize individual instances by attaching code or data as separate
 	// ROM blobs.
 	Roms []CreateInstanceRequestRom `json:"roms,omitempty"`
+	// (Optional).  Plugins to attach to the instance.  Plugins let you attach
+	// small helper programs to an instance and reach each one over a direct,
+	// authenticated HTTP endpoint.  Each plugin loads from its own ROM image,
+	// mounts at `/uk/plugins/<plugin_name>`, and is reachable at
+	// `.../v1/instances/<uuid>/plugins/<plugin_name>/<path>`.  At most 8 plugins
+	// may be attached to an instance.
+	Plugins []CreateInstanceRequestPlugin `json:"plugins,omitempty"`
 	// (Optional).  Tags to associate with the instance.
 	Tags     []string                       `json:"tags,omitempty"`
 	Template *CreateInstanceRequestTemplate `json:"template,omitempty"`
-	// (Optional).  The scheduling priority for the instance.  Higher values
-	// indicate higher priority.
-	SchedPriority *int32 `json:"sched_priority,omitempty"`
+	// The scheduling priority for the instance. Only settable by
+	// users with scheduling priority override permissions.
+	SchedPriority *SchedPriority `json:"sched_priority,omitempty"`
 	// (Optional).  Schedules for the instance.  Scheduled operations let you
-	// automatically start, stop, or delete the instance on a calendar-based
-	// schedule.  Each instance stores its own schedules, and cloning preserves
-	// them.
+	// automatically start, stop, delete, or exec a command in the instance on
+	// a calendar-based schedule.  For `exec` schedules, set the `args` field
+	// to the command and its arguments.  Each instance stores its own
+	// schedules, and cloning preserves them.
 	Schedules []Schedule                     `json:"schedules,omitempty"`
 	Autokill  *CreateInstanceRequestAutokill `json:"autokill,omitempty"`
+	// (Optional).  The hostname of the instance.
+	//
+	// If not provided, the hostname will be set to the instance name.  The
+	// hostname must be a valid DNS label (e.g., "my-instance") and is used for
+	// internal DNS resolution within the Unikraft Cloud network.
+	Hostname *string `json:"hostname,omitempty"`
+	// (Optional).  Dependencies of the instance.
+	//
+	// A list of instance identifiers (name or UUID) that this instance depends
+	// on.  Dependencies define startup ordering and can be used to ensure that
+	// prerequisite instances are running before this instance starts.
+	Dependencies []NameOrUUID                     `json:"dependencies,omitempty"`
+	BranchFrom   *CreateInstanceRequestBranchFrom `json:"branch_from,omitempty"`
+	Checkpoint   *CreateInstanceRequestCheckpoint `json:"checkpoint,omitempty"`
+	// The default gateway to configure inside the guest.
+	Gateway *string `json:"gateway,omitempty"`
+	// The DNS resolver to configure inside the guest.
+	Nameserver *string `json:"nameserver,omitempty"`
+	// A list of one to four interfaces to attach
+	NetworkInterfaces []CreateInstanceRequestNetworkInterface `json:"network_interfaces,omitempty"`
 }

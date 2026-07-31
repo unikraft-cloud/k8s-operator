@@ -49,7 +49,6 @@ spec:
           spec:
             properties:
               autokill:
-                description: Automatic delete-on-idle configuration.
                 properties:
                   time_ms:
                     description: |-
@@ -65,10 +64,10 @@ spec:
                     certificate:
                       properties:
                         name:
-                          description: Mutually exclusive with UUID.
+                          description: The name of the resource.
                           type: string
                         uuid:
-                          description: Mutually exclusive with name.
+                          description: The UUID of the resource.
                           type: string
                       required:
                       - name
@@ -120,19 +119,30 @@ spec:
                         for load balancing.  You configure the handlers for every published
                         service port individually.
                       items:
-                        description: |-
-                          A service connects a public-facing port to an internal destination port on
-                          which an application instance listens on.  Additional handlers can be defined
-                          for each published port in order to define how the service will handle
-                          incoming connections and forward traffic from the Internet to your
-                          application.  For example, a service can be configured to terminate TLS
-                          connections, redirect HTTP traffic, or enable HTTP mode for load balancing.
-                          Connection handlers to use for the service.  Handlers define how the
-                          service will handle incoming connections and forward traffic from the
-                          Internet to your application.  For example, a service can be configured
-                          to terminate TLS connections, redirect HTTP traffic, or enable HTTP mode
-                          for load balancing.  You configure the handlers for every published
-                          service port individually.
+                        description: "\tConnection handlers to use for the service.
+                          \ Handlers define how the service\n\twill handle incoming
+                          connections and forward traffic from the Internet to\n\tyour
+                          application.  For example, a service can be configured to
+                          terminate TLS\n\tconnections, redirect HTTP traffic, or
+                          enable HTTP mode for load balancing.\n\tYou configure the
+                          handlers for every published service port individually.\n\n\tThere
+                          are currently 3 supported handlers:\n\n\t| Handler    |
+                          Description |\n\t|------------|-------------|\n\t| `tls`
+                          \     | Terminate the TLS connection at the Unikraft Cloud
+                          gateway using our wildcard certificate issued for the kraft.cloud
+                          domain. The gateway forwards the unencrypted traffic to
+                          your application. |\n\t| `http`     | Enable HTTP mode on
+                          the load balancer to load balance on the level of individual
+                          HTTP requests. In this mode, only HTTP connections are accepted.
+                          If this option is not set the load balancer works in TCP
+                          mode and distributes TCP connections. |\n\t| `redirect`
+                          | Redirect traffic from the source port to the destination
+                          port. |\n\n\tNote that there is a set of constraints when
+                          publishing ports:\n\t- Port 80: MUST have \"http\" and MUST
+                          not have \"tls\" set;\n\t- Port 443: MUST have http and
+                          tls set;\n\t- The `redirect` handler can only be set on
+                          port 80 (HTTP) to redirect to\n\t  port 443 (HTTPS);\n\t-
+                          All other ports MUST have tls and MUST not have http set."
                         enum:
                         - tls
                         - http
@@ -163,6 +173,8 @@ spec:
                   instances are put into standby as fast as possible.
                 format: int64
                 type: integer
+            required:
+            - services
             type: object
             x-kubernetes-validations:
             - message: spec.name is immutable
@@ -206,9 +218,6 @@ spec:
                           items:
                             properties:
                               certificate:
-                                description: |-
-                                  Use an existing certificate for the domain.  If this field is
-                                  specified, the domain must be associated with a valid certificate.
                                 properties:
                                   common_name:
                                     description: |-
@@ -235,6 +244,7 @@ spec:
                                       This identifies the Certificate Authority (CA) that issued the certificate.
                                       It contains information about the CA including its common name, organization,
                                       and country.
+                                      Only present when the certificate has been issued.
                                     type: string
                                   message:
                                     description: |-
@@ -257,6 +267,7 @@ spec:
                                       The certificate should not be trusted after this date. This timestamp
                                       marks the end of the certificate's validity period. Certificates should
                                       be renewed before this date to maintain service availability.
+                                      Only present when the certificate has been issued.
                                     format: date-time
                                     type: string
                                   not_before:
@@ -265,6 +276,7 @@ spec:
 
                                       The certificate should not be trusted before this date. This timestamp
                                       marks the beginning of the certificate's validity period.
+                                      Only present when the certificate has been issued.
                                     format: date-time
                                     type: string
                                   serial_number:
@@ -274,6 +286,7 @@ spec:
                                       This is a unique identifier within the scope of the issuing CA that can be
                                       used to identify and track the certificate. Serial numbers are typically
                                       represented as hexadecimal strings.
+                                      Only present when the certificate has been issued.
                                     type: string
                                   state:
                                     description: |-
@@ -294,6 +307,7 @@ spec:
                                     enum:
                                     - success
                                     - error
+                                    - partial_success
                                     type: string
                                   subject:
                                     description: |-
@@ -302,6 +316,7 @@ spec:
                                       This contains the full subject information from the certificate, including
                                       the common name, organization, organizational unit, locality, state, and
                                       country. The subject identifies the entity that the certificate is issued to.
+                                      Only present when the certificate has been issued.
                                     type: string
                                   uuid:
                                     description: |-
@@ -312,6 +327,12 @@ spec:
                                       API calls and can be used to identify the certificate in all API calls that
                                       require an identifier.
                                     type: string
+                                required:
+                                - common_name
+                                - created_at
+                                - name
+                                - state
+                                - uuid
                                 type: object
                               fqdn:
                                 description: |-
@@ -319,6 +340,8 @@ spec:
                                   be a valid Full Qualified Domain Name (FQDN), otherwise it will become a
                                   subdomain of the target metro.
                                 type: string
+                            required:
+                            - fqdn
                             type: object
                           type: array
                         error:
@@ -355,6 +378,9 @@ spec:
                                   reference the instance in API calls and can be used to identify the
                                   instance in all API calls that require an instance identifier.
                                 type: string
+                            required:
+                            - name
+                            - uuid
                             type: object
                           type: array
                         message:
@@ -405,19 +431,34 @@ spec:
                                   for load balancing.  You configure the handlers for every published
                                   service port individually.
                                 items:
-                                  description: |-
-                                    A service connects a public-facing port to an internal destination port on
-                                    which an application instance listens on.  Additional handlers can be defined
-                                    for each published port in order to define how the service will handle
-                                    incoming connections and forward traffic from the Internet to your
-                                    application.  For example, a service can be configured to terminate TLS
-                                    connections, redirect HTTP traffic, or enable HTTP mode for load balancing.
-                                    Connection handlers to use for the service.  Handlers define how the
-                                    service will handle incoming connections and forward traffic from the
-                                    Internet to your application.  For example, a service can be configured
-                                    to terminate TLS connections, redirect HTTP traffic, or enable HTTP mode
-                                    for load balancing.  You configure the handlers for every published
-                                    service port individually.
+                                  description: "\tConnection handlers to use for the
+                                    service.  Handlers define how the service\n\twill
+                                    handle incoming connections and forward traffic
+                                    from the Internet to\n\tyour application.  For
+                                    example, a service can be configured to terminate
+                                    TLS\n\tconnections, redirect HTTP traffic, or
+                                    enable HTTP mode for load balancing.\n\tYou configure
+                                    the handlers for every published service port
+                                    individually.\n\n\tThere are currently 3 supported
+                                    handlers:\n\n\t| Handler    | Description |\n\t|------------|-------------|\n\t|
+                                    `tls`      | Terminate the TLS connection at the
+                                    Unikraft Cloud gateway using our wildcard certificate
+                                    issued for the kraft.cloud domain. The gateway
+                                    forwards the unencrypted traffic to your application.
+                                    |\n\t| `http`     | Enable HTTP mode on the load
+                                    balancer to load balance on the level of individual
+                                    HTTP requests. In this mode, only HTTP connections
+                                    are accepted. If this option is not set the load
+                                    balancer works in TCP mode and distributes TCP
+                                    connections. |\n\t| `redirect` | Redirect traffic
+                                    from the source port to the destination port.
+                                    |\n\n\tNote that there is a set of constraints
+                                    when publishing ports:\n\t- Port 80: MUST have
+                                    \"http\" and MUST not have \"tls\" set;\n\t- Port
+                                    443: MUST have http and tls set;\n\t- The `redirect`
+                                    handler can only be set on port 80 (HTTP) to redirect
+                                    to\n\t  port 443 (HTTPS);\n\t- All other ports
+                                    MUST have tls and MUST not have http set."
                                   enum:
                                   - tls
                                   - http
@@ -454,6 +495,7 @@ spec:
                           enum:
                           - success
                           - error
+                          - partial_success
                           type: string
                         uuid:
                           description: |-
@@ -464,6 +506,14 @@ spec:
                             API calls and can be used to identify the service group in all API calls
                             that require an identifier.
                           type: string
+                      required:
+                      - autoscale
+                      - created_at
+                      - hard_limit
+                      - name
+                      - persistent
+                      - soft_limit
+                      - uuid
                       type: object
                     type: array
                 type: object
@@ -475,6 +525,8 @@ spec:
                       description: The HTTP status code of the error.
                       format: int64
                       type: integer
+                  required:
+                  - status
                   type: object
                 type: array
               message:
@@ -493,7 +545,11 @@ spec:
                 enum:
                 - success
                 - error
+                - partial_success
                 type: string
+            required:
+            - op_time_us
+            - status
             type: object
         type: object
     served: true
