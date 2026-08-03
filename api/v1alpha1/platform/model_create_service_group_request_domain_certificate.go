@@ -11,8 +11,8 @@ package platform
 // specified, the domain must be associated with a valid certificate.
 
 type CreateServiceGroupRequestDomainCertificate struct {
-	// Mutually exclusive with name.
+	// The UUID of the resource.
 	Uuid string `json:"uuid"`
-	// Mutually exclusive with UUID.
+	// The name of the resource.
 	Name string `json:"name"`
 }
