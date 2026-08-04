@@ -7,11 +7,12 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// UUID or name of the instance to detach the volume from.
+// (Optional).  UUID or name of the instance to detach the volume from.
+// If not specified, the volume is detached from all instances.
 
 type DetachVolumeByUUIDRequestBodyFrom struct {
-	// The UUID of the instance that the volume is detached from.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance that the volume is detached from.
-	Name *string `json:"name,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The name of the resource.
+	Name string `json:"name"`
 }
