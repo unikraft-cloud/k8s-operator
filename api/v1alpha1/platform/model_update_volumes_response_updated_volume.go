@@ -9,11 +9,11 @@ package platform
 
 type UpdateVolumesResponseUpdatedVolume struct {
 	// The UUID of the volume that was updated.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 	// The name of the volume that was updated.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 	// The status of this particular volume update operation.
-	Status *string `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// (Optional).  The client-provided ID from the request.
 	Id *string `json:"id,omitempty"`
 	// An optional message providing additional information about the status.
