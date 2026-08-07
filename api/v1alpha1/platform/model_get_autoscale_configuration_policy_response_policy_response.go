@@ -9,8 +9,8 @@ package platform
 
 type GetAutoscaleConfigurationPolicyResponsePolicyResponse struct {
 	// The status of the response.
-	Status *ResponseStatus                                              `json:"status,omitempty"`
-	Policy *GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicy `json:"policy,omitempty"`
+	Status ResponseStatus                                              `json:"status"`
+	Policy GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicy `json:"policy"`
 	// An optional message providing additional information about the status.
 	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
