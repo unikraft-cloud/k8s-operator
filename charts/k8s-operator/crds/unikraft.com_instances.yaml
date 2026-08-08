@@ -74,6 +74,47 @@ spec:
                   Whether the instance should start automatically on creation.
                   Must be set to true when `timeout_s` is specified.
                 type: boolean
+              branch_from:
+                properties:
+                  name:
+                    description: The name of the resource.
+                    type: string
+                  uuid:
+                    description: The UUID of the resource.
+                    type: string
+                required:
+                - name
+                - uuid
+                type: object
+              checkpoint:
+                properties:
+                  name:
+                    description: The name of the resource.
+                    type: string
+                  uuid:
+                    description: The UUID of the resource.
+                    type: string
+                required:
+                - name
+                - uuid
+                type: object
+              dependencies:
+                description: |-
+                  (Optional).  Dependencies of the instance.
+
+                  A list of instance identifiers (name or UUID) that this instance depends
+                  on.  Dependencies define startup ordering and can be used to ensure that
+                  prerequisite instances are running before this instance starts.
+                items:
+                  properties:
+                    name:
+                      description: The name of the resource.
+                      type: string
+                    uuid:
+                      description: The UUID of the resource.
+                      type: string
+                  type: object
+                type: array
               env:
                 additionalProperties:
                   type: string
@@ -86,18 +127,65 @@ spec:
                   instance.  The `scale-to-zero` and `delete-on-stop` features are
                   mutually exclusive.
                 items:
-                  description: |-
-                    Features to enable for the instance.  Features are specific
-                    configurations or capabilities that can be enabled for the
-                    instance.  The `scale-to-zero` and `delete-on-stop` features are
-                    mutually exclusive.
+                  description: "\tFeatures are specific configurations or capabilities
+                    that can be enabled for\n\tthe instance.\n\n\tThe list of available
+                    features to enable for the instance:\n\n\t| Feature          |
+                    Description |\n\t|------------------|-------------|\n\t| `delete_on_stop`
+                    | The instance will be deleted when it is stopped. This is useful
+                    for instances that are not needed after they are stopped, such
+                    as temporary or ephemeral instances. |"
                   enum:
-                  - delete_on_stop
+                  - delete-on-stop
                   type: string
                 type: array
-              image:
-                description: The image to use for the instance.
+              gateway:
+                description: The default gateway to configure inside the guest.
                 type: string
+              gpus:
+                description: |-
+                  (Optional).  Number of GPUs to attach to the instance.  Currently
+                  restricted to at most 1.  Requires `type` to be `full` and a plan
+                  with GPU support.  A GPU stays assigned to the instance, even while
+                  stopped, until the instance is deleted.  Cannot be combined with
+                  `template`, `branch_from`, or `checkpoint`.
+                format: int32
+                type: integer
+              hostname:
+                description: |-
+                  (Optional).  The hostname of the instance.
+
+                  If not provided, the hostname will be set to the instance name.  The
+                  hostname must be a valid DNS label (e.g., "my-instance") and is used for
+                  internal DNS resolution within the Unikraft Cloud network.
+                type: string
+              image:
+                properties:
+                  credentials:
+                    description: |-
+                      Optional credentials for authenticating to an OCI registry.
+                      Only valid for OCI registry URLs; the platform rejects this
+                      field for non-OCI schemes.
+                    type: string
+                  headers:
+                    additionalProperties:
+                      type: string
+                    description: Optional HTTP headers to send when fetching the image.
+                    type: object
+                  pull_policy:
+                    description: |-
+                      Controls when the image is pulled relative to what is already cached on
+                      the node.
+                    enum:
+                    - always
+                    - if_not_present
+                    - never
+                    type: string
+                  url:
+                    description: The image URL
+                    type: string
+                required:
+                - url
+                type: object
               memory_mb:
                 description: (Optional).  Memory in MB to allocate for the instance.  Default
                   is 128.
@@ -109,6 +197,90 @@ spec:
 
                   If not provided, a random name will be generated.  The name must be unique.
                 type: string
+              nameserver:
+                description: The DNS resolver to configure inside the guest.
+                type: string
+              network_interfaces:
+                description: A list of one to four interfaces to attach
+                items:
+                  properties:
+                    autoconfig:
+                      description: Whether the guest configures the interface itself.
+                        Defaults to true.
+                      type: boolean
+                    ip:
+                      description: |-
+                        The interface IP address in CIDR notation. Provide it together
+                        with tap_name to bring your own interface.
+                      type: string
+                    name:
+                      description: |-
+                        The interface name. If omitted, Unikraft Cloud generates one as
+                        <instance-name>-ethX, falling back to eth-<suffix> when the
+                        instance name is too long.
+                      type: string
+                    relay:
+                      properties:
+                        name:
+                          description: |-
+                            Name of the existing interface to relay through.
+                            Mutually exclusive with UUID.
+                          type: string
+                        relay_dns:
+                          description: |-
+                            Whether the relay forwards DNS requests. Set to false
+                            to let the default DNS server handle them instead.
+                            Defaults to true.
+                          type: boolean
+                        uuid:
+                          description: |-
+                            UUID of the existing interface to relay through.
+                            Mutually exclusive with name.
+                          type: string
+                      type: object
+                    tap_name:
+                      description: |-
+                        The TAP device to attach the interface to. Provide it together
+                        with ip.
+                      type: string
+                  type: object
+                type: array
+              plugins:
+                description: |-
+                  (Optional).  Plugins to attach to the instance.  Plugins let you attach
+                  small helper programs to an instance and reach each one over a direct,
+                  authenticated HTTP endpoint.  Each plugin loads from its own ROM image,
+                  mounts at `/uk/plugins/<plugin_name>`, and is reachable at
+                  `.../v1/instances/<uuid>/plugins/<plugin_name>/<path>`.  At most 8 plugins
+                  may be attached to an instance.
+                items:
+                  properties:
+                    config:
+                      description: |-
+                        (Optional).  Arbitrary JSON configuration that the platform passes to the
+                        plugin's `init` program on `STDIN`.  Any JSON value works, including a
+                        string, a number, or an object.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    name:
+                      description: |-
+                        The plugin name.  It becomes the `<plugin_name>` segment in the plugin
+                        endpoint (`.../plugins/<plugin_name>/<path>`).  A plugin name has a
+                        maximum length of 63 characters and contains only letters (`a`-`z`,
+                        `A`-`Z`), digits (`0`-`9`), hyphen (`-`), and underscore (`_`).
+                      type: string
+                    rom:
+                      description: |-
+                        The plugin's ROM image, given as an image reference string such as
+                        `user/myplugin:latest`.  The platform loads the image, mounts it at
+                        `/uk/plugins/<plugin_name>`, and runs its `init` program when the plugin
+                        starts.
+                      type: string
+                  required:
+                  - name
+                  - rom
+                  type: object
+                type: array
               replicas:
                 description: |-
                   (Optional).  Number of additional replicas to create.  The total
@@ -123,7 +295,7 @@ spec:
                 enum:
                 - never
                 - always
-                - on_failure
+                - on-failure
                 type: string
               roms:
                 description: |-
@@ -134,14 +306,50 @@ spec:
                   ROM blobs.
                 items:
                   properties:
+                    at:
+                      description: |-
+                        (Optional).  The path at which the ROM should be automatically mounted
+                        inside the instance.  When set, the platform mounts the ROM device at
+                        the specified path so the guest does not need to mount it manually.
+                        When omitted, the ROM is exposed as a raw block device and the guest is
+                        responsible for mounting it.
+                      type: string
+                    files:
+                      description: |-
+                        (Optional).  Inline files to use as the ROM content.  When specified,
+                        the platform creates an EROFS image from the provided files.
+                        Mutually exclusive with `image`.
+                      items:
+                        properties:
+                          data:
+                            description: The file data, encoded according to the encoding
+                              field.
+                            type: string
+                          encoding:
+                            description: (Optional).  The encoding of the data field.  Defaults
+                              to "text".
+                            enum:
+                            - text
+                            - base64
+                            type: string
+                          path:
+                            description: The file path within the image.
+                            type: string
+                        required:
+                        - data
+                        - path
+                        type: object
+                      type: array
                     image:
-                      description: The image of the ROM to use for the instance configuration.
+                      description: |-
+                        (Optional).  The image of the ROM to use for the instance configuration.
+                        Mutually exclusive with `files`.
                       type: string
                     name:
                       description: The name of the ROM to use for the instance configuration.
                       type: string
                   required:
-                  - image
+                  - name
                   type: object
                 type: array
               scale_to_zero:
@@ -164,8 +372,8 @@ spec:
                     description: The specific policy to use for scaling the instance
                       to zero.
                     enum:
-                    - "on"
                     - "off"
+                    - "on"
                     - idle
                     type: string
                   stateful:
@@ -180,16 +388,21 @@ spec:
                 type: object
               sched_priority:
                 description: |-
-                  (Optional).  The scheduling priority for the instance.  Higher values
-                  indicate higher priority.
-                format: int32
-                type: integer
+                  The scheduling priority for the instance. Only settable by
+                  users with scheduling priority override permissions.
+                enum:
+                - normal
+                - medium
+                - high
+                - admin
+                type: string
               schedules:
                 description: |-
                   (Optional).  Schedules for the instance.  Scheduled operations let you
-                  automatically start, stop, or delete the instance on a calendar-based
-                  schedule.  Each instance stores its own schedules, and cloning preserves
-                  them.
+                  automatically start, stop, delete, or exec a command in the instance on
+                  a calendar-based schedule.  For `exec` schedules, set the `args` field
+                  to the command and its arguments.  Each instance stores its own
+                  schedules, and cloning preserves them.
                 items:
                   properties:
                     action:
@@ -198,7 +411,17 @@ spec:
                       - start
                       - stop
                       - delete
+                      - exec
                       type: string
+                    args:
+                      description: |-
+                        The command to execute when the action is `exec`.
+
+                        Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+                        Each element is a separate argument; the first element is the executable.
+                      items:
+                        type: string
+                      type: array
                     name:
                       description: |-
                         The name of the schedule.
@@ -211,8 +434,8 @@ spec:
 
                         This field is populated only in responses (not settable in requests).
                         Unix timestamp in seconds.  Omitted if no next execution is scheduled.
-                      format: int64
-                      type: integer
+                      format: date-time
+                      type: string
                     when:
                       description: |-
                         The calendar expression specifying when the action should be performed.
@@ -237,18 +460,16 @@ spec:
                     items:
                       properties:
                         certificate:
-                          description: |-
-                            A reference to an existing certificate which can be used for the
-                            specified domain.  If unspecified, Unikraft Cloud will
-                            automatically generate a new certificate for the domain based on Let's
-                            Encrypt and seek to accomplish a DNS-01 challenge.
                           properties:
                             name:
-                              description: Mutually exclusive with UUID.
+                              description: The name of the resource.
                               type: string
                             uuid:
-                              description: Mutually exclusive with name.
+                              description: The UUID of the resource.
                               type: string
+                          required:
+                          - name
+                          - uuid
                           type: object
                         name:
                           description: |-
@@ -296,19 +517,32 @@ spec:
                             for load balancing.  You configure the handlers for every published
                             service port individually.
                           items:
-                            description: |-
-                              A service connects a public-facing port to an internal destination port on
-                              which an application instance listens on.  Additional handlers can be defined
-                              for each published port in order to define how the service will handle
-                              incoming connections and forward traffic from the Internet to your
-                              application.  For example, a service can be configured to terminate TLS
-                              connections, redirect HTTP traffic, or enable HTTP mode for load balancing.
-                              Connection handlers to use for the service.  Handlers define how the
-                              service will handle incoming connections and forward traffic from the
-                              Internet to your application.  For example, a service can be configured
-                              to terminate TLS connections, redirect HTTP traffic, or enable HTTP mode
-                              for load balancing.  You configure the handlers for every published
-                              service port individually.
+                            description: "\tConnection handlers to use for the service.
+                              \ Handlers define how the service\n\twill handle incoming
+                              connections and forward traffic from the Internet to\n\tyour
+                              application.  For example, a service can be configured
+                              to terminate TLS\n\tconnections, redirect HTTP traffic,
+                              or enable HTTP mode for load balancing.\n\tYou configure
+                              the handlers for every published service port individually.\n\n\tThere
+                              are currently 3 supported handlers:\n\n\t| Handler    |
+                              Description |\n\t|------------|-------------|\n\t| `tls`
+                              \     | Terminate the TLS connection at the Unikraft
+                              Cloud gateway using our wildcard certificate issued
+                              for the kraft.cloud domain. The gateway forwards the
+                              unencrypted traffic to your application. |\n\t| `http`
+                              \    | Enable HTTP mode on the load balancer to load
+                              balance on the level of individual HTTP requests. In
+                              this mode, only HTTP connections are accepted. If this
+                              option is not set the load balancer works in TCP mode
+                              and distributes TCP connections. |\n\t| `redirect` |
+                              Redirect traffic from the source port to the destination
+                              port. |\n\n\tNote that there is a set of constraints
+                              when publishing ports:\n\t- Port 80: MUST have \"http\"
+                              and MUST not have \"tls\" set;\n\t- Port 443: MUST have
+                              http and tls set;\n\t- The `redirect` handler can only
+                              be set on port 80 (HTTP) to redirect to\n\t  port 443
+                              (HTTPS);\n\t- All other ports MUST have tls and MUST
+                              not have http set."
                             enum:
                             - tls
                             - http
@@ -344,6 +578,15 @@ spec:
                 type: array
               template:
                 properties:
+                  autokill:
+                    properties:
+                      time_ms:
+                        description: |-
+                          Time in milliseconds after the template was last used for cloning
+                          before it is deleted. A value of 0 disables template autokill.
+                        format: int64
+                        type: integer
+                    type: object
                   create_args:
                     properties:
                       args:
@@ -383,6 +626,15 @@ spec:
                           Not used for template instances.
                         format: int64
                         type: integer
+                      checkpoint_autokill:
+                        properties:
+                          time_ms:
+                            description: |-
+                              Time in milliseconds after the template was last used for cloning before
+                              it is deleted. A value of 0 disables template autokill.
+                            format: int64
+                            type: integer
+                        type: object
                       created_at:
                         description: The time the instance was created.
                         format: date-time
@@ -414,6 +666,28 @@ spec:
                           Not used for template instances.
                         format: int32
                         type: integer
+                      gateway:
+                        description: The default gateway configured inside the guest.
+                        type: string
+                      gpus:
+                        description: |-
+                          GPUs attached to the instance.  Only present for instances of type
+                          `full`.
+                        items:
+                          properties:
+                            model:
+                              description: |-
+                                The GPU model, given as its PCI vendor and device ID in the form
+                                `<vendor>:<device>`.
+                              type: string
+                            uuid:
+                              description: The UUID of the GPU.
+                              type: string
+                          required:
+                          - model
+                          - uuid
+                          type: object
+                        type: array
                       image:
                         description: |-
                           The image used to create the instance.  This is a reference to the
@@ -440,6 +714,9 @@ spec:
                           The name must be unique within the context of your account.  The name can
                           also be used to identify the instance in API calls.
                         type: string
+                      nameserver:
+                        description: The DNS resolver configured inside the guest.
+                        type: string
                       net_time_us:
                         description: |-
                           This is the time it took for the user-level application to start listening
@@ -456,8 +733,21 @@ spec:
                           Not used for template instances.
                         items:
                           properties:
+                            autoconfig:
+                              description: |-
+                                Whether the interface is automatically configured inside the guest
+                                (IP address, routes, etc.).  When absent or true, autoconfiguration
+                                is enabled.  Present and false when the guest is expected to
+                                configure the interface manually.
+                              type: boolean
                             mac:
                               description: The MAC address of the network interface.
+                              type: string
+                            name:
+                              description: |-
+                                The interface name. If omitted, Unikraft Cloud generates one as
+                                <instance-name>-ethX, falling back to eth-<suffix> when the
+                                instance name is too long.
                               type: string
                             private_ip:
                               description: |-
@@ -465,27 +755,73 @@ spec:
                                 address that is used for communication between instances within the same
                                 network.
                               type: string
-                            rx_bytes:
-                              description: Amount of bytes received from interface.
-                              format: int64
-                              type: integer
-                            rx_packets:
-                              description: Count of packets received from interface
-                              format: int64
-                              type: integer
-                            tx_bytes:
-                              description: Amount of bytes sent to interface.
-                              format: int64
-                              type: integer
-                            tx_packets:
-                              description: Count of packets sent to interface
-                              format: int64
-                              type: integer
+                            relay:
+                              properties:
+                                name:
+                                  description: Name of the relay interface.
+                                  type: string
+                                relay_dns:
+                                  description: |-
+                                    Whether DNS traffic is relayed through this interface.
+                                    Defaults to true.
+                                  type: boolean
+                                uuid:
+                                  description: UUID of the relay interface.
+                                  type: string
+                              required:
+                              - name
+                              - relay_dns
+                              - uuid
+                              type: object
+                            tap_name:
+                              description: The TAP device to attach the interface.
+                                Provide it together with ip.
+                              type: string
                             uuid:
                               description: |-
                                 The UUID of the network interface. This is a unique identifier for the
                                 network interface that is generated when the instance is created.
                               type: string
+                          required:
+                          - mac
+                          - private_ip
+                          - uuid
+                          type: object
+                        type: array
+                      plugins:
+                        description: |-
+                          Plugins attached to the instance.  Plugins let you attach small helper
+                          programs to an instance and reach each one over a direct, authenticated
+                          HTTP endpoint.  Each plugin loads from its own ROM image, mounts at
+                          `/uk/plugins/<plugin_name>`, and is reachable at
+                          `.../v1/instances/<uuid>/plugins/<plugin_name>/<path>`.  At most 8 plugins
+                          may be attached to an instance.
+                        items:
+                          properties:
+                            config:
+                              description: |-
+                                (Optional).  Arbitrary JSON configuration that the platform passes to the
+                                plugin's `init` program on `STDIN`.  Any JSON value works, including a
+                                string, a number, or an object.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            name:
+                              description: |-
+                                The plugin name.  It becomes the `<plugin_name>` segment in the plugin
+                                endpoint (`.../plugins/<plugin_name>/<path>`).  A plugin name has a
+                                maximum length of 63 characters and contains only letters (`a`-`z`,
+                                `A`-`Z`), digits (`0`-`9`), hyphen (`-`), and underscore (`_`).
+                              type: string
+                            rom:
+                              description: |-
+                                The plugin's ROM image, given as an image reference string such as
+                                `user/myplugin:latest`.  The platform loads the image, mounts it at
+                                `/uk/plugins/<plugin_name>`, and runs its `init` program when the plugin
+                                starts.
+                              type: string
+                          required:
+                          - name
+                          - rom
                           type: object
                         type: array
                       private_fqdn:
@@ -493,6 +829,9 @@ spec:
                           The internal hostname of the instance.  This address can be used privately
                           within the Unikraft Cloud network to access the instance.  It is not
                           accessible from the public Internet.
+                        type: string
+                      private_ip:
+                        description: The private IP address of the instance.
                         type: string
                       restart:
                         properties:
@@ -506,6 +845,8 @@ spec:
                             description: Timestamp of the next scheduled restart attempt.
                             format: date-time
                             type: string
+                        required:
+                        - attempt
                         type: object
                       restart_count:
                         description: |-
@@ -548,7 +889,7 @@ spec:
                         enum:
                         - never
                         - always
-                        - on_failure
+                        - on-failure
                         type: string
                       roms:
                         description: |-
@@ -559,16 +900,51 @@ spec:
                           ROM blobs.
                         items:
                           properties:
+                            at:
+                              description: |-
+                                (Optional).  The path at which the ROM should be automatically mounted
+                                inside the instance.  When set, the platform mounts the ROM device at
+                                the specified path so the guest does not need to mount it manually.
+                                When omitted, the ROM is exposed as a raw block device and the guest is
+                                responsible for mounting it.
+                              type: string
+                            files:
+                              description: |-
+                                (Optional).  Inline files to use as the ROM content.  When specified,
+                                the platform creates an EROFS image from the provided files.
+                                Mutually exclusive with `image`.
+                              items:
+                                properties:
+                                  data:
+                                    description: The file data, encoded according
+                                      to the encoding field.
+                                    type: string
+                                  encoding:
+                                    description: (Optional).  The encoding of the
+                                      data field.  Defaults to "text".
+                                    enum:
+                                    - text
+                                    - base64
+                                    type: string
+                                  path:
+                                    description: The file path within the image.
+                                    type: string
+                                required:
+                                - data
+                                - path
+                                type: object
+                              type: array
                             image:
-                              description: The image of the ROM to use for the instance
-                                configuration.
+                              description: |-
+                                (Optional).  The image of the ROM to use for the instance configuration.
+                                Mutually exclusive with `files`.
                               type: string
                             name:
                               description: The name of the ROM to use for the instance
                                 configuration.
                               type: string
                           required:
-                          - image
+                          - name
                           type: object
                         type: array
                       scale_to_zero:
@@ -595,8 +971,8 @@ spec:
                             description: The specific policy to use for scaling the
                               instance to zero.
                             enum:
-                            - "on"
                             - "off"
+                            - "on"
                             - idle
                             type: string
                           stateful:
@@ -609,12 +985,24 @@ spec:
                               scaled back up.
                             type: boolean
                         type: object
+                      sched_priority:
+                        description: |-
+                          The scheduling priority for the instance. Only present for
+                          users with scheduling priority override permissions.
+                        enum:
+                        - normal
+                        - medium
+                        - high
+                        - admin
+                        type: string
                       schedules:
                         description: |-
                           Scheduled operations for this instance.
 
                           Each schedule defines a calendar expression and an action (`start`,
-                          `stop`, or `delete`) to perform at matching times.
+                          `stop`, `delete`, or `exec`) to perform at matching times.  When the
+                          action is `exec`, the `args` field of the schedule specifies the command
+                          to run inside the instance.
                         items:
                           properties:
                             action:
@@ -624,7 +1012,17 @@ spec:
                               - start
                               - stop
                               - delete
+                              - exec
                               type: string
+                            args:
+                              description: |-
+                                The command to execute when the action is `exec`.
+
+                                Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+                                Each element is a separate argument; the first element is the executable.
+                              items:
+                                type: string
+                              type: array
                             name:
                               description: |-
                                 The name of the schedule.
@@ -637,8 +1035,8 @@ spec:
 
                                 This field is populated only in responses (not settable in requests).
                                 Unix timestamp in seconds.  Omitted if no next execution is scheduled.
-                              format: int64
-                              type: integer
+                              format: date-time
+                              type: string
                             when:
                               description: |-
                                 The calendar expression specifying when the action should be performed.
@@ -660,20 +1058,16 @@ spec:
                             items:
                               properties:
                                 certificate:
-                                  description: |-
-                                    The certificate associated with the domain.
-
-                                    The certificate is used to secure the domain with TLS/SSL.  If no
-                                    certificate is specified, Unikraft Cloud will automatically generate a
-                                    new certificate for the domain based on Let's Encrypt and seek to
-                                    accomplish a DNS-01 challenge.
                                   properties:
                                     name:
-                                      description: Mutually exclusive with UUID.
+                                      description: The name of the resource.
                                       type: string
                                     uuid:
-                                      description: Mutually exclusive with name.
+                                      description: The UUID of the resource.
                                       type: string
+                                  required:
+                                  - name
+                                  - uuid
                                   type: object
                                 fqdn:
                                   description: |-
@@ -683,6 +1077,8 @@ spec:
                                     Domain Name (FQDN), otherwise it will become a subdomain of the target
                                     metro.
                                   type: string
+                              required:
+                              - fqdn
                               type: object
                             type: array
                           name:
@@ -702,12 +1098,17 @@ spec:
                               in API calls and can be used to identify the service in all API calls
                               that require an service identifier.
                             type: string
+                        required:
+                        - name
+                        - uuid
                         type: object
                       snapshot:
                         properties:
                           uuid:
                             description: The UUID of the snapshot.
                             type: string
+                        required:
+                        - uuid
                         type: object
                       start_count:
                         description: |-
@@ -738,6 +1139,8 @@ spec:
                         - stopping
                         - template
                         - standby
+                        - deleted
+                        - checkpoint
                         type: string
                       status:
                         description: |-
@@ -746,6 +1149,7 @@ spec:
                         enum:
                         - success
                         - error
+                        - partial_success
                         type: string
                       stop_code:
                         description: |-
@@ -833,6 +1237,65 @@ spec:
                             format: int64
                             type: integer
                         type: object
+                      type:
+                        description: The type of virtual machine used to run the instance.
+                        enum:
+                        - micro
+                        - full
+                        type: string
+                      updates:
+                        description: Queued property changes awaiting application.
+                        items:
+                          properties:
+                            error:
+                              description: Error message.  Only present when status
+                                is "failed".
+                              type: string
+                            op:
+                              description: The patch operation type.
+                              enum:
+                              - set
+                              - add
+                              - del
+                              type: string
+                            prop:
+                              description: The property being updated.
+                              enum:
+                              - image
+                              - args
+                              - env
+                              - memory_mb
+                              - vcpus
+                              - scale_to_zero
+                              - tags
+                              - delete_lock
+                              - schedules
+                              - autokill
+                              - hostname
+                              - roms
+                              - dependencies
+                              - sched_priority
+                              - plugins
+                              type: string
+                            status:
+                              description: The status of this update.
+                              enum:
+                              - pending
+                              - failed
+                              type: string
+                            value:
+                              description: |-
+                                The new value for the property.  Type depends on the property being
+                                updated.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                          required:
+                          - op
+                          - prop
+                          - status
+                          - value
+                          type: object
+                        type: array
                       uptime_ms:
                         description: |-
                           The total amount of time the instance has been running in milliseconds.
@@ -912,25 +1375,45 @@ spec:
                                 and can be used to identify the volume in all API calls that require a
                                 volume identifier.
                               type: string
+                          required:
+                          - at
+                          - name
+                          - readonly
+                          - uuid
                           type: object
                         type: array
-                    type: object
-                  nameOrUUID:
-                    properties:
-                      name:
-                        description: Mutually exclusive with UUID.
-                        type: string
-                      uuid:
-                        description: Mutually exclusive with name.
-                        type: string
                     required:
+                    - created_at
+                    - image
+                    - memory_mb
                     - name
+                    - restart_policy
+                    - state
+                    - type
                     - uuid
+                    - vcpus
                     type: object
+                  name:
+                    description: |-
+                      (Optional).  The name of a template instance to create the instance from.
+                      Mutually exclusive with UUID.
+                    type: string
                   prepare:
                     description: (Optional).  Whether the instance needs to run in
                       order to reach template state
                     type: boolean
+                  prepare_timeout_s:
+                    description: |-
+                      (Optional). Timeout in seconds for preparing the template before the
+                      preparation is aborted. Only applies when `prepare` is set. A value of
+                      0 means no timeout.
+                    format: int64
+                    type: integer
+                  uuid:
+                    description: |-
+                      (Optional).  The UUID of a template instance to create the instance from.
+                      Mutually exclusive with name.
+                    type: string
                 type: object
               timeout_s:
                 description: |-
@@ -941,6 +1424,20 @@ spec:
                   zero.  No wait performed for a value of 0.
                 format: int64
                 type: integer
+              type:
+                description: |-
+                  (Optional).  The type of virtual machine to use for the instance.
+                  Defaults to `micro`, which runs on Firecracker.  `full` runs on QEMU
+                  instead and is required for GPU passthrough (see `gpus`) and, in the
+                  future, Windows VMs.  QEMU-backed instances currently do not support
+                  scale-to-zero, templates, branching, or checkpointing, and only
+                  support block-based volumes (no virtiofs).  Requires a plan with full
+                  VM support and cannot be combined with `template`, `branch_from`, or
+                  `checkpoint`.
+                enum:
+                - micro
+                - full
+                type: string
               vcpus:
                 description: |-
                   (Optional).  Number of vCPUs to allocate for the instance.
@@ -958,6 +1455,15 @@ spec:
                   instance where the volume will be mounted.
                 items:
                   properties:
+                    access_mode:
+                      description: |-
+                        Access mode of the volume, controlling sharing behavior.
+                        Defaults to read-write by a single instance (RWO).
+                      enum:
+                      - rwo
+                      - rox
+                      - rwx
+                      type: string
                     args:
                       additionalProperties:
                         type: string
@@ -1110,6 +1616,15 @@ spec:
                             Not used for template instances.
                           format: int64
                           type: integer
+                        checkpoint_autokill:
+                          properties:
+                            time_ms:
+                              description: |-
+                                Time in milliseconds after the template was last used for cloning before
+                                it is deleted. A value of 0 disables template autokill.
+                              format: int64
+                              type: integer
+                          type: object
                         created_at:
                           description: The time the instance was created.
                           format: date-time
@@ -1141,6 +1656,28 @@ spec:
                             Not used for template instances.
                           format: int32
                           type: integer
+                        gateway:
+                          description: The default gateway configured inside the guest.
+                          type: string
+                        gpus:
+                          description: |-
+                            GPUs attached to the instance.  Only present for instances of type
+                            `full`.
+                          items:
+                            properties:
+                              model:
+                                description: |-
+                                  The GPU model, given as its PCI vendor and device ID in the form
+                                  `<vendor>:<device>`.
+                                type: string
+                              uuid:
+                                description: The UUID of the GPU.
+                                type: string
+                            required:
+                            - model
+                            - uuid
+                            type: object
+                          type: array
                         image:
                           description: |-
                             The image used to create the instance.  This is a reference to the
@@ -1167,6 +1704,9 @@ spec:
                             The name must be unique within the context of your account.  The name can
                             also be used to identify the instance in API calls.
                           type: string
+                        nameserver:
+                          description: The DNS resolver configured inside the guest.
+                          type: string
                         net_time_us:
                           description: |-
                             This is the time it took for the user-level application to start listening
@@ -1183,8 +1723,21 @@ spec:
                             Not used for template instances.
                           items:
                             properties:
+                              autoconfig:
+                                description: |-
+                                  Whether the interface is automatically configured inside the guest
+                                  (IP address, routes, etc.).  When absent or true, autoconfiguration
+                                  is enabled.  Present and false when the guest is expected to
+                                  configure the interface manually.
+                                type: boolean
                               mac:
                                 description: The MAC address of the network interface.
+                                type: string
+                              name:
+                                description: |-
+                                  The interface name. If omitted, Unikraft Cloud generates one as
+                                  <instance-name>-ethX, falling back to eth-<suffix> when the
+                                  instance name is too long.
                                 type: string
                               private_ip:
                                 description: |-
@@ -1192,27 +1745,73 @@ spec:
                                   address that is used for communication between instances within the same
                                   network.
                                 type: string
-                              rx_bytes:
-                                description: Amount of bytes received from interface.
-                                format: int64
-                                type: integer
-                              rx_packets:
-                                description: Count of packets received from interface
-                                format: int64
-                                type: integer
-                              tx_bytes:
-                                description: Amount of bytes sent to interface.
-                                format: int64
-                                type: integer
-                              tx_packets:
-                                description: Count of packets sent to interface
-                                format: int64
-                                type: integer
+                              relay:
+                                properties:
+                                  name:
+                                    description: Name of the relay interface.
+                                    type: string
+                                  relay_dns:
+                                    description: |-
+                                      Whether DNS traffic is relayed through this interface.
+                                      Defaults to true.
+                                    type: boolean
+                                  uuid:
+                                    description: UUID of the relay interface.
+                                    type: string
+                                required:
+                                - name
+                                - relay_dns
+                                - uuid
+                                type: object
+                              tap_name:
+                                description: The TAP device to attach the interface.
+                                  Provide it together with ip.
+                                type: string
                               uuid:
                                 description: |-
                                   The UUID of the network interface. This is a unique identifier for the
                                   network interface that is generated when the instance is created.
                                 type: string
+                            required:
+                            - mac
+                            - private_ip
+                            - uuid
+                            type: object
+                          type: array
+                        plugins:
+                          description: |-
+                            Plugins attached to the instance.  Plugins let you attach small helper
+                            programs to an instance and reach each one over a direct, authenticated
+                            HTTP endpoint.  Each plugin loads from its own ROM image, mounts at
+                            `/uk/plugins/<plugin_name>`, and is reachable at
+                            `.../v1/instances/<uuid>/plugins/<plugin_name>/<path>`.  At most 8 plugins
+                            may be attached to an instance.
+                          items:
+                            properties:
+                              config:
+                                description: |-
+                                  (Optional).  Arbitrary JSON configuration that the platform passes to the
+                                  plugin's `init` program on `STDIN`.  Any JSON value works, including a
+                                  string, a number, or an object.
+                                type: object
+                                x-kubernetes-preserve-unknown-fields: true
+                              name:
+                                description: |-
+                                  The plugin name.  It becomes the `<plugin_name>` segment in the plugin
+                                  endpoint (`.../plugins/<plugin_name>/<path>`).  A plugin name has a
+                                  maximum length of 63 characters and contains only letters (`a`-`z`,
+                                  `A`-`Z`), digits (`0`-`9`), hyphen (`-`), and underscore (`_`).
+                                type: string
+                              rom:
+                                description: |-
+                                  The plugin's ROM image, given as an image reference string such as
+                                  `user/myplugin:latest`.  The platform loads the image, mounts it at
+                                  `/uk/plugins/<plugin_name>`, and runs its `init` program when the plugin
+                                  starts.
+                                type: string
+                            required:
+                            - name
+                            - rom
                             type: object
                           type: array
                         private_fqdn:
@@ -1220,6 +1819,9 @@ spec:
                             The internal hostname of the instance.  This address can be used privately
                             within the Unikraft Cloud network to access the instance.  It is not
                             accessible from the public Internet.
+                          type: string
+                        private_ip:
+                          description: The private IP address of the instance.
                           type: string
                         restart:
                           properties:
@@ -1234,6 +1836,8 @@ spec:
                                 attempt.
                               format: date-time
                               type: string
+                          required:
+                          - attempt
                           type: object
                         restart_count:
                           description: |-
@@ -1276,7 +1880,7 @@ spec:
                           enum:
                           - never
                           - always
-                          - on_failure
+                          - on-failure
                           type: string
                         roms:
                           description: |-
@@ -1287,16 +1891,51 @@ spec:
                             ROM blobs.
                           items:
                             properties:
+                              at:
+                                description: |-
+                                  (Optional).  The path at which the ROM should be automatically mounted
+                                  inside the instance.  When set, the platform mounts the ROM device at
+                                  the specified path so the guest does not need to mount it manually.
+                                  When omitted, the ROM is exposed as a raw block device and the guest is
+                                  responsible for mounting it.
+                                type: string
+                              files:
+                                description: |-
+                                  (Optional).  Inline files to use as the ROM content.  When specified,
+                                  the platform creates an EROFS image from the provided files.
+                                  Mutually exclusive with `image`.
+                                items:
+                                  properties:
+                                    data:
+                                      description: The file data, encoded according
+                                        to the encoding field.
+                                      type: string
+                                    encoding:
+                                      description: (Optional).  The encoding of the
+                                        data field.  Defaults to "text".
+                                      enum:
+                                      - text
+                                      - base64
+                                      type: string
+                                    path:
+                                      description: The file path within the image.
+                                      type: string
+                                  required:
+                                  - data
+                                  - path
+                                  type: object
+                                type: array
                               image:
-                                description: The image of the ROM to use for the instance
-                                  configuration.
+                                description: |-
+                                  (Optional).  The image of the ROM to use for the instance configuration.
+                                  Mutually exclusive with `files`.
                                 type: string
                               name:
                                 description: The name of the ROM to use for the instance
                                   configuration.
                                 type: string
                             required:
-                            - image
+                            - name
                             type: object
                           type: array
                         scale_to_zero:
@@ -1323,8 +1962,8 @@ spec:
                               description: The specific policy to use for scaling
                                 the instance to zero.
                               enum:
-                              - "on"
                               - "off"
+                              - "on"
                               - idle
                               type: string
                             stateful:
@@ -1337,12 +1976,24 @@ spec:
                                 scaled back up.
                               type: boolean
                           type: object
+                        sched_priority:
+                          description: |-
+                            The scheduling priority for the instance. Only present for
+                            users with scheduling priority override permissions.
+                          enum:
+                          - normal
+                          - medium
+                          - high
+                          - admin
+                          type: string
                         schedules:
                           description: |-
                             Scheduled operations for this instance.
 
                             Each schedule defines a calendar expression and an action (`start`,
-                            `stop`, or `delete`) to perform at matching times.
+                            `stop`, `delete`, or `exec`) to perform at matching times.  When the
+                            action is `exec`, the `args` field of the schedule specifies the command
+                            to run inside the instance.
                           items:
                             properties:
                               action:
@@ -1352,7 +2003,17 @@ spec:
                                 - start
                                 - stop
                                 - delete
+                                - exec
                                 type: string
+                              args:
+                                description: |-
+                                  The command to execute when the action is `exec`.
+
+                                  Required when `action` is `SCHEDULE_ACTION_EXEC`, ignored otherwise.
+                                  Each element is a separate argument; the first element is the executable.
+                                items:
+                                  type: string
+                                type: array
                               name:
                                 description: |-
                                   The name of the schedule.
@@ -1365,8 +2026,8 @@ spec:
 
                                   This field is populated only in responses (not settable in requests).
                                   Unix timestamp in seconds.  Omitted if no next execution is scheduled.
-                                format: int64
-                                type: integer
+                                format: date-time
+                                type: string
                               when:
                                 description: |-
                                   The calendar expression specifying when the action should be performed.
@@ -1388,20 +2049,16 @@ spec:
                               items:
                                 properties:
                                   certificate:
-                                    description: |-
-                                      The certificate associated with the domain.
-
-                                      The certificate is used to secure the domain with TLS/SSL.  If no
-                                      certificate is specified, Unikraft Cloud will automatically generate a
-                                      new certificate for the domain based on Let's Encrypt and seek to
-                                      accomplish a DNS-01 challenge.
                                     properties:
                                       name:
-                                        description: Mutually exclusive with UUID.
+                                        description: The name of the resource.
                                         type: string
                                       uuid:
-                                        description: Mutually exclusive with name.
+                                        description: The UUID of the resource.
                                         type: string
+                                    required:
+                                    - name
+                                    - uuid
                                     type: object
                                   fqdn:
                                     description: |-
@@ -1411,6 +2068,8 @@ spec:
                                       Domain Name (FQDN), otherwise it will become a subdomain of the target
                                       metro.
                                     type: string
+                                required:
+                                - fqdn
                                 type: object
                               type: array
                             name:
@@ -1430,12 +2089,17 @@ spec:
                                 in API calls and can be used to identify the service in all API calls
                                 that require an service identifier.
                               type: string
+                          required:
+                          - name
+                          - uuid
                           type: object
                         snapshot:
                           properties:
                             uuid:
                               description: The UUID of the snapshot.
                               type: string
+                          required:
+                          - uuid
                           type: object
                         start_count:
                           description: |-
@@ -1466,6 +2130,8 @@ spec:
                           - stopping
                           - template
                           - standby
+                          - deleted
+                          - checkpoint
                           type: string
                         status:
                           description: |-
@@ -1474,6 +2140,7 @@ spec:
                           enum:
                           - success
                           - error
+                          - partial_success
                           type: string
                         stop_code:
                           description: |-
@@ -1561,6 +2228,66 @@ spec:
                               format: int64
                               type: integer
                           type: object
+                        type:
+                          description: The type of virtual machine used to run the
+                            instance.
+                          enum:
+                          - micro
+                          - full
+                          type: string
+                        updates:
+                          description: Queued property changes awaiting application.
+                          items:
+                            properties:
+                              error:
+                                description: Error message.  Only present when status
+                                  is "failed".
+                                type: string
+                              op:
+                                description: The patch operation type.
+                                enum:
+                                - set
+                                - add
+                                - del
+                                type: string
+                              prop:
+                                description: The property being updated.
+                                enum:
+                                - image
+                                - args
+                                - env
+                                - memory_mb
+                                - vcpus
+                                - scale_to_zero
+                                - tags
+                                - delete_lock
+                                - schedules
+                                - autokill
+                                - hostname
+                                - roms
+                                - dependencies
+                                - sched_priority
+                                - plugins
+                                type: string
+                              status:
+                                description: The status of this update.
+                                enum:
+                                - pending
+                                - failed
+                                type: string
+                              value:
+                                description: |-
+                                  The new value for the property.  Type depends on the property being
+                                  updated.
+                                type: object
+                                x-kubernetes-preserve-unknown-fields: true
+                            required:
+                            - op
+                            - prop
+                            - status
+                            - value
+                            type: object
+                          type: array
                         uptime_ms:
                           description: |-
                             The total amount of time the instance has been running in milliseconds.
@@ -1640,8 +2367,23 @@ spec:
                                   and can be used to identify the volume in all API calls that require a
                                   volume identifier.
                                 type: string
+                            required:
+                            - at
+                            - name
+                            - readonly
+                            - uuid
                             type: object
                           type: array
+                      required:
+                      - created_at
+                      - image
+                      - memory_mb
+                      - name
+                      - restart_policy
+                      - state
+                      - type
+                      - uuid
+                      - vcpus
                       type: object
                     type: array
                 type: object
@@ -1653,6 +2395,8 @@ spec:
                       description: The HTTP status code of the error.
                       format: int64
                       type: integer
+                  required:
+                  - status
                   type: object
                 type: array
               message:
@@ -1671,7 +2415,11 @@ spec:
                 enum:
                 - success
                 - error
+                - partial_success
                 type: string
+            required:
+            - op_time_us
+            - status
             type: object
         type: object
     served: true
