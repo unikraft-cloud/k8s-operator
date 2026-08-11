@@ -7,17 +7,16 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 type Image struct {
-	// The digest of the image is a unique identifier of the image manifest which
-	// is a string representation including the hashing algorithm and the hash
-	// value separated by a colon.
-	Digest *string `json:"digest,omitempty"`
-	// The canonical name of the image is known as the "tag".
+	Url string `json:"url"`
+	// The time the volume was created.
+	CreatedAt   metav1.Time       `json:"created_at"`
+	InitrdOrRom bool              `json:"initrd_or_rom"`
+	SizeInBytes int64             `json:"size_in_bytes"`
+	Args        []string          `json:"args,omitempty"`
+	Env         map[string]string `json:"env,omitempty"`
 	Tags        []string          `json:"tags,omitempty"`
-	Initrd      *bool             `json:"initrd,omitempty"`
-	SizeInBytes *int64            `json:"size_in_bytes,omitempty"`
-	Args        *string           `json:"args,omitempty"`
-	KernelArgs  *string           `json:"kernel_args,omitempty"`
 	Users       []string          `json:"users,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
 }
