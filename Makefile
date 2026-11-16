@@ -230,30 +230,24 @@ CHANNEL             ?= prod-staging
 
 GO                  ?= go
 WGET                ?= wget
-DOCKER              ?= docker
-OPENAPI_GEN_VERSION ?= v6.4.0
+OPENAPI_GEN_VERSION ?= v0.0.0-20261116141545-97496f35d9fd
+OPENAPI_GEN         ?= $(GO) run unikraft.com/x/tools/openapi-gen@$(OPENAPI_GEN_VERSION)
 GOIMPORTS           ?= $(GO) run golang.org/x/tools/cmd/goimports@latest
 
 .PHONY: crds
 crds: platform apifmt generate manifests
 
+# The spec's schemas are namespaced by platform-api's TypeSpec sources
+# (Instances.Instance and so on); --namespace-flatten=strip drops the prefixes,
+# as the Go SDK does, so the models keep their plain names.
 .PHONY: platform
 platform: platform.yaml
-	rm -rf $(WORKDIR)/api/v1alpha1/platform/model_*
-	$(DOCKER) run \
-		--rm \
-		--volume "$(WORKDIR):/local" \
-		--user="$(shell id -u):$(shell id -g)" \
-		openapitools/openapi-generator-cli:$(OPENAPI_GEN_VERSION) generate \
-				--generator-name go \
-				--engine         "handlebars" \
-				--input-spec     /local/platform.yaml \
-				--config         /local/gen-config.yaml \
-				--template-dir   /local/templates \
-				--output         /local/api/v1alpha1/platform \
-				--global-property models \
-				$(OPENAPI_GENERATOR_EXTRA_OPTIONS)
-		rm -rf $(WORKDIR)/api/v1alpha1/platform/docs
+	rm -f $(WORKDIR)/api/v1alpha1/platform/model_*.go
+	$(OPENAPI_GEN) \
+		--input             $(WORKDIR)/platform.yaml \
+		--output            $(WORKDIR)/api/v1alpha1/platform \
+		--templates         $(WORKDIR)/templates \
+		--namespace-flatten strip
 
 platform.yaml:
 	$(Q)$(WGET) -O $@ https://raw.githubusercontent.com/unikraft-cloud/openapi/$(CHANNEL)/platform.yaml

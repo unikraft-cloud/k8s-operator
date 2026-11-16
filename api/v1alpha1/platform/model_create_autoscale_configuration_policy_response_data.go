@@ -7,7 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// The response data for this request.
 type CreateAutoscaleConfigurationPolicyResponseData struct {
-	// The policies which were added by the request.
 	Policies []CreateAutoscaleConfigurationPolicyResponsePolicy `json:"policies,omitempty"`
 }

@@ -7,9 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Template-specific automatic delete-on-idle configuration.
-// Not used for non-template instances.
-
+// Autokill configuration for a template instance.
 type InstanceTemplateAutokill struct {
 	// Time in milliseconds after the template was last used for cloning before
 	// it is deleted. A value of 0 disables template autokill.

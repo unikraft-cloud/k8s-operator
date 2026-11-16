@@ -54,41 +54,41 @@ func instanceUpdates(curr ukcplatform.Instance, obj *unikraftv1alpha1.Instance) 
 	instances := obj.Status.Data.Instances
 	var updates []ukcplatform.UpdateInstancesRequestItem
 
-	addUpdate := func(prop ukcplatform.UpdateInstancesRequestItemProp, op ukcplatform.UpdateInstancesRequestItemOp, value interface{}) {
+	setUpdate := func(prop ukcplatform.UpdateInstancesRequestItemProp, value any) {
 		for _, instance := range instances {
 			updates = append(updates, ukcplatform.UpdateInstancesRequestItem{
-				Name:  instance.Name,
+				Name:  ukcplatform.Ptr(instance.Name),
 				Prop:  prop,
-				Op:    op,
+				Op:    ukcplatform.UpdateInstancesRequestItemOpSet,
 				Value: ukcplatform.Ptr(value),
 			})
 		}
 	}
 
 	if !reflect.DeepEqual(curr.Args, obj.Spec.Args) {
-		addUpdate(ukcplatform.UpdateInstancesRequestItemPropArgs, ukcplatform.UpdateInstancesRequestItemOpSet, obj.Spec.Args)
+		setUpdate(ukcplatform.UpdateInstancesRequestItemPropArgs, obj.Spec.Args)
 	}
 
 	if !reflect.DeepEqual(curr.Env, obj.Spec.Env) {
-		addUpdate(ukcplatform.UpdateInstancesRequestItemPropEnv, ukcplatform.UpdateInstancesRequestItemOpSet, obj.Spec.Env)
+		setUpdate(ukcplatform.UpdateInstancesRequestItemPropEnv, obj.Spec.Env)
 	}
 
 	if !ptrValuesEqualWithDefault(curr.MemoryMb, obj.Spec.MemoryMb, defaultMemoryMB) {
-		addUpdate(ukcplatform.UpdateInstancesRequestItemPropMemory_mb, ukcplatform.UpdateInstancesRequestItemOpSet, obj.Spec.MemoryMb)
+		setUpdate(ukcplatform.UpdateInstancesRequestItemPropMemory_mb, obj.Spec.MemoryMb)
 	}
 
 	if !ptrValuesEqualWithDefault(curr.Vcpus, obj.Spec.Vcpus, defaultVCPU) {
-		addUpdate(ukcplatform.UpdateInstancesRequestItemPropVcpus, ukcplatform.UpdateInstancesRequestItemOpSet, obj.Spec.Vcpus)
+		setUpdate(ukcplatform.UpdateInstancesRequestItemPropVcpus, obj.Spec.Vcpus)
 	}
 
 	if !scaleToZeroEqual(curr.ScaleToZero, obj.Spec.ScaleToZero) {
-		addUpdate(ukcplatform.UpdateInstancesRequestItemPropScale_to_zero, ukcplatform.UpdateInstancesRequestItemOpSet, obj.Spec.ScaleToZero)
+		setUpdate(ukcplatform.UpdateInstancesRequestItemPropScale_to_zero, obj.Spec.ScaleToZero)
 	}
 
 	return updates
 }
 
-func scaleToZeroEqual(curr *ukcplatform.InstanceScaleToZero, spec *platform.CreateInstanceRequestScaleToZero) bool {
+func scaleToZeroEqual(curr *ukcplatform.InstanceScaleToZero, spec *platform.CreateInstanceScaleToZero) bool {
 	if curr == nil && spec == nil {
 		return true
 	}

@@ -7,34 +7,21 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The state of the volume.
-// +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error;template
-type CreateVolumeResponseVolumeState string
-
-const (
-	CreateVolumeResponseVolumeStateUninitialized CreateVolumeResponseVolumeState = "uninitialized"
-	CreateVolumeResponseVolumeStateInitializing  CreateVolumeResponseVolumeState = "initializing"
-	CreateVolumeResponseVolumeStateAvailable     CreateVolumeResponseVolumeState = "available"
-	CreateVolumeResponseVolumeStateIdle          CreateVolumeResponseVolumeState = "idle"
-	CreateVolumeResponseVolumeStateMounted       CreateVolumeResponseVolumeState = "mounted"
-	CreateVolumeResponseVolumeStateBusy          CreateVolumeResponseVolumeState = "busy"
-	CreateVolumeResponseVolumeStateError         CreateVolumeResponseVolumeState = "error"
-	CreateVolumeResponseVolumeStateTemplate      CreateVolumeResponseVolumeState = "template"
-)
-
+// Per-item result for a create volume operation.
 type CreateVolumeResponseVolume struct {
-	// The status of the response.
-	Status *ResponseStatus `json:"status,omitempty"`
-	// UUID of the newly created volume.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the newly created volume.
-	Name *string `json:"name,omitempty"`
-	// The state of the volume.
-	State *CreateVolumeResponseVolumeState `json:"state,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// Indicates whether the operation was successful for this item.
+	Status ResponseStatus `json:"status"`
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The state of the volume.
+	State VolumeState `json:"state"`
 }

@@ -8,25 +8,30 @@
 package platform
 
 // Parameters for stopping the instance.
-
 type StopInstanceByUUIDRequestBody struct {
-	// Whether to immediately force stop the instance.
+	// Whether to immediately force stop the instance. Cannot be combined with
+	// a non-zero `drain_timeout_ms`.
 	Force *bool `json:"force,omitempty"`
 	// Timeout for draining connections in milliseconds.
-	// No draining will occur if set to 0.  The instance
+	// No draining will occur if set to 0. The instance
 	// does not receive new connections in the draining
-	// phase.  The instance is stopped when the last
+	// phase. The instance is stopped when the last
 	// connection has been closed or the timeout expired.
-	// The maximum timeout may vary.  Use -1 for the
-	// largest possible value.  Ignored if force is set.
+	// The maximum timeout may vary. Use -1 for the
+	// largest possible value. Must be 0 or omitted if
+	// force is set; any other value, including -1, is
+	// rejected.
 	//
-	// Note: This endpoint does not block.  Use the wait
+	// Note: This endpoint does not block. Use the wait
 	// endpoint for the instance to reach the stopped
 	// state.
 	DrainTimeoutMs *uint64 `json:"drain_timeout_ms,omitempty"`
-	// Whether to perform a quick shutdown.  This flag is
+	// Whether to perform a quick shutdown. This flag is
 	// overridden by force.
 	Quick *bool `json:"quick,omitempty"`
 	// Only stop the instance if it is in this state.
 	Ifstate *string `json:"ifstate,omitempty"`
+	// If set, forces the VMM to shutdown immediately and generate a coredump.
+	// Can only be used in conjunction with force.
+	Dump *bool `json:"dump,omitempty"`
 }

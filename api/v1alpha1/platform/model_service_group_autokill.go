@@ -7,8 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Automatic delete-on-idle configuration.
-
+// Autokill configuration for a service group.
 type ServiceGroupAutokill struct {
 	// Time in milliseconds after the service group becomes empty before it is
 	// deleted. A value of 0 disables autokill.

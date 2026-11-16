@@ -7,50 +7,25 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-import "k8s.io/apimachinery/pkg/runtime"
+import (
+	"k8s.io/apimachinery/pkg/runtime"
+)
 
 // A single update operation to be applied to an instance.
-// The property to modify.
-// +kubebuilder:validation:Enum=image;args;env;memory_mb;vcpus;scale_to_zero;tags;delete_lock;schedules;autokill
-type UpdateInstancesRequestItemProp string
-
-const (
-	UpdateInstancesRequestItemPropImage         UpdateInstancesRequestItemProp = "image"
-	UpdateInstancesRequestItemPropArgs          UpdateInstancesRequestItemProp = "args"
-	UpdateInstancesRequestItemPropEnv           UpdateInstancesRequestItemProp = "env"
-	UpdateInstancesRequestItemPropMemory_mb     UpdateInstancesRequestItemProp = "memory_mb"
-	UpdateInstancesRequestItemPropVcpus         UpdateInstancesRequestItemProp = "vcpus"
-	UpdateInstancesRequestItemPropScale_to_zero UpdateInstancesRequestItemProp = "scale_to_zero"
-	UpdateInstancesRequestItemPropTags          UpdateInstancesRequestItemProp = "tags"
-	UpdateInstancesRequestItemPropDelete_lock   UpdateInstancesRequestItemProp = "delete_lock"
-	UpdateInstancesRequestItemPropSchedules     UpdateInstancesRequestItemProp = "schedules"
-	UpdateInstancesRequestItemPropAutokill      UpdateInstancesRequestItemProp = "autokill"
-)
-
-// The operation to perform on the property.
-// +kubebuilder:validation:Enum=set;add;del
-type UpdateInstancesRequestItemOp string
-
-const (
-	UpdateInstancesRequestItemOpSet UpdateInstancesRequestItemOp = "set"
-	UpdateInstancesRequestItemOpAdd UpdateInstancesRequestItemOp = "add"
-	UpdateInstancesRequestItemOpDel UpdateInstancesRequestItemOp = "del"
-)
-
 type UpdateInstancesRequestItem struct {
-	// (Optional).  A client-provided identifier for tracking this operation in
-	// the response.
-	Id *string `json:"id,omitempty"`
-	// The UUID of the instance to update. Mutually exclusive with name.
+	// The UUID of the resource.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to update. Mutually exclusive with UUID.
+	// The name of the resource.
 	Name *string `json:"name,omitempty"`
+	// A client-provided identifier for tracking this operation in the response.
+	Id *string `json:"id,omitempty"`
 	// The property to modify.
-	Prop UpdateInstancesRequestItemProp `json:"prop"`
+	Prop MutableInstanceProperty `json:"prop"`
 	// The operation to perform on the property.
-	Op UpdateInstancesRequestItemOp `json:"op"`
+	Op MutableInstanceOperation `json:"op"`
 	// The value for the update operation. The type depends on the property and operation:
-	// - For "image": string
+	// - For "image": image reference string, or object with image url,
+	// credentials, headers and pull policy
 	// - For "args": string or array of strings
 	// - For "env": object (for SET/ADD) or string/array of strings (for DEL)
 	// - For "memory_mb": integer
@@ -58,7 +33,16 @@ type UpdateInstancesRequestItem struct {
 	// - For "scale_to_zero": object with cooldown_time_ms, policy, and stateful fields
 	// - For "tags": array of strings
 	// - For "delete_lock": boolean
-	// - For "schedules": array of schedule objects (with name, when, and action fields)
+	// - For "schedules": array of schedule objects (with name, when, action, and optional args fields)
+	// for SET/ADD, or array of schedule names for DEL. Use action "exec" together with args to
+	// execute a command at the scheduled time.
 	// - For "autokill": object with time_ms and num_requests fields
+	// - For "hostname": string (valid DNS label)
+	// - For "roms": array of ROM objects (with name and image fields) for SET/ADD, or array of ROM names for DEL
+	// - For "plugins": array of plugin objects (with name, image, and optional config and
+	// authorization fields) for SET/ADD. The deprecated `rom` field is accepted in place of `image`.
+	// - For "dependencies": array of instance identifiers (name or UUID)
+	// - For "sched_priority": SchedPriority enum value ("normal", "medium", "high", "admin")
+	// - For "annotations": object (for SET/ADD) or string/array of strings (for DEL)
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

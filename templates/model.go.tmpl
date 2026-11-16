@@ -1,0 +1,42 @@
+{{- /*
+	The models here are embedded in the operator's CRDs, so every type has to
+	be one controller-gen can derive a structural schema and deep copies for.
+	That rules out interface types, which is what the Go SDK's templates use
+	for `anyOf` properties, so this set differs from the SDK's in three ways:
+
+	  - a union is a struct with one pointer member per variant (see
+	    "model_union"), and the fields typed as one are left schemaless in the
+	    CRD, since a structural schema cannot describe a value of more than one
+	    JSON type;
+	  - time.Time is metav1.Time and free-form values are runtime.RawExtension;
+	  - an "open" enum (`anyOf` of an enum and a plain string) is a string.
+
+	"goUnions" names a union after its first named branch; the override keeps
+	the string-or-`ImageSpec` union named `ImageSource` as in the Go SDK, since
+	`Image` is already the images resource.
+*/ -}}
+{{- $unions := goUnions (dict "Image" "ImageSource") -}}
+{{range .Models}}
+--- model_{{snakecase .SchemaName}}.go
+{{template "header" .}}
+{{$schema := .Schema}}
+{{- $openEnum := false}}
+{{- if and $schema.AnyOf (not $schema.Properties)}}
+{{- $openEnum = true}}
+{{- range $schema.AnyOf}}{{if ne (getType .Value) "string"}}{{$openEnum = false}}{{end}}{{end}}
+{{- end}}
+{{- if $schema.Enum}}
+{{template "model_enum" .}}
+{{- else if $openEnum}}
+{{template "model_open_enum" .}}
+{{- else if and (ne (getType $schema) "object") (not $schema.Properties)}}
+{{template "model_defined" .}}
+{{- else}}
+{{template "model_simple" (dict "Model" . "FieldUnions" $unions.Fields)}}
+{{- end}}
+{{- end}}
+{{- range $union := $unions.Unions}}
+--- model_{{snakecase $union.Name}}.go
+{{template "header"}}
+{{template "model_union" $union}}
+{{- end}}

@@ -7,14 +7,15 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
-// Records the current restart attempt of an instance.
-
+// Restart attempt information for an instance.
 type InstanceRestartAttempt struct {
 	// Current restart attempt number. This is incremented each time the instance
 	// is restarted automatically by the platform.
-	Attempt *uint32 `json:"attempt,omitempty"`
+	Attempt uint32 `json:"attempt"`
 	// Timestamp of the next scheduled restart attempt.
 	NextAt *metav1.Time `json:"next_at,omitempty"`
 }
