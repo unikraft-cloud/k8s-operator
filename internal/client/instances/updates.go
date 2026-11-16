@@ -57,10 +57,10 @@ func instanceUpdates(curr ukcplatform.Instance, obj *unikraftv1alpha1.Instance) 
 	setUpdate := func(prop ukcplatform.UpdateInstancesRequestItemProp, value any) {
 		for _, instance := range instances {
 			updates = append(updates, ukcplatform.UpdateInstancesRequestItem{
-				Name:  ukcplatform.Ptr(instance.Name),
+				Name:  new(instance.Name),
 				Prop:  prop,
 				Op:    ukcplatform.UpdateInstancesRequestItemOpSet,
-				Value: ukcplatform.Ptr(value),
+				Value: new(value),
 			})
 		}
 	}

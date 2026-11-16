@@ -82,7 +82,7 @@ func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Servi
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
 		return &platform.CreateServiceGroupResponse{
 			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
-			Message: ukcplatform.Ptr(err.Error()),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
@@ -104,7 +104,7 @@ func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Servi
 	for _, service := range obj.Status.Data.ServiceGroups {
 		if service.Name != "" {
 			serviceNames = append(serviceNames, ukcplatform.NameOrUUID{
-				Name: ukcplatform.Ptr(service.Name),
+				Name: new(service.Name),
 			})
 		}
 	}
@@ -113,7 +113,7 @@ func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Servi
 	if err != nil {
 		return &platform.CreateServiceGroupResponse{
 			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
-			Message: ukcplatform.Ptr(err.Error()),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
