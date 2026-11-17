@@ -8,25 +8,34 @@
 package platform
 
 // A single request item to stop an instance.
-
 type StopInstancesRequestItem struct {
-	// The UUID of the instance to stop.  Mutually exclusive with name.
+	// The UUID of the resource.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to stop.  Mutually exclusive with UUID.
+	// The name of the resource.
 	Name *string `json:"name,omitempty"`
-	// Whether to immediately force stop the instance.
+	// Whether to immediately force stop the instance. Cannot be combined with
+	// a non-zero `drain_timeout_ms`.
 	Force *bool `json:"force,omitempty"`
-	// Timeout for draining connections in milliseconds.  The instance does not
-	// receive new connections in the draining phase.  The instance is stopped
-	// when the last connection has been closed or the timeout expired.  The
-	// maximum timeout may vary.  Use -1 for the largest possible value.
+	// Timeout for draining connections in milliseconds.
+	// No draining will occur if set to 0. The instance
+	// does not receive new connections in the draining
+	// phase. The instance is stopped when the last
+	// connection has been closed or the timeout expired.
+	// The maximum timeout may vary. Use -1 for the
+	// largest possible value. Must be 0 or omitted if
+	// force is set; any other value, including -1, is
+	// rejected.
 	//
-	// Note: This endpoint does not block.  Use the wait endpoint for the
-	// instance to reach the stopped state.
+	// Note: This endpoint does not block. Use the wait
+	// endpoint for the instance to reach the stopped
+	// state.
 	DrainTimeoutMs *uint64 `json:"drain_timeout_ms,omitempty"`
-	// Whether to perform a quick shutdown.  This flag is
+	// Whether to perform a quick shutdown. This flag is
 	// overridden by force.
 	Quick *bool `json:"quick,omitempty"`
 	// Only stop the instance if it is in this state.
 	Ifstate *string `json:"ifstate,omitempty"`
+	// If set, forces the VMM to shutdown immediately and generate a coredump.
+	// Can only be used in conjunction with force.
+	Dump *bool `json:"dump,omitempty"`
 }

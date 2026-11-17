@@ -7,11 +7,18 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Reference to the instance to attach the volume to.
-
+// An instance a volume is attached to.
 type VolumeInstanceID struct {
-	// The UUID of the instance that the volume is attached to.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance that the volume is attached to.
+	// The UUID of the instance. This is a unique identifier for the instance
+	// that is generated when the instance is created. The UUID is used to
+	// reference the instance in API calls and can be used to identify the
+	// instance in all API calls that require an instance identifier.
+	Uuid string `json:"uuid"`
+	// The name of the instance. This is a human-readable name that can be used
+	// to identify the instance. The name must be unique within the context of
+	// your account. If no name is specified, a random name is generated for
+	// you. The name can also be used to identify the instance in API calls.
 	Name *string `json:"name,omitempty"`
+	// The name of the node the instance is placed on.
+	Node *string `json:"node,omitempty"`
 }

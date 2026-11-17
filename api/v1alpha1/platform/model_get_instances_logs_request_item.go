@@ -7,16 +7,13 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// A single item in the request.
-
+// A single request item to get an instance's logs.
 type GetInstancesLogsRequestItem struct {
-	// The UUID of the instance to retrieve logs for.  Mutually exclusive with
-	// name.
+	// The UUID of the resource.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance to retrieve logs for.  Mutually exclusive with
-	// UUID.
+	// The name of the resource.
 	Name *string `json:"name,omitempty"`
-	// The byte offset of the log output to receive.  A negative sign makes the
+	// The byte offset of the log output to receive. A negative sign makes the
 	// offset relative to the end of the log.
 	Offset *int64 `json:"offset,omitempty"`
 	// The amount of bytes to return at most.

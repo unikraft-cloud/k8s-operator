@@ -7,14 +7,21 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 // A schedule defines when an action should be performed on an instance.
 //
 // Each schedule specifies a name, a calendar expression following systemd
-// calendar event syntax, and an action (start, stop, or delete).
+// calendar event syntax, and an action (start, stop, delete, or exec).
 //
-// Calendar expressions format: [weekday] [[year-]month-day] [hour:minute[:second]]
+// Calendar expressions format:
+//
+// [weekday] [[year-]month-day] [hour:minute[:second]]
 //
 // Supported syntax:
+//
 // - `*` - Any value
 // - `5` - Exact value
 // - `1..5` - Range
@@ -23,16 +30,6 @@ package platform
 //
 // Example: `*-*-* 09:00:00` - Every day at 09:00 UTC
 // Example: `Sat,Sun *-*-* 20:00:00` - Every Saturday and Sunday at 20:00 UTC
-// The action to perform at the scheduled time.
-// +kubebuilder:validation:Enum=start;stop;delete
-type ScheduleAction string
-
-const (
-	ScheduleActionStart  ScheduleAction = "start"
-	ScheduleActionStop   ScheduleAction = "stop"
-	ScheduleActionDelete ScheduleAction = "delete"
-)
-
 type Schedule struct {
 	// The name of the schedule.
 	//
@@ -44,10 +41,17 @@ type Schedule struct {
 	// See https://www.man7.org/linux/man-pages/man7/systemd.time.7.html
 	When string `json:"when"`
 	// The action to perform at the scheduled time.
-	Action ScheduleAction `json:"action"`
+	Action *ScheduleAction `json:"action,omitempty"`
 	// The timestamp of when the next scheduled action will occur.
 	//
 	// This field is populated only in responses (not settable in requests).
-	// Unix timestamp in seconds.  Omitted if no next execution is scheduled.
-	NextAt *int64 `json:"next_at,omitempty"`
+	// Omitted if no next execution is scheduled.
+	NextAt *metav1.Time `json:"next_at,omitempty"`
+	// The command to execute when the action is `exec`.
+	//
+	// Required and non-empty when `action` is `exec`, and rejected for any
+	// other action, even when empty. Each element is a separate argument; the
+	// first element is the executable. At most 128 arguments, and the encoded
+	// command must fit in 1024 bytes.
+	Args []string `json:"args,omitempty"`
 }

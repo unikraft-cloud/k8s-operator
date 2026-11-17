@@ -7,14 +7,14 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// Per-item result for a get autoscale configuration policy operation.
 type GetAutoscaleConfigurationPolicyResponsePolicyResponse struct {
+	// The policy which was retrieved by the request.
+	Policy AutoscalePolicy `json:"policy"`
 	// The status of the response.
-	Status *ResponseStatus                                              `json:"status,omitempty"`
-	Policy *GetAutoscaleConfigurationPolicyResponsePolicyResponsePolicy `json:"policy,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
 	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
 	Error *int32 `json:"error,omitempty"`
 }

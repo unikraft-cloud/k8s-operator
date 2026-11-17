@@ -15,38 +15,86 @@ on:
       - .github/workflows/std.yaml
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
-  issues: read
-  checks: write
 
 jobs:
   check-static:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: read
-      checks: write
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run go-check
-        uses: unikraft-cloud/internal-actions/actions/go-check@prod-staging
+      - uses: go-task/setup-task@v2
+
+      - uses: actions/setup-go@v6
         with:
-          gh_pat: ${{ secrets.GH_PAT }}
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set Go variables
+        id: goenv
+        run: |
+          {
+            echo "cache=$(go env GOCACHE)"
+            echo "modcache=$(go env GOMODCACHE)"
+            echo "mod=$(go env GOMOD)"
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.goenv.outputs.cache }}
+            ${{ steps.goenv.outputs.modcache }}
+          key: ${{ github.job }}-${{ runner.os }}-go-${{ hashFiles(steps.goenv.outputs.mod) }}
+          restore-keys: |
+            ${{ github.job }}-${{ runner.os }}-go-
+
+      - name: Run checks
+        env:
+          GOTOOLCHAIN: auto
+        run: |
+          task --yes go:ci/check
 
   test:
     runs-on: ubuntu-latest
     needs:
       - check-static
-    permissions:
-      contents: read
-      issues: read
-      checks: write
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run go-test
-        uses: unikraft-cloud/internal-actions/actions/go-test@prod-staging
+      - uses: go-task/setup-task@v2
+
+      - uses: actions/setup-go@v6
         with:
-          gh_pat: ${{ secrets.GH_PAT }}
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set Go variables
+        id: goenv
+        run: |
+          {
+            echo "cache=$(go env GOCACHE)"
+            echo "modcache=$(go env GOMODCACHE)"
+            echo "mod=$(go env GOMOD)"
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Go caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.goenv.outputs.cache }}
+            ${{ steps.goenv.outputs.modcache }}
+          key: ${{ github.job }}-${{ runner.os }}-go-${{ hashFiles(steps.goenv.outputs.mod) }}
+          restore-keys: |
+            ${{ github.job }}-${{ runner.os }}-go-
+
+      - name: Run tests
+        env:
+          GOTOOLCHAIN: auto
+        run: |
+          task --yes go:ci/test

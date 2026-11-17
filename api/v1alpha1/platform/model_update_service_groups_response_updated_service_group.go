@@ -7,21 +7,21 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// Per-item result for an update service groups operation.
 type UpdateServiceGroupsResponseUpdatedServiceGroup struct {
-	// The UUID of the service group that was updated.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the service group that was updated.
-	Name *string `json:"name,omitempty"`
-	// The status of this particular service group update operation.
-	Status *string `json:"status,omitempty"`
-	// (Optional).  The client-provided ID from the request.
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The client-provided ID from the request.
 	Id *string `json:"id,omitempty"`
+	// The status of the response.
+	Status ResponseStatus `json:"status"`
 	// An optional message providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
 	// An optional error code providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
 	Error *int32 `json:"error,omitempty"`
 }

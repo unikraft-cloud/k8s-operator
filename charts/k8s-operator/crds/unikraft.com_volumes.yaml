@@ -47,63 +47,63 @@ spec:
           metadata:
             type: object
           spec:
+            description: The request message for creating a volume.
             properties:
+              access_mode:
+                description: |-
+                  VolumeAccessMode defines the access mode of a volume, which controls sharing
+                  behavior and caching strategy.
+                enum:
+                - rwo
+                - rox
+                - rwx
+                type: string
               args:
                 additionalProperties:
                   type: string
-                description: Script arguments passed to volume initialization scripts.
                 type: object
               filesystem:
-                description: |-
-                  Filesystem type to format or configure.
-                  Without custom configuration, this is either `ext4` or `virtiofs`.
                 type: string
               gid:
-                description: Guest GID for managed volumes (host_path mode only).
                 format: int32
                 type: integer
               host_path:
-                description: A host path to create a managed volume from.
                 type: string
               name:
                 description: |-
-                  The name of the volume.
-
-                  This is a human-readable name that can be used to identify the volume.
-                  The name must be unique within the context of your account.  If no name is
-                  specified, a random name of the form `vol-X` is generated for you, where
-                  `X` is a 5 character long random alphanumeric suffix..  The name can also
-                  be used to identify the volume in API calls.
+                  The name of the resource. If not provided, a random name is generated.
+                  The name must be unique within the context of your account.
+                type: string
+              node:
+                description: |-
+                  The name of the node to place the resource on. If not provided, the
+                  platform picks one. Only accepted on metros that span multiple nodes.
                 type: string
               quota_policy:
-                description: Quota policy for the volume.
+                description: Quota policy for a volume.
                 enum:
                 - static
                 - dynamic
                 type: string
               size_mb:
-                description: The size of the volume in megabytes.
                 format: int64
                 type: integer
               tags:
-                description: Tags to assign to the new volume.
                 items:
                   type: string
                 type: array
               template:
+                description: An identifier for a resource — either a name or a UUID,
+                  but not both.
                 properties:
                   name:
-                    description: Mutually exclusive with UUID.
+                    description: The name of the resource.
                     type: string
                   uuid:
-                    description: Mutually exclusive with name.
+                    description: The UUID of the resource.
                     type: string
-                required:
-                - name
-                - uuid
                 type: object
               uid:
-                description: Guest UID for managed volumes (host_path mode only).
                 format: int32
                 type: integer
             type: object
@@ -112,26 +112,29 @@ spec:
               rule: (!has(oldSelf.name) && !has(self.name)) || (has(oldSelf.name)
                 && has(self.name) && self.name == oldSelf.name)
           status:
+            description: The response message for creating a volume.
             properties:
               data:
+                description: The response data for this request.
                 properties:
                   volumes:
-                    description: The volume(s) which were created by the request.
                     items:
+                      description: Per-item result for a create volume operation.
                       properties:
                         error:
-                          description: |-
-                            An optional error code providing additional information about the status.
-                            This field is useful when the status is not `success`.
+                          description: An optional error code.
                           format: int32
                           type: integer
                         message:
-                          description: |-
-                            An optional message providing additional information about the status.
-                            This field is useful when the status is not `success`.
+                          description: An optional message providing additional information.
                           type: string
                         name:
-                          description: The name of the newly created volume.
+                          description: The human-readable name of the resource.
+                          type: string
+                        node:
+                          description: |-
+                            The name of the node the resource is placed on. Only present on metros
+                            that span multiple nodes.
                           type: string
                         state:
                           description: The state of the volume.
@@ -146,36 +149,43 @@ spec:
                           - template
                           type: string
                         status:
-                          description: The status of the response.
+                          description: Indicates whether the operation was successful
+                            for this item.
                           enum:
                           - success
                           - error
+                          - partial_success
                           type: string
                         uuid:
-                          description: UUID of the newly created volume.
+                          description: The UUID of the resource.
                           type: string
+                      required:
+                      - name
+                      - state
+                      - status
+                      - uuid
                       type: object
                     type: array
                 type: object
               errors:
                 description: A list of errors which may have occurred during the request.
                 items:
+                  description: The error response message for an API request.
                   properties:
                     status:
                       description: The HTTP status code of the error.
                       format: int64
                       type: integer
+                  required:
+                  - status
                   type: object
                 type: array
               message:
-                description: |-
-                  An optional message providing additional information about the status.
-                  This field is useful when the status is not `success`.
+                description: An optional message providing additional information
+                  about the status.
                 type: string
               op_time_us:
-                description: |-
-                  The operation time in microseconds.  This is the time it took to process
-                  the request and generate the response.
+                description: The operation time in microseconds.
                 format: int64
                 type: integer
               status:
@@ -183,7 +193,11 @@ spec:
                 enum:
                 - success
                 - error
+                - partial_success
                 type: string
+            required:
+            - op_time_us
+            - status
             type: object
         type: object
     served: true

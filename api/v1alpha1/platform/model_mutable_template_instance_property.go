@@ -1,0 +1,22 @@
+// This file is auto-generated. DO NOT EDIT.
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2025, Unikraft GmbH.
+// Licensed under the BSD-3-Clause License (the "License").
+// You may not use this file except in compliance with the License.
+
+// +k8s:deepcopy-gen=package
+package platform
+
+// The mutable properties of a template instance that can be updated.
+// Setting `image`, `roms`, or `plugins` updates the template in place.
+// +kubebuilder:validation:Enum="tags";"delete_lock";"autokill";"image";"roms";"plugins"
+type MutableTemplateInstanceProperty string
+
+const (
+	MutableTemplateInstancePropertyTags       MutableTemplateInstanceProperty = "tags"
+	MutableTemplateInstancePropertyDeleteLock MutableTemplateInstanceProperty = "delete_lock"
+	MutableTemplateInstancePropertyAutokill   MutableTemplateInstanceProperty = "autokill"
+	MutableTemplateInstancePropertyImage      MutableTemplateInstanceProperty = "image"
+	MutableTemplateInstancePropertyRoms       MutableTemplateInstanceProperty = "roms"
+	MutableTemplateInstancePropertyPlugins    MutableTemplateInstanceProperty = "plugins"
+)

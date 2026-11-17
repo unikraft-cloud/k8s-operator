@@ -8,11 +8,6 @@
 package platform
 
 // The response data for this request.
-
 type CreateServiceGroupResponseData struct {
-	// The service group which was created by this request.
-	//
-	// Note: only one service group can be specified in the request, so this
-	// will always contain a single entry.
 	ServiceGroups []ServiceGroup `json:"service_groups,omitempty"`
 }

@@ -7,8 +7,15 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The response data for this request.
-
+// Additional data returned by the health check.
 type HealthzResponseData struct {
-	Services map[string]string `json:"services,omitempty"`
+	// The health state of each registered checker, keyed by checker name.
+	// Valid keys are "images", "systemd", and "user-defined"; a checker's
+	// key is only present if it is enabled. Checkers report only their
+	// aggregate state; per-check detail (e.g. which default image is
+	// missing, or which user-defined script failed) is not exposed here.
+	Checks   map[string]HealthState `json:"checks,omitempty"`
+	Versions map[string]string      `json:"versions,omitempty"`
+	// License information (admin only).
+	License *DataLicense `json:"license,omitempty"`
 }

@@ -7,22 +7,19 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Details of the service group which was deleted by this request.
-
+// Per-item result for a delete service groups operation.
 type DeleteServiceGroupsResponseDeletedServiceGroup struct {
-	// Indicates whether the delete operation was successful or not for this
-	// service group.
-	Status *ResponseStatus `json:"status,omitempty"`
-	// The UUID of the service group which was deleted.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the service group which was deleted.
-	Name *string `json:"name,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The status of the response.
+	Status ResponseStatus `json:"status"`
 	// An optional message providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
 	Message *string `json:"message,omitempty"`
 	// An optional error code providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
 	Error *int32 `json:"error,omitempty"`
 }

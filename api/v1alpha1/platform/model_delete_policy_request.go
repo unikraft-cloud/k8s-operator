@@ -8,8 +8,7 @@
 package platform
 
 // The request message to delete an autoscale configuration policy by name.
-
 type DeletePolicyRequest struct {
-	// The Name of the policy to delete.
+	// The name of the policy to delete.
 	Name string `json:"name"`
 }

@@ -7,29 +7,20 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// A single request item describing the volume to clone.
-// The quota policy for the new cloned volume.  If not provided, the quota
-// policy of the source volume is used.
-// +kubebuilder:validation:Enum=static;dynamic
-type CloneVolumesRequestItemQuotaPolicy string
-
-const (
-	CloneVolumesRequestItemQuotaPolicyStatic  CloneVolumesRequestItemQuotaPolicy = "static"
-	CloneVolumesRequestItemQuotaPolicyDynamic CloneVolumesRequestItemQuotaPolicy = "dynamic"
-)
-
+// A single request item to clone a volume.
 type CloneVolumesRequestItem struct {
-	// The UUID of the volume to clone.  Mutually exclusive with name.
+	// The UUID of the resource.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume to clone.  Mutually exclusive with UUID.
+	// The name of the resource.
 	Name *string `json:"name,omitempty"`
-	// The name of the new cloned volume.  If not provided, a random name
+	// The name of the new cloned volume. If not provided, a random name
 	// of the form `vol-X` is generated for you, where `X` is a 5 character
 	// long random alphanumeric suffix.
 	VolName *string `json:"vol_name,omitempty"`
-	// The quota policy for the new cloned volume.  If not provided, the quota
+	// The quota policy for the new cloned volume. If not provided, the quota
 	// policy of the source volume is used.
-	QuotaPolicy *CloneVolumesRequestItemQuotaPolicy `json:"quota_policy,omitempty"`
+	QuotaPolicy *VolumeQuotaPolicy `json:"quota_policy,omitempty"`
 	// A list of tags to assign to the new cloned volume.
-	Tags []string `json:"tags,omitempty"`
+	Tags       []string          `json:"tags,omitempty"`
+	AccessMode *VolumeAccessMode `json:"access_mode,omitempty"`
 }

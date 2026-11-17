@@ -8,8 +8,6 @@
 package platform
 
 // The response data for this request.
-
 type GetCertificatesResponseData struct {
-	// The certificate(s) which were retrieved by the request.
 	Certificates []Certificate `json:"certificates,omitempty"`
 }

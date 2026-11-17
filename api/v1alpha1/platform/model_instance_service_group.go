@@ -7,22 +7,18 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The service group configuration for the instance.
-
+// The service group configuration for the instance. This is a reference to the
+// service group that the instance is part of. The service group defines the
+// services (e.g. ports, connection handling) that the instance exposes and how
+// they are configured.
 type InstanceServiceGroup struct {
-	// The UUID of the service group.
-	//
-	// This is a unique identifier for the service group that is generated when
-	// the service is created.  The UUID is used to reference the service group
-	// in API calls and can be used to identify the service in all API calls
-	// that require an service identifier.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the service group.
-	//
-	// This is a human-readable name that can be used to identify the service
-	// group.  The name is unique within the context of your account.  The name
-	// can also be used to identify the service group in API calls.
-	Name *string `json:"name,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
 	// The domain configuration for the service group.
 	Domains []ServiceGroupInstanceDomain `json:"domains,omitempty"`
 }

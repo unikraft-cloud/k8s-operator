@@ -7,33 +7,21 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The current state of the instance.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type CreateTemplateInstancesResponseTemplateInstanceState string
-
-const (
-	CreateTemplateInstancesResponseTemplateInstanceStateStopped  CreateTemplateInstancesResponseTemplateInstanceState = "stopped"
-	CreateTemplateInstancesResponseTemplateInstanceStateStarting CreateTemplateInstancesResponseTemplateInstanceState = "starting"
-	CreateTemplateInstancesResponseTemplateInstanceStateRunning  CreateTemplateInstancesResponseTemplateInstanceState = "running"
-	CreateTemplateInstancesResponseTemplateInstanceStateDraining CreateTemplateInstancesResponseTemplateInstanceState = "draining"
-	CreateTemplateInstancesResponseTemplateInstanceStateStopping CreateTemplateInstancesResponseTemplateInstanceState = "stopping"
-	CreateTemplateInstancesResponseTemplateInstanceStateTemplate CreateTemplateInstancesResponseTemplateInstanceState = "template"
-	CreateTemplateInstancesResponseTemplateInstanceStateStandby  CreateTemplateInstancesResponseTemplateInstanceState = "standby"
-)
-
+// Per-item result for a create template instances operation.
 type CreateTemplateInstancesResponseTemplateInstance struct {
-	// The status of this particular template instance creation operation.
-	Status *string `json:"status,omitempty"`
-	// The UUID of the template instance that was created.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the template instance that was created.
-	Name *string `json:"name,omitempty"`
-	// The current state of the instance.
-	State *CreateTemplateInstancesResponseTemplateInstanceState `json:"state,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// Indicates whether the operation was successful for this item.
+	Status ResponseStatus `json:"status"`
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The current state of the instance.
+	State InstanceState `json:"state"`
 }
