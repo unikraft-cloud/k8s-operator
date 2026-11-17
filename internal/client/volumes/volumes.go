@@ -82,7 +82,7 @@ func (m *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Volum
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
 		return &platform.CreateVolumeResponse{
 			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
-			Message: ukcplatform.Ptr(err.Error()),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
@@ -104,7 +104,7 @@ func (m *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Volum
 	for _, volume := range obj.Status.Data.Volumes {
 		if volume.Name != "" {
 			volumeNames = append(volumeNames, ukcplatform.NameOrUUID{
-				Name: ukcplatform.Ptr(volume.Name),
+				Name: new(volume.Name),
 			})
 		}
 	}
@@ -113,7 +113,7 @@ func (m *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Volum
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
 		return &platform.CreateVolumeResponse{
 			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
-			Message: ukcplatform.Ptr(err.Error()),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
