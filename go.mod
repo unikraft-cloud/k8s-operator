@@ -7,7 +7,7 @@ require (
 	github.com/go-logr/logr v1.4.4
 	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.17.1
-	github.com/onsi/gomega v1.32.0
+	github.com/onsi/gomega v1.44.0
 	k8s.io/apimachinery v0.30.1
 	k8s.io/client-go v0.30.1
 	sigs.k8s.io/controller-runtime v0.18.4
