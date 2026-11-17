@@ -13,6 +13,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request_target' && github.head_ref || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   actionlint:
     uses: unikraft-cloud/x/.github/workflows/actionlint.yaml@prod-staging
