@@ -1,9 +1,20 @@
 version: 2
 
+registries:
+  # Only so the egress proxy allows the unikraft.com go-get lookups. The
+  # schema requires credentials, but unikraft.com ignores them.
+  unikraft-com:
+    type: git
+    url: https://unikraft.com
+    username: anonymous
+    password: anonymous
+
 updates:
 
   - package-ecosystem: gomod
     directory: /
+    registries:
+      - unikraft-com
     schedule:
       interval: weekly
       day: sunday
@@ -13,6 +24,14 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '09:00'
+
+  - package-ecosystem: docker
+    directories:
+      - /
     schedule:
       interval: weekly
       day: sunday
