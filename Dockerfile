@@ -30,7 +30,7 @@
 # ISSUE, OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER
 # TO UNIKRAFT FOR SUCH UNIKRAFT SOFTWARE AT ISSUE.
 
-FROM debian:bookworm AS user
+FROM debian:12.15@sha256:268fb24c39bca92d326dd83ea3abebe4a3f7751c804ffef23bb6d857dd343ff8 AS user
 
 # Create an unprivileged user for production runtime
 ENV USER=k8s-operator
@@ -44,11 +44,12 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-FROM alpine:3.17.2 as ca-certificates
+FROM alpine:3.22.8@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f AS ca-certificates
 
-RUN apk add -U --no-cache ca-certificates
+RUN apk add -U --no-cache ca-certificates \
+ && ! grep -q MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG /etc/ssl/certs/ca-certificates.crt
 
-FROM debian:bullseye AS prod
+FROM debian:11.11@sha256:6f519a81440354a85eb592c5f32109ab80605f6b892455983a6f618bf87fabe9 AS prod
 
 # Import the user and group files from the build
 COPY --from=user /etc/passwd /etc/passwd
