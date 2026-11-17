@@ -140,8 +140,8 @@ func (r *Reconciler[CRD, SpecT, StatusT]) SetupWithManager(mgr ctrl.Manager) err
 		return fmt.Errorf("Reconciler.NewObject must be provided")
 	}
 
-	rateLimiter := workqueue.NewMaxOfRateLimiter(
-		workqueue.NewItemExponentialFailureRateLimiter(1*time.Second, 64*time.Second),
+	rateLimiter := workqueue.NewTypedMaxOfRateLimiter(
+		workqueue.NewTypedItemExponentialFailureRateLimiter[reconcile.Request](1*time.Second, 64*time.Second),
 	)
 
 	return ctrl.NewControllerManagedBy(mgr).
