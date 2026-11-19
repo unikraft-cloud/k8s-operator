@@ -1,0 +1,90 @@
+{{define "model_union" -}}
+{{- $union := .Name -}}
+{{- range $v := .Variants}}
+{{- if $v.Keys}}
+{{- fail (printf "union %s: variants told apart by their keys are not supported yet; extend model_union.go.tmpl" $union)}}
+{{- end}}
+{{- end -}}
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// {{$union}} holds exactly one of {{join ", " .TypeNames}}.
+//
+// It encodes to the JSON value of whichever member is set, and decodes into the
+// member matching the kind of the JSON value.  A struct rather than an
+// interface, so that it can be deep copied and embedded in a CRD.
+type {{$union}} struct {
+{{- range $v := .Variants}}
+	{{$v.Type}} *{{$v.Type}} `json:"-"`
+{{- end}}
+}
+{{range $v := .Variants}}
+{{- if $v.Declare}}
+{{- if $v.Doc}}
+// {{$v.Doc | replace "\n" "\n// "}}
+{{- end}}
+type {{$v.Type}} {{$v.Underlying}}
+{{end}}
+{{- end}}
+
+// MarshalJSON encodes the member that is set, or null if none is.
+func (u {{$union}}) MarshalJSON() ([]byte, error) {
+	switch {
+{{- range $v := .Variants}}
+	case u.{{$v.Type}} != nil:
+		return json.Marshal(u.{{$v.Type}})
+{{- end}}
+	}
+	return []byte("null"), nil
+}
+
+// UnmarshalJSON decodes data into the member matching its JSON kind.
+func (u *{{$union}}) UnmarshalJSON(data []byte) error {
+	*u = {{$union}}{}
+
+	kind := jsonKind(data)
+	if kind == 'n' {
+		return nil
+	}
+
+	// The kind narrows the candidates but does not prove a match: a failed
+	// decode falls through to the members that share the kind, and its error is
+	// only reported once none of them matched either.
+	var err error
+
+	switch kind {
+{{- range $v := .Variants}}
+{{- if $v.Kinds}}
+	case {{join ", " $v.Kinds}}:
+		var out {{$v.Type}}
+		if err = json.Unmarshal(data, &out); err == nil {
+			u.{{$v.Type}} = &out
+			return nil
+		}
+{{- end}}
+{{- end}}
+	}
+{{- range $v := .Variants}}
+{{- if not $v.Kinds}}
+
+	// {{$v.Type}} shares its JSON kind with an earlier member, so it can only
+	// be attempted speculatively.
+	{
+		var out {{$v.Type}}
+		if err = json.Unmarshal(data, &out); err == nil {
+			u.{{$v.Type}} = &out
+			return nil
+		}
+	}
+{{- end}}
+{{- end}}
+
+	if err != nil {
+		return err
+	}
+
+	return fmt.Errorf("cannot unmarshal JSON %q into {{$union}}", kind)
+}
+{{- end}}

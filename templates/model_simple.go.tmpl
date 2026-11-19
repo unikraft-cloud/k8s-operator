@@ -1,0 +1,49 @@
+{{define "model_simple" -}}
+{{- /* Unused imports are pruned by goimports after generation. */ -}}
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+)
+
+{{$schema := .Model.Schema}}
+{{$schemaName := .Model.SchemaName}}
+{{$fieldUnions := .FieldUnions}}
+{{- if $schema.Description}}
+// {{$schema.Description | replace "\n" "\n// "}}
+{{- end}}
+type {{$schemaName}} struct {
+{{- range $propName := propertyNamesOrdered $schemaName $schema}}
+{{- $prop := getProperty $schema $propName}}
+{{- if $prop}}
+{{- if $prop.Description}}
+	// {{$prop.Description | replace "\n" "\n	// "}}
+{{- end}}
+{{- $required := getPropertyRequired $schema $propName}}
+{{- $openAPIType := getType $prop}}
+{{- $union := index $fieldUnions (printf "%s.%s" $schemaName $propName)}}
+{{- $propType := schemaToGoType $prop | replace "map[string]interface{}" "runtime.RawExtension" | replace "interface{}" "runtime.RawExtension" | replace "time.Time" "metav1.Time"}}
+{{- if $union}}
+	{{- $propType = $union}}
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:pruning:PreserveUnknownFields
+{{- else if $prop.AnyOf}}
+	{{- /* An `anyOf` that is not a union is an "open" enum: known values
+	       plus any other string. */}}
+	{{- $open := true}}
+	{{- range $prop.AnyOf}}{{if ne (getType .Value) "string"}}{{$open = false}}{{end}}{{end}}
+	{{- if $open}}{{$propType = "string"}}{{end}}
+{{- else if $prop.Enum}}
+	// +kubebuilder:validation:Enum={{range $i, $v := $prop.Enum}}{{if $i}};{{end}}{{enumValue $prop $v}}{{end}}
+{{- else if and $prop.Items (not $prop.Items.Ref) $prop.Items.Value.Enum}}
+	// +kubebuilder:validation:items:Enum={{range $i, $v := $prop.Items.Value.Enum}}{{if $i}};{{end}}{{enumValue $prop.Items.Value $v}}{{end}}
+{{- end}}
+{{- if not $required}}
+	{{- if and (ne $openAPIType "array") (ne $openAPIType "object")}}
+		{{- $propType = printf "*%s" $propType}}
+	{{- end}}
+{{- end}}
+	{{pascalcase $propName}} {{$propType}} `json:"{{$propName}}{{if not $required}},omitempty{{end}}"`
+{{- end}}
+{{- end}}
+}
+{{- end}}

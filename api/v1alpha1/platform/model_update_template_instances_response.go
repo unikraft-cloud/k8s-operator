@@ -7,18 +7,17 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The response message for updating a template instance by its UUID.
-
+// The response message for updating one or more template instance(s) given
+// their UUID(s) or name(s).
 type UpdateTemplateInstancesResponse struct {
 	// The status of the response.
-	Status *ResponseStatus `json:"status,omitempty"`
+	Status ResponseStatus `json:"status"`
 	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
-	Message *string                              `json:"message,omitempty"`
-	Data    *UpdateTemplateInstancesResponseData `json:"data,omitempty"`
+	Message *string `json:"message,omitempty"`
+	// The response data for this request.
+	Data *UpdateTemplateInstancesResponseData `json:"data,omitempty"`
 	// A list of errors which may have occurred during the request.
 	Errors []ResponseError `json:"errors,omitempty"`
-	// The operation time in microseconds.  This is the time it took to process
-	// the request and generate the response.
-	OpTimeUs *uint64 `json:"op_time_us,omitempty"`
+	// The operation time in microseconds.
+	OpTimeUs uint64 `json:"op_time_us"`
 }

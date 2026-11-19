@@ -7,62 +7,63 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-// A volume represents a storage device that can be attached to an instance.
-// Current state of the volume.
-// +kubebuilder:validation:Enum=uninitialized;initializing;available;idle;mounted;busy;error
-type VolumeState string
-
-const (
-	VolumeStateUninitialized VolumeState = "uninitialized"
-	VolumeStateInitializing  VolumeState = "initializing"
-	VolumeStateAvailable     VolumeState = "available"
-	VolumeStateIdle          VolumeState = "idle"
-	VolumeStateMounted       VolumeState = "mounted"
-	VolumeStateBusy          VolumeState = "busy"
-	VolumeStateError         VolumeState = "error"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// A volume represents a storage device that can be attached to an instance.
 type Volume struct {
-	// The UUID of the volume.
-	//
-	// This is a unique identifier for the volume that is generated when the
-	// volume is created.  The UUID is used to reference the volume in
-	// API calls and can be used to identify the volume in all API calls that
-	// require an identifier.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the volume.
-	//
-	// This is a human-readable name that can be used to identify the volume.
-	// The name must be unique within the context of your account.  The name can
-	// also be used to identify the volume in API calls.
-	Name *string `json:"name,omitempty"`
+	// Indicates whether the operation was successful for this item.
+	Status *ResponseStatus `json:"status,omitempty"`
+	// An optional message providing additional information.
+	Message *string `json:"message,omitempty"`
+	// An optional error code.
+	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
 	// The time the volume was created.
-	CreatedAt *metav1.Time `json:"created_at,omitempty"`
+	CreatedAt metav1.Time `json:"created_at"`
 	// Current state of the volume.
-	State *VolumeState `json:"state,omitempty"`
+	State VolumeState `json:"state"`
 	// The size of the volume in megabytes.
-	SizeMb *uint64 `json:"size_mb,omitempty"`
+	SizeMb uint64 `json:"size_mb"`
 	// Indicates if the volume will stay alive when the last instance is deleted
 	// that this volume is attached to.
-	Persistent *bool `json:"persistent,omitempty"`
+	Persistent bool `json:"persistent"`
 	// List of instances that this volume is attached to.
 	AttachedTo []VolumeInstanceID `json:"attached_to,omitempty"`
 	// List of instances that have this volume mounted.
-	MountedBy []VolumeVolumeInstanceMount `json:"mounted_by,omitempty"`
+	// This does not apply to template volumes.
+	MountedBy []VolumeInstanceMount `json:"mounted_by,omitempty"`
 	// The tags associated with the volume.
 	// Maximum 16 tags are allowed, and each tag may not be longer than 256 characters.
 	Tags []string `json:"tags,omitempty"`
-	// An optional field representing the status of the request.  This field is
-	// only set when this message object is used as a response message.
-	Status *ResponseStatus `json:"status,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
-	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
-	Error *int32 `json:"error,omitempty"`
+	// Either static or dynamic reservation.
+	QuotaPolicy VolumeQuotaPolicy `json:"quota_policy"`
+	// If set to true, the volume cannot be deleted.
+	DeleteLock *bool `json:"delete_lock,omitempty"`
+	// The amount of free space in the volume in megabytes.
+	FreeMb *uint32 `json:"free_mb,omitempty"`
+	// The filesystem type of this volume.
+	// Without custom configuration, this is either `ext4` or `virtiofs`.
+	Filesystem *string `json:"filesystem,omitempty"`
+	// Host path backing this managed volume.
+	// This field is only available for managed volumes and users with
+	// appropriate permissions.
+	HostPath *string `json:"host_path,omitempty"`
+	// The access mode of the volume, controlling volume sharing behavior.
+	// Defaults to `rwo` if not specified.
+	AccessMode *VolumeAccessMode `json:"access_mode,omitempty"`
+	// Guest UID for managed volumes (host_path mode only).
+	Uid *uint32 `json:"uid,omitempty"`
+	// Guest GID for managed volumes (host_path mode only).
+	Gid *uint32 `json:"gid,omitempty"`
+	// Optional script arguments that were applied to the custom volume filesystem
+	// initialization scripts.
+	Args map[string]string `json:"args,omitempty"`
 }

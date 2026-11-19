@@ -7,19 +7,21 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// Per-item result for an update volumes operation.
 type UpdateVolumesResponseUpdatedVolume struct {
-	// The UUID of the volume that was updated.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the service group that was updated.
-	Name *string `json:"name,omitempty"`
-	// The status of this particular volume update operation.
-	Status *string `json:"status,omitempty"`
-	// (Optional).  The client-provided ID from the request.
-	Id *string `json:"id,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// Indicates whether the operation was successful for this item.
+	Status ResponseStatus `json:"status"`
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The client-provided ID from the request.
+	Id *string `json:"id,omitempty"`
 }

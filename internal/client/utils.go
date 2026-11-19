@@ -55,7 +55,7 @@ func Convert[S any, T any](spec S) (T, error) {
 		return req, fmt.Errorf("failed to copy spec to request: source is invalid")
 	}
 
-	if srcVal.Kind() == reflect.Ptr {
+	if srcVal.Kind() == reflect.Pointer {
 		if srcVal.IsNil() {
 			return req, fmt.Errorf("failed to copy spec to request: source pointer is nil")
 		}
@@ -67,7 +67,7 @@ func Convert[S any, T any](spec S) (T, error) {
 
 	dst := any(&req)
 	dstVal := reflect.ValueOf(dst).Elem()
-	if dstVal.Kind() == reflect.Ptr {
+	if dstVal.Kind() == reflect.Pointer {
 		if dstVal.IsNil() {
 			dstVal.Set(reflect.New(dstVal.Type().Elem()))
 		}

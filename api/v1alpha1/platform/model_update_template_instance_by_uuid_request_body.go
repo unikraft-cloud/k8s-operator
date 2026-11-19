@@ -7,37 +7,24 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-import "k8s.io/apimachinery/pkg/runtime"
-
-// The property to modify.
-// +kubebuilder:validation:Enum=tags;delete_lock
-type UpdateTemplateInstanceByUUIDRequestBodyProp string
-
-const (
-	UpdateTemplateInstanceByUUIDRequestBodyPropTags        UpdateTemplateInstanceByUUIDRequestBodyProp = "tags"
-	UpdateTemplateInstanceByUUIDRequestBodyPropDelete_lock UpdateTemplateInstanceByUUIDRequestBodyProp = "delete_lock"
-)
-
-// The operation to perform on the property.
-// +kubebuilder:validation:Enum=set;add;del
-type UpdateTemplateInstanceByUUIDRequestBodyOp string
-
-const (
-	UpdateTemplateInstanceByUUIDRequestBodyOpSet UpdateTemplateInstanceByUUIDRequestBodyOp = "set"
-	UpdateTemplateInstanceByUUIDRequestBodyOpAdd UpdateTemplateInstanceByUUIDRequestBodyOp = "add"
-	UpdateTemplateInstanceByUUIDRequestBodyOpDel UpdateTemplateInstanceByUUIDRequestBodyOp = "del"
+import (
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type UpdateTemplateInstanceByUUIDRequestBody struct {
-	// (Optional).  A client-provided identifier for tracking this operation in
-	// the response.
+	// A client-provided identifier for tracking this operation in the response.
 	Id *string `json:"id,omitempty"`
 	// The property to modify.
-	Prop UpdateTemplateInstanceByUUIDRequestBodyProp `json:"prop"`
-	// The operation to perform on the property.
-	Op UpdateTemplateInstanceByUUIDRequestBodyOp `json:"op"`
-	// The value for the update operation. The type depends on the property and operation:
+	Prop MutableTemplateInstanceProperty `json:"prop"`
+	// The operation to perform.
+	Op MutableTemplateInstanceOperation `json:"op"`
+	// The value for the update operation. The type depends on the property and
+	// operation:
 	// - For "tags": array of strings
 	// - For "delete_lock": boolean
+	// - For "autokill": object with time_ms field
+	// - For "image": image reference string or object (SET only)
+	// - For "roms": array of ROM objects (SET only)
+	// - For "plugins": array of plugin objects (SET only)
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

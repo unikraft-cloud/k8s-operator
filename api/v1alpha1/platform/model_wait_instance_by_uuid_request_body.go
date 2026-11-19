@@ -8,26 +8,26 @@
 package platform
 
 // Wait parameters.
-// The desired state to wait for.  Default is `running`.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type WaitInstanceByUUIDRequestBodyState string
-
-const (
-	WaitInstanceByUUIDRequestBodyStateStopped  WaitInstanceByUUIDRequestBodyState = "stopped"
-	WaitInstanceByUUIDRequestBodyStateStarting WaitInstanceByUUIDRequestBodyState = "starting"
-	WaitInstanceByUUIDRequestBodyStateRunning  WaitInstanceByUUIDRequestBodyState = "running"
-	WaitInstanceByUUIDRequestBodyStateDraining WaitInstanceByUUIDRequestBodyState = "draining"
-	WaitInstanceByUUIDRequestBodyStateStopping WaitInstanceByUUIDRequestBodyState = "stopping"
-	WaitInstanceByUUIDRequestBodyStateTemplate WaitInstanceByUUIDRequestBodyState = "template"
-	WaitInstanceByUUIDRequestBodyStateStandby  WaitInstanceByUUIDRequestBodyState = "standby"
-)
-
 type WaitInstanceByUUIDRequestBody struct {
-	// The desired state to wait for.  Default is `running`.
-	State *WaitInstanceByUUIDRequestBodyState `json:"state,omitempty"`
-	// Timeout in milliseconds to wait for the instance to reach the desired
-	// state.  If the timeout is reached, the request will fail with an error.
-	// A value of -1 means to wait indefinitely until the instance reaches the
-	// desired state.
+	// The desired state to wait for. Default is `running`.
+	State *InstanceState `json:"state,omitempty"`
+	// Deprecated: Use `timeout_s` instead. Timeout in milliseconds to
+	// wait for the instance to reach the desired state. If `timeout_s` is
+	// not set, this value is converted by rounding up to the next full
+	// second. A value of -1 selects the platform's maximum API timeout
+	// (60000 ms by default); larger values are rejected.
 	TimeoutMs *int64 `json:"timeout_ms,omitempty"`
+	// Timeout in seconds to wait for the instance to reach the desired
+	// state. Every wait is capped at the platform's maximum API timeout
+	// (60 seconds by default); larger values are rejected. A value of 0 or
+	// -1, or omitting the timeout, waits for that maximum; there is no way
+	// to wait indefinitely or to skip the wait. If several instances are
+	// waited for in one request, the shortest positive timeout applies to
+	// all of them.
+	//
+	// Reaching the timeout is not an HTTP error: the response carries the
+	// message `Operation timed out`, and each instance that has not reached
+	// the desired state is reported with its current `state` and an `error`
+	// status.
+	TimeoutS *int64 `json:"timeout_s,omitempty"`
 }

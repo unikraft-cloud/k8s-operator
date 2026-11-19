@@ -7,11 +7,22 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// (Optional).  The UUID of a template instance to create the instance from.
-
+// Template configuration when creating an instance.
 type CreateInstanceRequestTemplate struct {
-	// Mutually exclusive with name.
-	Uuid string `json:"uuid"`
-	// Mutually exclusive with UUID.
-	Name string `json:"name"`
+	// The UUID of the resource.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the resource.
+	Name *string `json:"name,omitempty"`
+	// Whether the instance needs to run in order to reach template state
+	Prepare *bool `json:"prepare,omitempty"`
+	// Configuration parameters to apply when building the new instance from the
+	// source template.
+	CreateArgs *Instance `json:"create_args,omitempty"`
+	// Timeout in seconds for preparing the template before the preparation is
+	// aborted. Only applies when `prepare` is set. A value of 0 means no
+	// timeout.
+	PrepareTimeoutS *int64 `json:"prepare_timeout_s,omitempty"`
+	// Automatic delete-on-idle configuration for the template. Only applies
+	// when `prepare` is set.
+	Autokill *TemplateAutokill `json:"autokill,omitempty"`
 }

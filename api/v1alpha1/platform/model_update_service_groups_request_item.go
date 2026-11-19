@@ -7,45 +7,37 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-import "k8s.io/apimachinery/pkg/runtime"
-
-// A single update operation to be applied to a service group
-// The property to modify.
-// +kubebuilder:validation:Enum=services;domains;soft_limit;hard_limit
-type UpdateServiceGroupsRequestItemProp string
-
-const (
-	UpdateServiceGroupsRequestItemPropServices   UpdateServiceGroupsRequestItemProp = "services"
-	UpdateServiceGroupsRequestItemPropDomains    UpdateServiceGroupsRequestItemProp = "domains"
-	UpdateServiceGroupsRequestItemPropSoft_limit UpdateServiceGroupsRequestItemProp = "soft_limit"
-	UpdateServiceGroupsRequestItemPropHard_limit UpdateServiceGroupsRequestItemProp = "hard_limit"
+import (
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// The operation to perform.
-// +kubebuilder:validation:Enum=set;add;del
-type UpdateServiceGroupsRequestItemOp string
-
-const (
-	UpdateServiceGroupsRequestItemOpSet UpdateServiceGroupsRequestItemOp = "set"
-	UpdateServiceGroupsRequestItemOpAdd UpdateServiceGroupsRequestItemOp = "add"
-	UpdateServiceGroupsRequestItemOpDel UpdateServiceGroupsRequestItemOp = "del"
-)
-
+// A single update operation to be applied to a service group.
 type UpdateServiceGroupsRequestItem struct {
-	// (Optional).  A client-provided identifier for tracking this operation in the response.
-	Id *string `json:"id,omitempty"`
-	// The UUID of the service group to update.  Mutually exclusive with name.
+	// The UUID of the resource.
 	Uuid *string `json:"uuid,omitempty"`
-	// The name of the service group to update.  Mutually exclusive with UUID.
+	// The name of the resource.
 	Name *string `json:"name,omitempty"`
+	// A client-provided identifier for tracking this operation in the response.
+	Id *string `json:"id,omitempty"`
 	// The property to modify.
-	Prop UpdateServiceGroupsRequestItemProp `json:"prop"`
+	Prop MutableServiceGroupProperty `json:"prop"`
 	// The operation to perform.
-	Op UpdateServiceGroupsRequestItemOp `json:"op"`
-	// The value for the update operation:
-	// - For "services": array of Service objects
-	// - For "domains": array of Domain objects
-	// - For "soft_limit": integer (1–65535), must be <= "hard_limit"
-	// - For "hard_limit": integer (1–65535), must be >= "soft_limit"
+	Op MutableServiceGroupOperation `json:"op"`
+	// The value for the update operation. The type depends on the property and operation:
+	// - For "image": string
+	// - For "args": string or array of strings
+	// - For "env": object (for SET/ADD) or string/array of strings (for DEL)
+	// - For "memory_mb": integer
+	// - For "vcpus": integer
+	// - For "scale_to_zero": object with cooldown_time_ms, policy, and stateful fields
+	// - For "tags": array of strings
+	// - For "delete_lock": boolean
+	// - For "schedules": array of schedule objects (with name, when, action, and optional args fields).
+	// Use action "exec" together with args to execute a command at the scheduled time.
+	// - For "autokill": object with time_ms and num_requests fields
+	// - For "hostname": string (valid DNS label)
+	// - For "roms": array of ROM objects (with name and image fields) for SET/ADD, or array of ROM names for DEL
+	// - For "dependencies": array of instance identifiers (name or UUID)
+	// - For "sched_priority": SchedPriority enum value ("normal", "medium", "high", "admin")
 	Value *runtime.RawExtension `json:"value,omitempty"`
 }

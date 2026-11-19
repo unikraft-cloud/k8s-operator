@@ -7,50 +7,24 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The current state of the instance.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type StopInstancesResponseStoppedInstanceState string
-
-const (
-	StopInstancesResponseStoppedInstanceStateStopped  StopInstancesResponseStoppedInstanceState = "stopped"
-	StopInstancesResponseStoppedInstanceStateStarting StopInstancesResponseStoppedInstanceState = "starting"
-	StopInstancesResponseStoppedInstanceStateRunning  StopInstancesResponseStoppedInstanceState = "running"
-	StopInstancesResponseStoppedInstanceStateDraining StopInstancesResponseStoppedInstanceState = "draining"
-	StopInstancesResponseStoppedInstanceStateStopping StopInstancesResponseStoppedInstanceState = "stopping"
-	StopInstancesResponseStoppedInstanceStateTemplate StopInstancesResponseStoppedInstanceState = "template"
-	StopInstancesResponseStoppedInstanceStateStandby  StopInstancesResponseStoppedInstanceState = "standby"
-)
-
-// The previous state of the instance before the stop operation was invoked.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type StopInstancesResponseStoppedInstancePreviousState string
-
-const (
-	StopInstancesResponseStoppedInstancePreviousStateStopped  StopInstancesResponseStoppedInstancePreviousState = "stopped"
-	StopInstancesResponseStoppedInstancePreviousStateStarting StopInstancesResponseStoppedInstancePreviousState = "starting"
-	StopInstancesResponseStoppedInstancePreviousStateRunning  StopInstancesResponseStoppedInstancePreviousState = "running"
-	StopInstancesResponseStoppedInstancePreviousStateDraining StopInstancesResponseStoppedInstancePreviousState = "draining"
-	StopInstancesResponseStoppedInstancePreviousStateStopping StopInstancesResponseStoppedInstancePreviousState = "stopping"
-	StopInstancesResponseStoppedInstancePreviousStateTemplate StopInstancesResponseStoppedInstancePreviousState = "template"
-	StopInstancesResponseStoppedInstancePreviousStateStandby  StopInstancesResponseStoppedInstancePreviousState = "standby"
-)
-
+// Per-item result for a stop instances operation.
 type StopInstancesResponseStoppedInstance struct {
-	// The UUID of the instance.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance.
-	Name *string `json:"name,omitempty"`
-	// The current state of the instance.
-	State *StopInstancesResponseStoppedInstanceState `json:"state,omitempty"`
-	// The previous state of the instance before the stop operation was invoked.
-	PreviousState *StopInstancesResponseStoppedInstancePreviousState `json:"previous_state,omitempty"`
-	// An optional field representing the status of the request.  This field is
-	// only set when this message object is used as a response message.
+	// Indicates whether the operation was successful for this item.
 	Status *ResponseStatus `json:"status,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The current state of the instance.
+	State InstanceState `json:"state"`
+	// The previous state of the instance before the stop operation was
+	// invoked.
+	PreviousState InstanceState `json:"previous_state"`
 }
