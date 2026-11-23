@@ -7,35 +7,28 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// State of the instance when the logs were retrieved.
-// +kubebuilder:validation:Enum=stopped;starting;running;draining;stopping;template;standby
-type GetInstancesLogsResponseLoggedInstanceState string
-
-const (
-	GetInstancesLogsResponseLoggedInstanceStateStopped  GetInstancesLogsResponseLoggedInstanceState = "stopped"
-	GetInstancesLogsResponseLoggedInstanceStateStarting GetInstancesLogsResponseLoggedInstanceState = "starting"
-	GetInstancesLogsResponseLoggedInstanceStateRunning  GetInstancesLogsResponseLoggedInstanceState = "running"
-	GetInstancesLogsResponseLoggedInstanceStateDraining GetInstancesLogsResponseLoggedInstanceState = "draining"
-	GetInstancesLogsResponseLoggedInstanceStateStopping GetInstancesLogsResponseLoggedInstanceState = "stopping"
-	GetInstancesLogsResponseLoggedInstanceStateTemplate GetInstancesLogsResponseLoggedInstanceState = "template"
-	GetInstancesLogsResponseLoggedInstanceStateStandby  GetInstancesLogsResponseLoggedInstanceState = "standby"
-)
-
+// Per-item result for a get instances logs operation.
 type GetInstancesLogsResponseLoggedInstance struct {
-	// The UUID of the instance.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the instance.
-	Name *string `json:"name,omitempty"`
-	// Base64 encoded log output of the instance.
-	Output    *string                                          `json:"output,omitempty"`
-	Available *GetInstancesLogsResponseLoggedInstanceAvailable `json:"available,omitempty"`
-	Range     *GetInstancesLogsResponseLoggedInstanceRange     `json:"range,omitempty"`
-	// State of the instance when the logs were retrieved.
-	State *GetInstancesLogsResponseLoggedInstanceState `json:"state,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// Indicates whether the operation was successful for this item.
+	Status *ResponseStatus `json:"status,omitempty"`
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// Base64 encoded log output of the instance.
+	Output string `json:"output"`
+	// Description of the log availability.
+	Available GetInstancesLogsResponseAvailable `json:"available"`
+	// Description of the range that was returned. Useful for requests with
+	// offset relative to end.
+	Range GetInstancesLogsResponseRange `json:"range"`
+	// State of the instance when the logs were retrieved.
+	State InstanceState `json:"state"`
 }

@@ -8,19 +8,25 @@
 package platform
 
 // The request message for creating/uploading a new certificate.
-
 type CreateCertificateRequest struct {
-	// The common name (CN) of the certificate.
-	Cn string `json:"cn"`
-	// The chain of the certificate.
-	Chain string `json:"chain"`
-	// The private key of the certificate.
-	Pkey string `json:"pkey"`
-	// The name of the certificate.
-	//
-	// This is a human-readable name that can be used to identify the certificate.
-	// The name must be unique within the context of your account.  If no name is
-	// specified, a random name is generated for you.  The name can also be used
-	// to identify the certificate in API calls.
+	// The name of the resource. If not provided, a random name is generated.
+	// The name must be unique within the context of your account.
 	Name *string `json:"name,omitempty"`
+	// The name of the node to place the resource on. If not provided, the
+	// platform picks one. Only accepted on metros that span multiple nodes.
+	Node *string `json:"node,omitempty"`
+	// The common name (CN) of the certificate.
+	//
+	// Deprecated: Use `common_name` instead.
+	Cn *string `json:"cn,omitempty"`
+	// The common name (CN) of the certificate.
+	//
+	// This must be a fully-qualified domain name (FQDN) ending with a period
+	// `.`, e.g. `funky-town.com.`. Exactly one of `cn` or `common_name` must be
+	// specified.
+	CommonName *string `json:"common_name,omitempty"`
+	// The certificate chain in PEM format. Required for user-uploaded certificates.
+	Chain string `json:"chain"`
+	// The private key in PEM format. Required for user-uploaded certificates.
+	Pkey string `json:"pkey"`
 }

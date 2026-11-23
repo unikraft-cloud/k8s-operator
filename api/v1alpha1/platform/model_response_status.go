@@ -7,12 +7,12 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-//	The response status of an API request.
-//
-// +kubebuilder:validation:Enum=success;error
+// The response status of an API request.
+// +kubebuilder:validation:Enum="success";"error";"partial_success"
 type ResponseStatus string
 
 const (
-	ResponseStatusSUCCESS ResponseStatus = "success"
-	ResponseStatusERROR   ResponseStatus = "error"
+	ResponseStatusSuccess        ResponseStatus = "success"
+	ResponseStatusError          ResponseStatus = "error"
+	ResponseStatusPartialSuccess ResponseStatus = "partial_success"
 )

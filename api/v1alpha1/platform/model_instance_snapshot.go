@@ -7,9 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// The snapshot of the instance, if exists.
-
+// A snapshot reference for an instance.
 type InstanceSnapshot struct {
-	// The UUID of the snapshot.
-	Uuid *string `json:"uuid,omitempty"`
+	Uuid string `json:"uuid"`
 }

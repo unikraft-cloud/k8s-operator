@@ -7,21 +7,20 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// Quotas with per-item response envelope fields merged in.
 type Quotas struct {
-	// The UUID of the quota.
-	Uuid   *string       `json:"uuid,omitempty"`
-	Used   *QuotasUsed   `json:"used,omitempty"`
-	Hard   *QuotasHard   `json:"hard,omitempty"`
-	Limits *QuotasLimits `json:"limits,omitempty"`
-	// An optional field representing the status of the request.  This field is
-	// only set when this message object is used as a response message.
+	// Indicates whether the operation was successful for this item.
 	Status *ResponseStatus `json:"status,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is only set when this message object is used as a response
-	// message, and is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the quota.
+	Uuid string `json:"uuid"`
+	// Used quota.
+	Used QuotasStats `json:"used"`
+	// Configured quota limits.
+	Hard QuotasStats `json:"hard"`
+	// Additional limits.
+	Limits QuotasLimits `json:"limits"`
 }

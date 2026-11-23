@@ -7,7 +7,7 @@
 // +k8s:deepcopy-gen=package
 package platform
 
+// The response data for this request.
 type CreateVolumeResponseData struct {
-	// The volume(s) which were created by the request.
 	Volumes []CreateVolumeResponseVolume `json:"volumes,omitempty"`
 }

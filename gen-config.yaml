@@ -1,7 +1,0 @@
-typeMappings:
-  DateTime: metav1.Time
-  AnyType: runtime.RawExtension
-
-additionalProperties:
-  packageName: platform
-  packageVersion: 0.1.0

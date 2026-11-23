@@ -8,11 +8,6 @@
 package platform
 
 // The response data for this request.
-
 type GetInstancesLogsResponseData struct {
-	// The instance which this requested waited on.
-	//
-	// Note: only one instance can be specified in the request, so this will
-	// always contain a single entry.
 	Instances []GetInstancesLogsResponseLoggedInstance `json:"instances,omitempty"`
 }

@@ -83,8 +83,8 @@ func (c *Client) CreateResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	resp, err := c.client.CreateInstance(ctx, req)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorAlreadyExists) {
 		return &platform.CreateInstanceResponse{
-			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
-			Message: ukcplatform.Ptr(err.Error()),
+			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
@@ -96,8 +96,8 @@ func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	resp, err := c.client.GetInstances(ctx, []ukcplatform.NameOrUUID{{Name: obj.Spec.Name}}, true)
 	if err != nil {
 		return &platform.CreateInstanceResponse{
-			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
-			Message: ukcplatform.Ptr(err.Error()),
+			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
@@ -116,23 +116,23 @@ func (c *Client) UpdateResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	updateResp, err := c.client.UpdateInstances(ctx, updates)
 	if err != nil {
 		return &platform.CreateInstanceResponse{
-			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
-			Message: ukcplatform.Ptr(err.Error()),
+			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}
 
 	if updateResp.Status == string(ukcplatform.ResponseStatusERROR) {
 		return &platform.CreateInstanceResponse{
-			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
-			Message: ukcplatform.Ptr(updateResp.Message),
+			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
+			Message: new(updateResp.Message),
 			Data:    obj.Status.Data,
 		}, nil
 	}
 
 	return &platform.CreateInstanceResponse{
-		Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusSUCCESS)),
-		Message: ukcplatform.Ptr(""),
+		Status:  platform.ResponseStatus(ukcplatform.ResponseStatusSUCCESS),
+		Message: new(""),
 		Data:    obj.Status.Data,
 	}, nil
 }
@@ -144,9 +144,9 @@ func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 
 	instanceNames := make([]ukcplatform.NameOrUUID, 0)
 	for _, instance := range obj.Status.Data.Instances {
-		if instance.Name != nil {
+		if instance.Name != "" {
 			instanceNames = append(instanceNames, ukcplatform.NameOrUUID{
-				Name: instance.Name,
+				Name: new(instance.Name),
 			})
 		}
 	}
@@ -154,8 +154,8 @@ func (c *Client) DeleteResource(ctx context.Context, obj *unikraftv1alpha1.Insta
 	resp, err := c.client.DeleteInstances(ctx, instanceNames)
 	if err != nil && !ukcplatform.ErrorContainsOnly(err, ukcplatform.APIHTTPErrorNotFound) {
 		return &platform.CreateInstanceResponse{
-			Status:  ukcplatform.Ptr(platform.ResponseStatus(ukcplatform.ResponseStatusERROR)),
-			Message: ukcplatform.Ptr(err.Error()),
+			Status:  platform.ResponseStatus(ukcplatform.ResponseStatusERROR),
+			Message: new(err.Error()),
 			Data:    obj.Status.Data,
 		}, err
 	}

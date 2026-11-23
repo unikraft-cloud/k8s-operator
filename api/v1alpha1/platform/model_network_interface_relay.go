@@ -1,0 +1,20 @@
+// This file is auto-generated. DO NOT EDIT.
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2025, Unikraft GmbH.
+// Licensed under the BSD-3-Clause License (the "License").
+// You may not use this file except in compliance with the License.
+
+// +k8s:deepcopy-gen=package
+package platform
+
+// An object that routes all traffic through another interface.
+type NetworkInterfaceRelay struct {
+	// Whether the relay forwards DNS requests. Set to false
+	// to let the default DNS server handle them instead.
+	// Defaults to true.
+	RelayDns *bool `json:"relay_dns,omitempty"`
+	// The UUID of the resource.
+	Uuid *string `json:"uuid,omitempty"`
+	// The name of the resource.
+	Name *string `json:"name,omitempty"`
+}

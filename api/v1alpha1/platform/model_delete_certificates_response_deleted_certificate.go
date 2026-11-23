@@ -7,20 +7,19 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// Details of the certificate which was deleted by this request.
-
+// Per-item result for a delete certificates operation.
 type DeleteCertificatesResponseDeletedCertificate struct {
-	// Indicates whether the delete operation was successful or not for this
-	// certificate.
-	Status *ResponseStatus `json:"status,omitempty"`
-	// The UUID of the certificate which was deleted.
-	Uuid *string `json:"uuid,omitempty"`
-	// The name of the certificate which was deleted.
-	Name *string `json:"name,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// Indicates whether the operation was successful for this item.
+	Status ResponseStatus `json:"status"`
+	// An optional message providing additional information.
 	Message *string `json:"message,omitempty"`
-	// An optional error code providing additional information about the status.
-	// This field is useful when the status is not `success`.
+	// An optional error code.
 	Error *int32 `json:"error,omitempty"`
+	// The UUID of the resource.
+	Uuid string `json:"uuid"`
+	// The human-readable name of the resource.
+	Name string `json:"name"`
+	// The name of the node the resource is placed on. Only present on metros
+	// that span multiple nodes.
+	Node *string `json:"node,omitempty"`
 }

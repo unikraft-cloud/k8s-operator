@@ -1,0 +1,57 @@
+// This file is auto-generated. DO NOT EDIT.
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2025, Unikraft GmbH.
+// Licensed under the BSD-3-Clause License (the "License").
+// You may not use this file except in compliance with the License.
+
+// +k8s:deepcopy-gen=package
+package platform
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// A schedule defines when an action should be performed on an instance.
+//
+// Each schedule specifies a name, a calendar expression following systemd
+// calendar event syntax, and an action (start, stop, delete, or exec).
+//
+// Calendar expressions format:
+//
+// [weekday] [[year-]month-day] [hour:minute[:second]]
+//
+// Supported syntax:
+//
+// - `*` - Any value
+// - `5` - Exact value
+// - `1..5` - Range
+// - `1..5/2` - Range with step
+// - `1,2,5` - Comma-separated list
+//
+// Example: `*-*-* 09:00:00` - Every day at 09:00 UTC
+// Example: `Sat,Sun *-*-* 20:00:00` - Every Saturday and Sunday at 20:00 UTC
+type Schedule struct {
+	// The name of the schedule.
+	//
+	// Must be unique within an instance.
+	Name string `json:"name"`
+	// The calendar expression specifying when the action should be performed.
+	//
+	// Uses systemd calendar event syntax.
+	// See https://www.man7.org/linux/man-pages/man7/systemd.time.7.html
+	When string `json:"when"`
+	// The action to perform at the scheduled time.
+	Action *ScheduleAction `json:"action,omitempty"`
+	// The timestamp of when the next scheduled action will occur.
+	//
+	// This field is populated only in responses (not settable in requests).
+	// Omitted if no next execution is scheduled.
+	NextAt *metav1.Time `json:"next_at,omitempty"`
+	// The command to execute when the action is `exec`.
+	//
+	// Required and non-empty when `action` is `exec`, and rejected for any
+	// other action, even when empty. Each element is a separate argument; the
+	// first element is the executable. At most 128 arguments, and the encoded
+	// command must fit in 1024 bytes.
+	Args []string `json:"args,omitempty"`
+}

@@ -8,5 +8,7 @@
 package platform
 
 type DetachVolumeByUUIDRequestBody struct {
-	From *DetachVolumeByUUIDRequestBodyFrom `json:"from,omitempty"`
+	// UUID or name of the instance to detach the volume from. If not specified,
+	// the volume is detached from all instances.
+	From *NameOrUUID `json:"from,omitempty"`
 }

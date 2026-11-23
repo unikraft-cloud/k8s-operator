@@ -8,27 +8,15 @@
 package platform
 
 // The response message for a GetAutoscaleConfigurationsRequest.
-// The status of the response.
-// +kubebuilder:validation:Enum=success;error;unconfigured
-type GetAutoscaleConfigurationsResponseStatus string
-
-const (
-	GetAutoscaleConfigurationsResponseStatusSuccess      GetAutoscaleConfigurationsResponseStatus = "success"
-	GetAutoscaleConfigurationsResponseStatusError        GetAutoscaleConfigurationsResponseStatus = "error"
-	GetAutoscaleConfigurationsResponseStatusUnconfigured GetAutoscaleConfigurationsResponseStatus = "unconfigured"
-)
-
 type GetAutoscaleConfigurationsResponse struct {
 	// The status of the response.
-	Status *GetAutoscaleConfigurationsResponseStatus `json:"status,omitempty"`
+	Status GetAutoscaleConfigurationsResponseStatus `json:"status"`
+	// An optional message providing additional information about the status.
+	Message *string `json:"message,omitempty"`
 	// The response data for this request.
-	Data *GetAutoscaleConfigurationsResponseData `json:"data,omitempty"`
+	Data GetAutoscaleConfigurationsResponseData `json:"data"`
 	// A list of errors which may have occurred during the request.
 	Errors []ResponseError `json:"errors,omitempty"`
-	// The operation time in microseconds.  This is the time it took to process
-	// the request and generate the response.
-	OpTimeUs *uint64 `json:"op_time_us,omitempty"`
-	// An optional message providing additional information about the status.
-	// This field is useful when the status is not `success`.
-	Message *string `json:"message,omitempty"`
+	// The operation time in microseconds.
+	OpTimeUs uint64 `json:"op_time_us"`
 }

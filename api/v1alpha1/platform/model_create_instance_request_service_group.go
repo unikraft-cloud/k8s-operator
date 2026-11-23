@@ -7,34 +7,20 @@
 // +k8s:deepcopy-gen=package
 package platform
 
-// (Optional).  The service group configuration when creating an instance.
-//
-// When creating an instance, either a previously created (persistent) service
-// group can be referenced (either through its name or UUID), or a new
-// (ephemeral) service group can be created for the instance by specifying the
-// list of services it should expose and optionally the domains it should use.
-// Not used by template instances.
-
+// The service group configuration when creating an instance. If no existing
+// (persistent) service group is specified via its identifier, a new
+// (ephemeral) service group can be created by specifying the services it
+// should expose. A service defines the configuration settings of an exposed
+// port by the instance. A service is a combination of a public port, an
+// internal port, and a set of handlers that define how the service will handle
+// incoming connections.
 type CreateInstanceRequestServiceGroup struct {
-	// (Optional).  Reference an existing (persistent) service group by its
-	// UUID.  Mutually exclusive with name.
+	// The UUID of the resource.
 	Uuid *string `json:"uuid,omitempty"`
-	// (Optional).  Reference an existing (persistent) service group by its
-	// name.  Mutually exclusive with UUID.
-	Name *string `json:"name,omitempty"`
-	// If no existing (persistent) service group is specified via its
-	// identifier, a new (ephemeral) service group can be created.  In addition
-	// to the services it must expose, you can specify which domains it should
-	// use too.
-	Domains []CreateInstanceRequestDomain `json:"domains,omitempty"`
-	// If no existing service group identifier is provided, one or more new
-	// (ephemeral, non-persistent) service(s) can be created with the following
-	// definitions.
-	Services []Service `json:"services,omitempty"`
-	// The soft limit for the number of services that can be created in this
-	// service group.
-	SoftLimit *uint32 `json:"soft_limit,omitempty"`
-	// The hard limit for the number of services that can be created in this
-	// service group.
-	HardLimit *uint32 `json:"hard_limit,omitempty"`
+	// The name of the resource.
+	Name      *string                       `json:"name,omitempty"`
+	Domains   []CreateInstanceRequestDomain `json:"domains,omitempty"`
+	Services  []Service                     `json:"services,omitempty"`
+	SoftLimit *uint32                       `json:"soft_limit,omitempty"`
+	HardLimit *uint32                       `json:"hard_limit,omitempty"`
 }

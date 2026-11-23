@@ -1,0 +1,34 @@
+{{define "model_enum" -}}
+{{$schema := .Schema}}
+{{$schemaName := .SchemaName}}
+{{- if $schema.Description}}
+// {{$schema.Description | replace "\n" "\n// "}}
+{{- end}}
+// +kubebuilder:validation:Enum={{range $i, $v := $schema.Enum}}{{if $i}};{{end}}{{enumValue $schema $v}}{{end}}
+type {{$schemaName}} {{enumBaseGoType $schema}}
+
+const (
+{{- range $schema.Enum}}
+	{{$schemaName}}{{pascalcase (printf "%v" .)}} {{$schemaName}} = {{enumValue $schema .}}
+{{- end}}
+)
+{{- end}}
+
+{{define "model_open_enum" -}}
+{{$schema := .Schema}}
+{{$schemaName := .SchemaName}}
+{{- if $schema.Description}}
+// {{$schema.Description | replace "\n" "\n// "}}
+{{- end}}
+//
+// The values below are the known ones; any other string is accepted too.
+type {{$schemaName}} string
+
+const (
+{{- range $branch := $schema.AnyOf}}
+{{- range $branch.Value.Enum}}
+	{{$schemaName}}{{pascalcase (printf "%v" .)}} {{$schemaName}} = {{enumValue $branch.Value .}}
+{{- end}}
+{{- end}}
+)
+{{- end}}
