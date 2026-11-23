@@ -30,26 +30,27 @@
 # ISSUE, OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER
 # TO UNIKRAFT FOR SUCH UNIKRAFT SOFTWARE AT ISSUE.
 
-FROM debian:12.15@sha256:268fb24c39bca92d326dd83ea3abebe4a3f7751c804ffef23bb6d857dd343ff8 AS user
+FROM debian:13.7@sha256:9c6e381421d0f48d1b8133e573f33c185ee16cbf505eda9c4a8a4791b25ea8a6 AS user
 
 # Create an unprivileged user for production runtime
 ENV USER=k8s-operator
 ENV UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
+RUN groupadd --gid "${UID}" "${USER}" \
+ && useradd \
+    --uid "${UID}" \
+    --gid "${UID}" \
+    --comment ",,," \
+    --home-dir "/nonexistent" \
     --no-create-home \
     --shell "/sbin/nologin" \
-    --uid "${UID}" \
     "${USER}"
 
-FROM alpine:3.22.8@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f AS ca-certificates
+FROM alpine:3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf AS ca-certificates
 
 RUN apk add -U --no-cache ca-certificates \
  && ! grep -q MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG /etc/ssl/certs/ca-certificates.crt
 
-FROM debian:11.11@sha256:6f519a81440354a85eb592c5f32109ab80605f6b892455983a6f618bf87fabe9 AS prod
+FROM debian:13.7@sha256:9c6e381421d0f48d1b8133e573f33c185ee16cbf505eda9c4a8a4791b25ea8a6 AS prod
 
 # Import the user and group files from the build
 COPY --from=user /etc/passwd /etc/passwd
